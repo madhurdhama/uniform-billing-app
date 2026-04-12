@@ -4,6 +4,8 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Uniform Order Manager</title>
+  <!-- Receipt SVG favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='6' y='2' width='20' height='28' rx='2' fill='%232563eb'/><rect x='10' y='8' width='12' height='2' rx='1' fill='white'/><rect x='10' y='13' width='12' height='2' rx='1' fill='white'/><rect x='10' y='18' width='8' height='2' rx='1' fill='white'/><polygon points='6,30 10,27 14,30 16,27 18,30 22,27 26,30' fill='%23f3f4f6'/></svg>">
   <style>
 
     /* ─── Design tokens ─────────────────────────────── */
@@ -33,11 +35,7 @@
       font-size: 15px;
     }
 
-    .app {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 1rem;
-    }
+    .app { max-width: 600px; margin: 0 auto; padding: 1rem; }
 
     /* ─── Header ─────────────────────────────────────── */
     .header { text-align: center; padding: 1rem 0 1.25rem; }
@@ -45,11 +43,7 @@
     .header p  { font-size: 12px; color: var(--text-3); margin-top: 2px; }
 
     /* ─── Location pill ──────────────────────────────── */
-    .location-row {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1rem;
-    }
+    .location-row { display: flex; justify-content: center; margin-bottom: 1rem; }
     .location-pill {
       display: flex;
       background: var(--surface);
@@ -117,7 +111,6 @@
 
     /* ─── Form fields ────────────────────────────────── */
     .field { margin-bottom: 10px; }
-
     .field label {
       font-size: 12px;
       color: var(--text-2);
@@ -125,8 +118,7 @@
       margin-bottom: 4px;
       font-weight: 500;
     }
-    .field input,
-    .field select {
+    .field input, .field select {
       width: 100%;
       padding: 9px 11px;
       font-size: 14px;
@@ -137,13 +129,11 @@
       outline: none;
       transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .field input:focus,
-    .field select:focus {
+    .field input:focus, .field select:focus {
       border-color: var(--accent);
       background: #fff;
       box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
     }
-
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
     /* ─── Payment toggle ─────────────────────────────── */
@@ -167,7 +157,6 @@
       transition: all 0.15s;
     }
     .pay-btn:not(:last-child) { border-right: 1px solid var(--border-2); }
-
     #pay-cash.active,    #eo-pay-cash.active    { background: var(--green-bg);  color: var(--green);  }
     #pay-online.active,  #eo-pay-online.active  { background: var(--blue-bg);   color: var(--blue);   }
     #pay-pending.active, #eo-pay-pending.active { background: var(--orange-bg); color: var(--orange); }
@@ -205,12 +194,7 @@
       align-items: center;
       margin-bottom: 6px;
     }
-    .combo-sub {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 5px;
-      margin-bottom: 4px;
-    }
+    .combo-sub { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 4px; }
     .combo-label { font-size: 11px; color: var(--text-3); padding-left: 2px; font-weight: 500; }
 
     /* Shared input styles for item/combo rows */
@@ -232,13 +216,7 @@
       border-color: var(--accent);
       box-shadow: 0 0 0 2px rgba(37,99,235,0.08);
     }
-
-    .item-price {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      text-align: right;
-    }
+    .item-price { font-size: 13px; font-weight: 600; color: var(--text); text-align: right; }
     .remove-btn {
       background: none;
       border: none;
@@ -256,7 +234,6 @@
 
     /* ─── Add item buttons ───────────────────────────── */
     .add-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-
     .add-btn {
       font-size: 13px;
       font-weight: 500;
@@ -270,12 +247,8 @@
       min-height: 40px;
     }
     .add-btn:hover { background: #dbeafe; }
-
-    /* Combo buttons (purple) */
     .add-btn.combo { color: var(--purple); background: var(--purple-bg); }
     .add-btn.combo:hover { background: #ddd6fe; }
-
-    /* Full-set quick button (green, full width, sits above others) */
     .add-btn.quickset {
       color: var(--green);
       background: var(--green-bg);
@@ -294,13 +267,7 @@
       margin-top: 1rem;
       border: 1px solid var(--border);
     }
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      color: var(--text-2);
-      margin-bottom: 4px;
-    }
+    .total-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-2); margin-bottom: 4px; }
     .total-final {
       display: flex;
       justify-content: space-between;
@@ -343,14 +310,11 @@
       margin-bottom: 8px;
       transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .search-box input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
-    }
+    .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
     .total-count { font-size: 12px; color: var(--text-3); margin-bottom: 8px; }
 
     /* ─── Pending banner ─────────────────────────────── */
-    /* Compact card showing total pending + today's pending */
+    /* Compact card: total pending count + how many from today */
     .pending-banner {
       display: flex;
       align-items: center;
@@ -393,12 +357,12 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
     .order-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
-    .order-name     { font-size: 15px; font-weight: 600; }
-    .order-meta     { font-size: 12px; color: var(--text-3); margin-top: 2px; }
-    .order-amount   { font-size: 16px; font-weight: 700; }
+    .order-name   { font-size: 15px; font-weight: 600; }
+    .order-meta   { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+    .order-amount { font-size: 16px; font-weight: 700; }
 
     /* ─── Badges (payment + location) ───────────────── */
-    /* All use same pill shape — color encodes meaning */
+    /* All same pill shape — color encodes the meaning   */
     .badge {
       display: inline-flex;
       align-items: center;
@@ -413,10 +377,9 @@
     .badge.pending  { background: var(--orange-bg); color: var(--orange); }
     .badge.badagaon { background: var(--purple-bg); color: var(--purple); }
     .badge.baghpat  { background: var(--pink-bg);   color: var(--pink);   }
-
     .discount-badge { font-size: 11px; color: #dc2626; margin-top: 2px; }
 
-    /* Item lines inside order card */
+    /* ─── Item lines inside order card ──────────────── */
     .order-items { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
     .order-item-line {
       display: flex;
@@ -438,7 +401,6 @@
 
     /* ─── Card action buttons ────────────────────────── */
     .card-actions { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
-
     .action-btn {
       font-size: 12px;
       font-weight: 500;
@@ -451,9 +413,8 @@
       transition: background 0.12s;
     }
     .action-btn:hover { background: var(--border); }
-    .action-btn.whatsapp { color: var(--green); border-color: #86efac; background: var(--green-bg); }
-    .action-btn.whatsapp:hover { background: #bbf7d0; }
-
+    .action-btn.bill { color: var(--green); border-color: #86efac; background: var(--green-bg); }
+    .action-btn.bill:hover { background: #bbf7d0; }
     .del-order {
       background: none;
       border: none;
@@ -465,11 +426,10 @@
       margin-left: 4px;
     }
     .del-order:hover { background: #fee2e2; color: #dc2626; }
-
     .empty { text-align: center; padding: 2.5rem; color: var(--text-3); font-size: 14px; }
 
     /* ─── Edit payment panel ─────────────────────────── */
-    /* Hidden by default inside each order card, toggled open */
+    /* Hidden inside each card; slides open on Edit Payment tap */
     .edit-panel {
       display: none;
       background: #f8f9ff;
@@ -479,7 +439,6 @@
       margin-top: 10px;
     }
     .edit-panel.open { display: block; }
-
     .edit-panel-title {
       font-size: 10px;
       font-weight: 700;
@@ -507,19 +466,11 @@
       transition: all 0.15s;
     }
     .edit-pay-btn:not(:last-child) { border-right: 1px solid var(--border-2); }
-
-    /* Active state matches badge color */
     .edit-pay-btn.cash-active    { background: var(--green-bg);  color: var(--green);  }
     .edit-pay-btn.online-active  { background: var(--blue-bg);   color: var(--blue);   }
     .edit-pay-btn.pending-active { background: var(--orange-bg); color: var(--orange); }
-
     .edit-amount-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    .edit-amount-row label {
-      font-size: 12px;
-      color: var(--text-2);
-      white-space: nowrap;
-      font-weight: 500;
-    }
+    .edit-amount-row label { font-size: 12px; color: var(--text-2); white-space: nowrap; font-weight: 500; }
     .edit-amount-row input {
       flex: 1;
       padding: 7px 10px;
@@ -532,9 +483,7 @@
       color: var(--text);
     }
     .edit-amount-row input:focus { border-color: var(--accent); }
-
     .edit-orig { font-size: 11px; color: var(--text-3); margin-bottom: 10px; }
-
     .update-btn {
       width: 100%;
       padding: 9px;
@@ -550,7 +499,7 @@
     .update-btn:active { transform: scale(0.99); }
 
     /* ─── Full order edit screen ─────────────────────── */
-    /* Fixed overlay that slides over everything */
+    /* Fixed overlay that slides over everything          */
     #edit-order-screen {
       display: none;
       position: fixed;
@@ -561,7 +510,6 @@
       padding: 1rem;
     }
     #edit-order-screen.open { display: block; }
-
     .edit-screen-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.2rem; }
     .back-btn {
       background: #fff;
@@ -576,9 +524,9 @@
     .back-btn:hover { background: var(--surface); }
     .edit-screen-title { font-size: 17px; font-weight: 700; }
 
-    /* ─── Quick-set size picker modal ────────────────── */
-    /* Bottom sheet that slides up when Full Set is tapped */
-    .quickset-modal {
+    /* ─── Bottom sheet modal (shared by all pickers) ─── */
+    /* Used by Quick Set, Single Item, Combo pickers       */
+    .sheet-modal {
       display: none;
       position: fixed;
       inset: 0;
@@ -587,28 +535,32 @@
       align-items: flex-end;
       justify-content: center;
     }
-    .quickset-modal.open { display: flex; }
-
-    .quickset-sheet {
+    .sheet-modal.open { display: flex; }
+    .sheet {
       background: #fff;
       border-radius: 20px 20px 0 0;
       padding: 1.25rem 1.25rem 2rem;
       width: 100%;
       max-width: 600px;
+      max-height: 85vh;
+      overflow-y: auto;
     }
-    .quickset-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-    .quickset-sub   { font-size: 12px; color: var(--text-3); margin-bottom: 1rem; }
+    .sheet-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .sheet-sub   { font-size: 12px; color: var(--text-3); margin-bottom: 1rem; }
+    .sheet-label { font-size: 11px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
 
-    .quickset-sizes {
+    /* Grid of selectable chips (sizes, items) */
+    .chip-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
       gap: 8px;
-      margin-bottom: 1rem;
+      margin-bottom: 8px;
     }
-    .size-chip {
-      padding: 10px 4px;
+    .chip-grid.wide { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    .chip {
+      padding: 10px 6px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       border: 1.5px solid var(--border-2);
       border-radius: 8px;
       background: var(--surface);
@@ -616,10 +568,45 @@
       cursor: pointer;
       text-align: center;
       transition: all 0.12s;
+      line-height: 1.3;
     }
-    .size-chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .chip:hover  { border-color: var(--accent); color: var(--accent); }
+    .chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-    .quickset-confirm {
+    /* Quantity stepper inside sheet */
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 12px 0;
+    }
+    .qty-row label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+    .qty-stepper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border-2);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .qty-stepper button {
+      padding: 7px 14px;
+      font-size: 18px;
+      font-weight: 500;
+      border: none;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .qty-stepper button:hover { background: var(--border); }
+    .qty-stepper span {
+      min-width: 32px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .sheet-confirm {
       width: 100%;
       padding: 13px;
       font-size: 15px;
@@ -629,9 +616,10 @@
       border: none;
       border-radius: 12px;
       cursor: pointer;
+      margin-top: 16px;
     }
-    .quickset-confirm:hover { background: #1d4ed8; }
-    .quickset-cancel {
+    .sheet-confirm:hover { background: #1d4ed8; }
+    .sheet-cancel {
       width: 100%;
       padding: 10px;
       font-size: 13px;
@@ -646,6 +634,7 @@
   </style>
 </head>
 <body>
+
 <div class="app">
 
   <div class="header">
@@ -653,7 +642,7 @@
     <p>Golden Gate International School</p>
   </div>
 
-  <!-- Location toggle — compact pill under header -->
+  <!-- Compact location pill under header -->
   <div class="location-row">
     <div class="location-pill">
       <button class="loc-btn active" id="loc-badagaon" onclick="setLocation('badagaon')">Badagaon</button>
@@ -672,13 +661,12 @@
   ══════════════════════════════════════ -->
   <div id="tab-new">
 
-    <!-- Parent & student info -->
     <div class="section">
       <div class="section-title">Student Details</div>
       <div class="row2">
         <div class="field">
           <label>Student Name</label>
-          <!-- Enter key moves focus to next field -->
+          <!-- Enter key moves focus to next field for faster entry -->
           <input id="sname" type="text" placeholder="e.g. Rahul" onkeydown="onEnter(event,'sclass')">
         </div>
         <div class="field">
@@ -710,7 +698,6 @@
       </div>
     </div>
 
-    <!-- Dress items -->
     <div class="section">
       <div class="section-title">Dress Items</div>
       <div class="col-labels">
@@ -738,7 +725,7 @@
   ══════════════════════════════════════ -->
   <div id="tab-orders" style="display:none">
 
-    <!-- Pending banner: shows total + today's pending count -->
+    <!-- Pending banner: tapping scrolls to first pending order -->
     <div id="pending-banner" class="pending-banner" style="display:none">
       <div class="pending-banner-left">
         <div class="pending-count" id="pending-count">0</div>
@@ -750,7 +737,6 @@
       <div class="pending-tap">tap to view</div>
     </div>
 
-    <!-- Date filter -->
     <div class="date-filter">
       <button class="date-btn active" id="filter-all"   onclick="setDateFilter('all')">All</button>
       <button class="date-btn"        id="filter-today" onclick="setDateFilter('today')">Today</button>
@@ -758,14 +744,17 @@
     </div>
 
     <div class="search-box">
-      <input type="text" placeholder="Search by name, class or mobile..." oninput="renderOrders(this.value)">
+      <input type="text" placeholder="Search by name, class, mobile or #order..." oninput="renderOrders(this.value)">
     </div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div id="orders-summary" class="total-count"></div>
-      <button onclick="exportCSV()" style="font-size:12px;padding:5px 10px;border:1px solid #86efac;border-radius:7px;background:none;color:#16a34a;cursor:pointer">
-        Export CSV
-      </button>
+      <div style="display:flex;gap:5px">
+        <button onclick="exportJSON()" style="font-size:12px;padding:5px 10px;border:1px solid #93c5fd;border-radius:7px;background:none;color:#1d4ed8;cursor:pointer">Backup</button>
+        <button onclick="$('import-file').click()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border-2);border-radius:7px;background:none;color:var(--text-2);cursor:pointer">Restore</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+        <button onclick="exportCSV()" style="font-size:12px;padding:5px 10px;border:1px solid #86efac;border-radius:7px;background:none;color:#16a34a;cursor:pointer">CSV</button>
+      </div>
     </div>
 
     <div id="orders-list"></div>
@@ -780,12 +769,10 @@
 ══════════════════════════════════════ -->
 <div id="edit-order-screen">
   <div style="max-width:640px;margin:0 auto">
-
     <div class="edit-screen-header">
       <button class="back-btn" onclick="closeEditOrder()">&#8592; Back</button>
       <div class="edit-screen-title">Edit Order</div>
     </div>
-
     <div class="section">
       <div class="section-title">Student Details</div>
       <div class="row2">
@@ -809,7 +796,6 @@
         <input id="eo-notes" type="text">
       </div>
     </div>
-
     <div class="section">
       <div class="section-title">Dress Items</div>
       <div class="col-labels">
@@ -826,7 +812,6 @@
         </div>
       </div>
     </div>
-
     <button class="save-btn" onclick="saveEditOrder()">Save Changes</button>
     <div style="height:2rem"></div>
   </div>
@@ -834,22 +819,78 @@
 
 
 <!-- ══════════════════════════════════════
-     QUICK-SET MODAL
-     Bottom sheet for picking full-set size
+     BOTTOM SHEET — QUICK SET (Full Set)
+     Pick one size, all 7 items added at once
 ══════════════════════════════════════ -->
-<div class="quickset-modal" id="quickset-modal" onclick="closeQuickSet(event)">
-  <div class="quickset-sheet">
-    <div class="quickset-title">Quick Add — Full Set</div>
-    <div class="quickset-sub">Adds: Pant + Shirt + Lower + T-Shirt + Tie + Belt + Socks x2</div>
-    <div class="quickset-sub" style="margin-bottom:0.75rem;font-weight:600;color:var(--text-2)">
-      Pick size (all items use same size):
-    </div>
-    <div class="quickset-sizes" id="qs-sizes"></div>
-    <div style="font-size:12px;color:var(--text-3);margin-top:8px;margin-bottom:1rem">
+<div class="sheet-modal" id="qs-modal" onclick="closeSheet('qs-modal',event)">
+  <div class="sheet">
+    <div class="sheet-title">Full Set</div>
+    <div class="sheet-sub">Adds: Pant + Shirt + Lower + T-Shirt + Tie + Belt + Socks ×2</div>
+    <div class="sheet-label">Pick size — all items use same size</div>
+    <div class="chip-grid" id="qs-sizes"></div>
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">
       Tie: Small for size &lt;34 &nbsp;|&nbsp; Large for size 34+
     </div>
-    <button class="quickset-confirm" onclick="confirmQuickSet()">Add Full Set</button>
-    <button class="quickset-cancel"  onclick="closeQuickSet()">Cancel</button>
+    <div class="qty-row">
+      <label>Quantity</label>
+      <div class="qty-stepper">
+        <button onclick="stepQty('qs-qty',-1)">−</button>
+        <span id="qs-qty">1</span>
+        <button onclick="stepQty('qs-qty',1)">+</button>
+      </div>
+    </div>
+    <button class="sheet-confirm" onclick="confirmQuickSet()">Add Full Set</button>
+    <button class="sheet-cancel"  onclick="closeSheet('qs-modal')">Cancel</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     BOTTOM SHEET — SINGLE ITEM PICKER
+     Pick item, size, quantity
+══════════════════════════════════════ -->
+<div class="sheet-modal" id="si-modal" onclick="closeSheet('si-modal',event)">
+  <div class="sheet">
+    <div class="sheet-title">Add Single Item</div>
+    <div class="sheet-label">Select item</div>
+    <div class="chip-grid wide" id="si-items"></div>
+    <div class="sheet-label">Select size</div>
+    <div class="chip-grid" id="si-sizes"></div>
+    <div class="qty-row">
+      <label>Quantity</label>
+      <div class="qty-stepper">
+        <button onclick="stepQty('si-qty',-1)">−</button>
+        <span id="si-qty">1</span>
+        <button onclick="stepQty('si-qty',1)">+</button>
+      </div>
+    </div>
+    <button class="sheet-confirm" onclick="confirmSingleItem()">Add Item</button>
+    <button class="sheet-cancel"  onclick="closeSheet('si-modal')">Cancel</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     BOTTOM SHEET — COMBO PICKER
+     Single size picker — both items get same size.
+     (User can adjust sizes in the row after adding if needed)
+══════════════════════════════════════ -->
+<div class="sheet-modal" id="co-modal" onclick="closeSheet('co-modal',event)">
+  <div class="sheet">
+    <div class="sheet-title" id="co-title">Add Combo</div>
+    <div class="sheet-sub" id="co-sub"></div>
+    <div class="sheet-label" id="co-label1">Select size</div>
+    <div class="chip-grid" id="co-sizes1"></div>
+    <div class="qty-row">
+      <label>Quantity</label>
+      <div class="qty-stepper">
+        <button onclick="stepQty('co-qty',-1)">−</button>
+        <span id="co-qty">1</span>
+        <button onclick="stepQty('co-qty',1)">+</button>
+      </div>
+    </div>
+    <button class="sheet-confirm" onclick="confirmCombo()">Add</button>
+    <button class="sheet-cancel"  onclick="closeSheet('co-modal')">Cancel</button>
   </div>
 </div>
 
@@ -860,48 +901,43 @@
    PRICE TABLES
    ──────────────────────────────────────────────────────
    Format:   "Item Name": { Size: Price, ... }
-   Sizes can be numbers (26, 28) or strings ("Small", "All")
+   Sizes: numbers (26, 28) or strings ("Small", "All")
 
    TO EDIT A PRICE  → change the number after the size
    TO ADD A SIZE    → add ", 46: 500" inside the { }
-   TO ADD AN ITEM   → copy any line and change name + prices
+   TO ADD AN ITEM   → copy a line, change name + prices
    TO REMOVE ITEM   → delete the whole line
 ══════════════════════════════════════════════════════ */
 
 const PRICES = {
-
-  // Badagaon prices
   badagaon: {
-    "Tie":          { "Small": 50,  "Large": 100 },
-    "Belt":         { "All":   100 },
-    "Socks":        { "Pair":   30 },
-    "Pant":         { 20: 300, 22: 300, 24: 300, 26: 325, 28: 325, 30: 350, 32: 350, 34: 375, 36: 375, 38: 400, 40: 400, 42: 425, 44: 450 },
-    "Shirt":        { 20: 300, 22: 300, 24: 300, 26: 325, 28: 325, 30: 350, 32: 350, 34: 375, 36: 375, 38: 400, 40: 400, 42: 425, 44: 450 },
-    "Lower":        { 26: 300, 28: 300, 30: 325, 32: 325, 34: 350, 36: 350, 38: 375, 40: 400, 42: 425, 44: 450 },
-    "T-Shirt":      { 26: 300, 28: 300, 30: 325, 32: 325, 34: 350, 36: 350, 38: 375, 40: 400, 42: 425, 44: 450 },
-    "Half Lower":   { 20: 250, 22: 250, 24: 250 },
-    "Half T-Shirt": { 20: 350, 22: 350, 24: 400 },
+    "Tie":          { "Small": 50, "Large": 100 },
+    "Belt":         { "All": 100 },
+    "Socks":        { "Pair": 30 },
     "Suit":         { "All": 350 },
     "Trouser":      { "All": 350 },
-    "Jacket":       { "All": 300 }
+    "Jacket":       { "All": 300 },
+    "Half Lower":   { 20: 250, 22: 250, 24: 250 },
+    "Half T-Shirt": { 20: 350, 22: 350, 24: 400 },
+    "Lower":        { 26: 300, 28: 300, 30: 325, 32: 325, 34: 350, 36: 350, 38: 375, 40: 400, 42: 425, 44: 450 },
+    "T-Shirt":      { 26: 300, 28: 300, 30: 325, 32: 325, 34: 350, 36: 350, 38: 375, 40: 400, 42: 425, 44: 450 },
+    "Pant":         { 20: 300, 22: 300, 24: 300, 26: 325, 28: 325, 30: 350, 32: 350, 34: 375, 36: 375, 38: 400, 40: 400, 42: 425, 44: 450 },
+    "Shirt":        { 20: 300, 22: 300, 24: 300, 26: 325, 28: 325, 30: 350, 32: 350, 34: 375, 36: 375, 38: 400, 40: 400, 42: 425, 44: 450 }
   },
-
-  // Baghpat prices
   baghpat: {
-    "Tie":          { "Small": 50,  "Large": 100 },
-    "Belt":         { "All":   100 },
-    "Socks":        { "Pair":   40 },
-    "Pant":         { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
-    "Shirt":        { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
-    "Lower":        { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
-    "T-Shirt":      { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
-    "Half Lower":   { 20: 250, 22: 250, 24: 250, 26: 250, 28: 300, 30: 300 },
-    "Half T-Shirt": { 20: 350, 22: 350, 24: 400, 26: 400, 28: 400, 30: 400 },
+    "Tie":          { "Small": 50, "Large": 100 },
+    "Belt":         { "All": 100 },
+    "Socks":        { "Pair": 40 },
     "Suit":         { "All": 400 },
     "Trouser":      { "All": 400 },
-    "Jacket":       { "All": 300 }
+    "Jacket":       { "All": 300 },
+    "Half Lower":   { 20: 250, 22: 250, 24: 250, 26: 250, 28: 300, 30: 300 },
+    "Half T-Shirt": { 20: 350, 22: 350, 24: 400, 26: 400, 28: 400, 30: 400 },
+    "Lower":        { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
+    "T-Shirt":      { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
+    "Pant":         { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
+    "Shirt":        { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 }, 
   }
-
 };
 
 /* ══════════════════════════════════════════════════════
@@ -923,34 +959,42 @@ let currentLocation = 'badagaon';  // active location
 let paymentMode     = 'pending';   // resets to pending after each save
 let eoOrderId       = null;        // id of order being edited
 let eoPayMode       = 'cash';      // payment mode in edit screen
-let itemCounter     = 0;           // global counter — keeps item IDs unique
+let itemCounter     = 0;           // global — keeps item element IDs unique
 let dateFilter      = 'all';       // saved orders date filter
+let orderCounter    = parseInt(localStorage.getItem('uniform_order_counter') || '0');
 let savedOrders     = JSON.parse(localStorage.getItem('uniform_orders2') || '[]');
 
-// Quick-set state
-let qsTarget = null;   // which screen opened it: 'new' or 'eo'
-let qsSize   = null;   // selected size for all items in the full set
+// Sheet picker state
+let sheetTarget = null;  // 'new' or 'eo' — which screen opened the sheet
+let siItem      = null;  // selected item name in single-item sheet
+let siSize      = null;  // selected size in single-item sheet
+let qsSize      = null;  // selected size in quick-set sheet
+let coType      = null;  // combo type key in combo sheet
+let coSize1     = null;  // selected size in combo sheet
 
 /* ══════════════════════════════════════════════════════
    UTILITY FUNCTIONS
 ══════════════════════════════════════════════════════ */
 
 // Short alias for getElementById
-const $ = id => document.getElementById(id);
+const $         = id => document.getElementById(id);
 
-// Format number as rupees string
-const rupees = n => 'Rs.' + n.toLocaleString('en-IN');
+// Format number as "Rs.1,250"
+const rupees    = n  => 'Rs.' + n.toLocaleString('en-IN');
 
-// Save all orders to localStorage
+// Persist orders to localStorage
 const saveLocal = () => localStorage.setItem('uniform_orders2', JSON.stringify(savedOrders));
+
+// Save order counter to localStorage
+const saveCounter = () => localStorage.setItem('uniform_order_counter', String(orderCounter));
 
 // Get price table for the active location
 const getPrices = () => PRICES[currentLocation];
 
-// Get unit price — tries string key first, then numeric key
+// Get unit price — tries string key first, then numeric
 function getUnitPrice(itemName, size) {
-  const table = getPrices();
-  return table[itemName]?.[size] || table[itemName]?.[parseInt(size)] || 0;
+  const t = getPrices();
+  return t[itemName]?.[size] || t[itemName]?.[parseInt(size)] || 0;
 }
 
 // Build <option> tags for a size dropdown, pre-selecting selectedSize
@@ -960,133 +1004,246 @@ function getSizeOptions(itemName, selectedSize) {
     .join('');
 }
 
-/* ══════════════════════════════════════════════════════
-   ENTER KEY — moves focus to next field for faster entry
-══════════════════════════════════════════════════════ */
-
+// Move focus to next field when Enter is pressed (faster data entry)
 function onEnter(event, nextId) {
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    $(nextId)?.focus();
-  }
+  if (event.key === 'Enter') { event.preventDefault(); $(nextId)?.focus(); }
 }
 
 /* ══════════════════════════════════════════════════════
-   LOCATION
+   LOCATION / PAYMENT MODE
 ══════════════════════════════════════════════════════ */
 
 function setLocation(loc) {
   currentLocation = loc;
-  ['badagaon', 'baghpat'].forEach(l =>
-    $('loc-' + l).classList.toggle('active', l === loc)
-  );
-  // Clear items since prices changed
+  ['badagaon', 'baghpat'].forEach(l => $('loc-' + l).classList.toggle('active', l === loc));
+  // Clear items since prices differ between locations
   $('items-container').innerHTML = '';
   itemCounter = 0;
   recalc();
 }
 
-/* ══════════════════════════════════════════════════════
-   PAYMENT MODE
-══════════════════════════════════════════════════════ */
-
 function setPayment(mode) {
   paymentMode = mode;
-  ['cash', 'online', 'pending'].forEach(m =>
-    $('pay-' + m).classList.toggle('active', m === mode)
-  );
+  ['cash', 'online', 'pending'].forEach(m => $('pay-' + m).classList.toggle('active', m === mode));
 }
 
 function setEoPay(mode) {
   eoPayMode = mode;
-  ['cash', 'online', 'pending'].forEach(m =>
-    $('eo-pay-' + m).classList.toggle('active', m === mode)
-  );
+  ['cash', 'online', 'pending'].forEach(m => $('eo-pay-' + m).classList.toggle('active', m === mode));
 }
 
 /* ══════════════════════════════════════════════════════
    BUILD ADD BUTTONS
-   Called once on init and again when location changes
-   in edit screen (to get correct prices).
+   Called on init and when entering edit screen.
    isEo = true when building for the edit order screen.
 ══════════════════════════════════════════════════════ */
 
 function buildAddButtons(containerId, isEo) {
-  const prefix = isEo ? 'eoAdd' : 'add';
-  const target = isEo ? 'eo'   : 'new';
+  const target = isEo ? 'eo' : 'new';
 
   // Green full-set button at top
-  let html = `<button class="add-btn quickset" onclick="openQuickSet('${target}')">
-    Full Set (Pant + Shirt + Lower + T-Shirt + Tie + Belt + Socks)
+  let html = `<button class="add-btn quickset" onclick="openQsSheet('${target}')">
+    Full Set (Pant+Shirt+Lower+T-Shirt+Tie+Belt+Socks)
   </button>`;
 
-  // Combo set buttons (purple)
+  // Combo set buttons (purple) — each opens the combo sheet
   Object.entries(COMBOS).forEach(([key, cfg]) => {
-    html += `<button class="add-btn combo" onclick="${prefix}Combo('${key}')">${cfg.label}</button>`;
+    html += `<button class="add-btn combo" onclick="openCoSheet('${target}','${key}')">${cfg.label}</button>`;
   });
 
-  html += `<button class="add-btn combo" onclick="${prefix}Combo('suit-set')">Suit Set</button>`;
-  html += `<button class="add-btn" onclick="${prefix}Item()">+ Single Item</button>`;
+  html += `<button class="add-btn combo" onclick="openCoSheet('${target}','suit-set')">Suit Set</button>`;
+
+  // Single item button — opens the single-item sheet
+  html += `<button class="add-btn" onclick="openSiSheet('${target}')">+ Single Item</button>`;
 
   $(containerId).innerHTML = html;
 }
 
 /* ══════════════════════════════════════════════════════
-   QUICK-SET FULL SET
-   Opens a bottom sheet to pick one size.
-   Adds 7 items at once with Socks qty 2.
-   Tie size auto-set: Large for size ≥34, Small otherwise.
+   BOTTOM SHEET HELPERS
+   All three sheets (Quick Set, Single Item, Combo) share
+   the same open/close mechanism. Tapping the dark backdrop
+   closes the sheet; tapping the sheet itself does nothing.
 ══════════════════════════════════════════════════════ */
 
-function openQuickSet(target) {
-  qsTarget = target;
-  qsSize   = null;
+function openSheet(id) { $(id).classList.add('open'); }
 
-  // Fixed size range for the full set: 26–44
+function closeSheet(id, event) {
+  // If called from onclick backdrop, only close if tap was on backdrop itself
+  if (event && event.target !== $(id)) return;
+  $(id).classList.remove('open');
+}
+
+// Quantity stepper used by all sheets
+function stepQty(spanId, delta) {
+  const el  = $(spanId);
+  const val = Math.max(1, Math.min(99, parseInt(el.textContent) + delta));
+  el.textContent = val;
+}
+
+// Build chip grid from an array of values
+function buildChips(containerId, values, selectedValue, onClickFn) {
+  $(containerId).innerHTML = values.map(v => `
+    <div class="chip${String(v) === String(selectedValue) ? ' selected' : ''}"
+         onclick="${onClickFn}('${v}',this)">${v}</div>
+  `).join('');
+}
+
+// Select a chip — deselect siblings first
+function selectChip(containerId, value, el) {
+  $(containerId).querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  return value;
+}
+
+/* ══════════════════════════════════════════════════════
+   QUICK-SET SHEET
+   One size → 7 items added at once.
+   Tie auto-set: Large for size ≥34, Small otherwise.
+══════════════════════════════════════════════════════ */
+
+function openQsSheet(target) {
+  sheetTarget = target;
+  qsSize      = null;
+  $('qs-qty').textContent = '1';
+
   const sizes = [26, 28, 30, 32, 34, 36, 38, 40, 42, 44];
-  $('qs-sizes').innerHTML = sizes
-    .map(s => `<div class="size-chip" onclick="selectQsSize('${s}',this)">${s}</div>`)
-    .join('');
-
-  $('quickset-modal').classList.add('open');
+  buildChips('qs-sizes', sizes, null, 'selectQsSize');
+  openSheet('qs-modal');
 }
 
 function selectQsSize(size, el) {
-  $('qs-sizes').querySelectorAll('.size-chip').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  qsSize = size;
-}
-
-// Close if user taps the dark backdrop (not the sheet itself)
-function closeQuickSet(event) {
-  if (event && event.target !== $('quickset-modal')) return;
-  $('quickset-modal').classList.remove('open');
+  qsSize = selectChip('qs-sizes', size, el);
 }
 
 function confirmQuickSet() {
   if (!qsSize) { alert('Please select a size'); return; }
-  $('quickset-modal').classList.remove('open');
+  closeSheet('qs-modal');
 
-  const isEo     = qsTarget === 'eo';
-  const ctr      = isEo ? 'eo-items-container' : 'items-container';
-  const pfx      = isEo ? 'e' : 'n';
-  const fn       = isEo ? 'eoRecalc' : 'recalc';
-  const size     = String(qsSize);
-  const tieSize  = parseInt(size) >= 34 ? 'Large' : 'Small';  // auto Tie size
+  const isEo   = sheetTarget === 'eo';
+  const ctr    = isEo ? 'eo-items-container' : 'items-container';
+  const pfx    = isEo ? 'e' : 'n';
+  const fn     = isEo ? 'eoRecalc' : 'recalc';
+  const size   = String(qsSize);
+  const tieSz  = parseInt(size) >= 34 ? 'Large' : 'Small';
+  const qty    = parseInt($('qs-qty').textContent);
 
-  _addCombo(ctr, pfx, fn, 'pant-shirt',   size, size);  // Pant + Shirt
-  _addCombo(ctr, pfx, fn, 'lower-tshirt', size, size);  // Lower + T-Shirt
-  _addItem(ctr,  pfx, fn, 'Tie',   tieSize);             // Tie (auto size)
-  _addItem(ctr,  pfx, fn, 'Belt',  'All');                // Belt
-  _addItem(ctr,  pfx, fn, 'Socks', 'Pair', 2);           // Socks x2
+  _addCombo(ctr, pfx, fn, 'pant-shirt',   size, size, qty);
+  _addCombo(ctr, pfx, fn, 'lower-tshirt', size, size, qty);
+  _addItem(ctr,  pfx, fn, 'Tie',   tieSz, qty);
+  _addItem(ctr,  pfx, fn, 'Belt',  'All', qty);
+  _addItem(ctr,  pfx, fn, 'Socks', 'Pair', qty * 2);  // always 2 pairs per set
 }
 
 /* ══════════════════════════════════════════════════════
-   ADD SINGLE ITEM ROW
-   containerId = where to append
-   prefix      = 'n' (new order) or 'e' (edit screen) — keeps IDs unique
-   recalcFn    = name of the recalc function to call on change
-   defaultItem / defaultSize / defaultQty = used when restoring saved order
+   SINGLE ITEM SHEET
+   Pick item name → sizes update → pick size → add.
+══════════════════════════════════════════════════════ */
+
+function openSiSheet(target) {
+  sheetTarget = target;
+  siItem      = null;
+  siSize      = null;
+  $('si-qty').textContent = '1';
+
+  const items = Object.keys(getPrices());
+  buildChips('si-items', items, null, 'selectSiItem');
+  $('si-sizes').innerHTML = '<div style="color:var(--text-3);font-size:12px">Select an item first</div>';
+  openSheet('si-modal');
+}
+
+function selectSiItem(item, el) {
+  siItem = selectChip('si-items', item, el);
+  siSize = null;
+  // Build size chips for this item
+  const sizes = Object.keys(getPrices()[item] || {});
+  // Auto-select the first size (lowest number, or "All"/"Pair"/"Small")
+  // This is especially useful for Belt (All), Socks (Pair), Suit (All) etc.
+  siSize = String(sizes[0]);
+  buildChips('si-sizes', sizes, siSize, 'selectSiSize');
+}
+
+function selectSiSize(size, el) {
+  siSize = selectChip('si-sizes', size, el);
+}
+
+function confirmSingleItem() {
+  if (!siItem) { alert('Please select an item'); return; }
+  if (!siSize) { alert('Please select a size');  return; }
+  closeSheet('si-modal');
+
+  const isEo = sheetTarget === 'eo';
+  const ctr  = isEo ? 'eo-items-container' : 'items-container';
+  const pfx  = isEo ? 'e' : 'n';
+  const fn   = isEo ? 'eoRecalc' : 'recalc';
+  const qty  = parseInt($('si-qty').textContent);
+
+  _addItem(ctr, pfx, fn, siItem, String(siSize), qty);
+}
+
+/* ══════════════════════════════════════════════════════
+   COMBO SHEET
+   Single size picker — both items get the same size.
+   For Suit Set: no size needed (fixed "All" price).
+   User can adjust individual sizes in the row after adding.
+══════════════════════════════════════════════════════ */
+
+function openCoSheet(target, type) {
+  sheetTarget = target;
+  coType      = type;
+  coSize1     = null;
+  $('co-qty').textContent = '1';
+
+  if (type === 'suit-set') {
+    const p    = getPrices();
+    const unit = p['Suit']['All'] + p['Trouser']['All'] + p['Jacket']['All'];
+    $('co-title').textContent  = 'Suit Set';
+    $('co-sub').textContent    = `Suit + Trouser + Jacket = ${rupees(unit)} each`;
+    $('co-label1').textContent = '';
+    $('co-sizes1').innerHTML   = '';
+  } else {
+    const cfg   = COMBOS[type];
+    // Use item1 sizes for the single picker (item2 always has matching sizes)
+    const sizes = Object.keys(getPrices()[cfg.item1] || {});
+    $('co-title').textContent  = cfg.label;
+    $('co-sub').textContent    = 'Both items use the same size';
+    $('co-label1').textContent = 'Select size';
+    // Auto-select first (lowest) size so user can just tap Add for common orders
+    coSize1 = String(sizes[0]);
+    buildChips('co-sizes1', sizes, coSize1, 'selectCoSize1');
+  }
+
+  openSheet('co-modal');
+}
+
+function selectCoSize1(size, el) {
+  coSize1 = selectChip('co-sizes1', size, el);
+}
+
+function confirmCombo() {
+  const isEo = sheetTarget === 'eo';
+  const ctr  = isEo ? 'eo-items-container' : 'items-container';
+  const pfx  = isEo ? 'e' : 'n';
+  const fn   = isEo ? 'eoRecalc' : 'recalc';
+  const qty  = parseInt($('co-qty').textContent);
+
+  if (coType === 'suit-set') {
+    closeSheet('co-modal');
+    _addCombo(ctr, pfx, fn, 'suit-set', null, null, qty);
+    return;
+  }
+
+  if (!coSize1) { alert('Please select a size'); return; }
+  closeSheet('co-modal');
+  // Both item1 and item2 get the same size
+  _addCombo(ctr, pfx, fn, coType, String(coSize1), String(coSize1), qty);
+}
+
+/* ══════════════════════════════════════════════════════
+   ADD SINGLE ITEM ROW (internal)
+   prefix = 'n' (new order) or 'e' (edit screen) — keeps IDs unique
+   recalcFn = name of recalc function to call on any change
+   defaultItem/Size/Qty used when restoring a saved order
 ══════════════════════════════════════════════════════ */
 
 function _addItem(containerId, prefix, recalcFn, defaultItem, defaultSize, defaultQty) {
@@ -1104,7 +1261,6 @@ function _addItem(containerId, prefix, recalcFn, defaultItem, defaultSize, defau
   row.className    = 'item-row';
   row.id           = 'item-' + id;
   row.dataset.type = 'single';
-
   row.innerHTML = `
     <select id="isel-${id}" onchange="onItemChange('${id}','${recalcFn}')">${itemOptions}</select>
     <select id="ssel-${id}" onchange="${recalcFn}()">${getSizeOptions(firstItem, defaultSize)}</select>
@@ -1112,14 +1268,13 @@ function _addItem(containerId, prefix, recalcFn, defaultItem, defaultSize, defau
     <div    id="price-${id}" class="item-price">Rs.0</div>
     <button class="remove-btn" onclick="removeItem('${id}','${recalcFn}')">&#215;</button>
   `;
-
   $(containerId).appendChild(row);
   window[recalcFn]();
 }
 
 /* ══════════════════════════════════════════════════════
-   ADD COMBO ROW
-   Handles two-item combos (separate sizes) and
+   ADD COMBO ROW (internal)
+   Handles two-item combos (with separate sizes) and
    the fixed Suit Set (Suit + Trouser + Jacket).
 ══════════════════════════════════════════════════════ */
 
@@ -1132,18 +1287,18 @@ function _addCombo(containerId, prefix, recalcFn, type, defaultSize1, defaultSiz
   row.id        = 'item-' + id;
 
   if (type === 'suit-set') {
-    const prices    = getPrices();
-    const unitPrice = prices['Suit']['All'] + prices['Trouser']['All'] + prices['Jacket']['All'];
+    const p    = getPrices();
+    const unit = p['Suit']['All'] + p['Trouser']['All'] + p['Jacket']['All'];
     row.dataset.type = 'suit-set';
     row.innerHTML = `
       <div class="combo-top">
         <div style="font-size:12px;font-weight:600;color:var(--text-2)">Suit Set</div>
         <input id="qty-${id}" type="number" value="${qty}" min="1" max="99" style="text-align:center" oninput="${recalcFn}()">
-        <div id="price-${id}" class="item-price">${rupees(unitPrice)}</div>
+        <div id="price-${id}" class="item-price">${rupees(unit)}</div>
         <button class="remove-btn" onclick="removeItem('${id}','${recalcFn}')">&#215;</button>
       </div>
       <div style="font-size:11px;color:var(--text-3);padding:2px 0 4px">
-        Suit ${rupees(prices['Suit']['All'])} + Trouser ${rupees(prices['Trouser']['All'])} + Jacket ${rupees(prices['Jacket']['All'])} = ${rupees(unitPrice)} each
+        Suit ${rupees(p['Suit']['All'])} + Trouser ${rupees(p['Trouser']['All'])} + Jacket ${rupees(p['Jacket']['All'])} = ${rupees(unit)} each
       </div>`;
   } else {
     const cfg = COMBOS[type];
@@ -1168,7 +1323,6 @@ function _addCombo(containerId, prefix, recalcFn, type, defaultSize1, defaultSiz
         </div>
       </div>`;
   }
-
   $(containerId).appendChild(row);
   window[recalcFn]();
 }
@@ -1177,37 +1331,34 @@ function _addCombo(containerId, prefix, recalcFn, type, defaultSize1, defaultSiz
    ITEM HELPERS
 ══════════════════════════════════════════════════════ */
 
-// When item name changes, refresh its size dropdown
+// When item name dropdown changes, refresh its size dropdown
 function onItemChange(id, recalcFn) {
   $('ssel-' + id).innerHTML = getSizeOptions($('isel-' + id).value);
   window[recalcFn]();
 }
 
-// Remove an item row and recalculate
+// Remove an item row and recalculate total
 function removeItem(id, recalcFn) {
   const el = $('item-' + id);
   if (el) el.remove();
   window[recalcFn]();
 }
 
-// When size1 changes in a combo, auto-match size2 to the same value
+// When size1 of a combo changes, auto-match size2 to same value
 function syncSize2(id) {
   const s1 = $('s1-' + id), s2 = $('s2-' + id);
   if (!s1 || !s2) return;
-  for (let opt of s2.options) {
-    if (opt.value === s1.value) { s2.value = s1.value; break; }
-  }
+  for (let opt of s2.options) { if (opt.value === s1.value) { s2.value = s1.value; break; } }
 }
 
 /* ══════════════════════════════════════════════════════
    RECALCULATE TOTALS
-   Loops all rows in containerId, updates each line price,
-   shows qty>1 breakdown, updates the grand total.
+   Loops all item rows, updates each line price display,
+   shows per-line breakdown when qty > 1, updates grand total.
 ══════════════════════════════════════════════════════ */
 
 function _recalc(containerId, breakdownId, totalId) {
-  let subtotal     = 0;
-  let breakdownHtml = '';
+  let subtotal = 0, html = '';
 
   $(containerId).querySelectorAll('[id^="item-"]').forEach(row => {
     const id      = row.id.replace('item-', '');
@@ -1224,12 +1375,10 @@ function _recalc(containerId, breakdownId, totalId) {
       if (!is) return;
       unit  = getUnitPrice(is.value, ss.value);
       label = `${is.value} (${ss.value}) x${qty}`;
-
     } else if (type === 'suit-set') {
       const p = getPrices();
       unit  = p['Suit']['All'] + p['Trouser']['All'] + p['Jacket']['All'];
       label = `Suit Set x${qty}`;
-
     } else if (type === 'combo') {
       const s1 = $('s1-' + id), s2 = $('s2-' + id);
       if (!s1) return;
@@ -1240,37 +1389,31 @@ function _recalc(containerId, breakdownId, totalId) {
     const line = unit * qty;
     subtotal += line;
     priceEl.textContent = rupees(line);
-
-    // Show in breakdown only when qty > 1
-    if (qty > 1) {
-      breakdownHtml += `<div class="total-row"><span>${label}</span><span>${rupees(line)}</span></div>`;
-    }
+    // Show breakdown line only when qty > 1
+    if (qty > 1) html += `<div class="total-row"><span>${label}</span><span>${rupees(line)}</span></div>`;
   });
 
-  $(breakdownId).innerHTML = breakdownHtml;
+  $(breakdownId).innerHTML = html;
   $(totalId).textContent   = rupees(subtotal);
   return subtotal;
 }
 
-/* ── Public wrappers (called by HTML onclick and confirmQuickSet) ── */
-
+/* ── Public wrappers called by HTML onclick and sheet confirmations ── */
 function addItem(di, ds, dq)         { _addItem('items-container',   'n', 'recalc',   di, ds, dq); }
 function addCombo(type, s1, s2, qty) { _addCombo('items-container',  'n', 'recalc',   type, s1, s2, qty); }
 function recalc()                    { _recalc('items-container',   'item-breakdown', 'grand-total'); }
-
 function eoAddItem(di, ds, dq)         { _addItem('eo-items-container',  'e', 'eoRecalc', di, ds, dq); }
 function eoAddCombo(type, s1, s2, qty) { _addCombo('eo-items-container', 'e', 'eoRecalc', type, s1, s2, qty); }
 function eoRecalc()                    { _recalc('eo-items-container', 'eo-breakdown', 'eo-grand-total'); }
 
 /* ══════════════════════════════════════════════════════
    COLLECT ITEMS
-   Reads all item rows and returns a clean array + subtotal.
-   Used before saving an order.
+   Reads all item rows and returns { items, subtotal }.
+   Called before saving or updating an order.
 ══════════════════════════════════════════════════════ */
 
 function collectItems(containerId) {
-  let items    = [];
-  let subtotal = 0;
+  let items = [], subtotal = 0;
 
   $(containerId).querySelectorAll('[id^="item-"]').forEach(row => {
     const id   = row.id.replace('item-', '');
@@ -1283,13 +1426,11 @@ function collectItems(containerId) {
       if (!is) return;
       unit  = getUnitPrice(is.value, ss.value);
       label = `${is.value} (${ss.value})${qty > 1 ? ' x ' + qty : ''}`;
-
     } else if (type === 'suit-set') {
       const p = getPrices();
       unit    = p['Suit']['All'] + p['Trouser']['All'] + p['Jacket']['All'];
       label   = `Suit Set (Suit + Trouser + Jacket)${qty > 1 ? ' x ' + qty : ''}`;
       extra   = { isSuitSet: true };
-
     } else if (type === 'combo') {
       const s1 = $('s1-' + id), s2 = $('s2-' + id);
       if (!s1) return;
@@ -1308,20 +1449,22 @@ function collectItems(containerId) {
 
 /* ══════════════════════════════════════════════════════
    SAVE ORDER
+   Auto-assigns an order number (#001, #002, ...).
 ══════════════════════════════════════════════════════ */
 
 function saveOrder() {
   const sname = $('sname').value.trim();
   if (!sname) { alert('Please enter student name'); return; }
-  if (!$('items-container').querySelector('[id^="item-"]')) {
-    alert('Please add at least one item');
-    return;
-  }
+  if (!$('items-container').querySelector('[id^="item-"]')) { alert('Please add at least one item'); return; }
 
   const { items, subtotal } = collectItems('items-container');
 
+  orderCounter++;
+  saveCounter();
+
   const order = {
     id:          Date.now(),
+    orderNum:    orderCounter,     // unique order number shown as #001
     location:    currentLocation,
     sname,
     sclass:      $('sclass').value.trim(),
@@ -1338,7 +1481,7 @@ function saveOrder() {
 
   savedOrders.unshift(order);
   saveLocal();
-  alert(`Order saved!\n${sname}  -  ${rupees(subtotal)}`);
+  alert(`Order #${String(orderCounter).padStart(3,'0')} saved!\n${sname}  -  ${rupees(subtotal)}`);
   resetForm();
 }
 
@@ -1370,25 +1513,18 @@ function showTab(tab) {
 
 function setDateFilter(filter) {
   dateFilter = filter;
-  ['all', 'today', 'week'].forEach(f =>
-    $('filter-' + f).classList.toggle('active', f === filter)
-  );
+  ['all', 'today', 'week'].forEach(f => $('filter-' + f).classList.toggle('active', f === filter));
   renderOrders($('tab-orders').querySelector('.search-box input')?.value || '');
 }
 
 // Returns true if the order's date matches the active filter
 function matchesDateFilter(order) {
   if (dateFilter === 'all') return true;
-
-  // Parse "d/m/yyyy" format from toLocaleDateString('en-IN')
   const parts     = (order.date || '').split('/');
   const orderDate = new Date(parts[2], parts[1] - 1, parts[0]);
   const now       = new Date();
   const today     = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  if (dateFilter === 'today') {
-    return orderDate.getTime() === today.getTime();
-  }
+  if (dateFilter === 'today') return orderDate.getTime() === today.getTime();
   if (dateFilter === 'week') {
     const weekAgo = new Date(today);
     weekAgo.setDate(today.getDate() - 6);
@@ -1399,8 +1535,8 @@ function matchesDateFilter(order) {
 
 /* ══════════════════════════════════════════════════════
    RENDER SAVED ORDERS
-   Applies date filter + search, updates pending banner,
-   renders order cards.
+   Applies date filter + search query, updates pending
+   banner, renders all order cards.
 ══════════════════════════════════════════════════════ */
 
 function renderOrders(query) {
@@ -1408,16 +1544,18 @@ function renderOrders(query) {
 
   const filtered = savedOrders.filter(o => {
     if (!matchesDateFilter(o)) return false;
+    const orderNumStr = o.orderNum ? '#' + String(o.orderNum).padStart(3,'0') : '';
     return (
-      (o.sname   || '').toLowerCase().includes(query) ||
-      (o.sclass  || '').toLowerCase().includes(query) ||
-      (o.mobile  || '').includes(query)               ||
-      (o.location|| '').toLowerCase().includes(query) ||
-      (o.notes   || '').toLowerCase().includes(query)
+      (o.sname    || '').toLowerCase().includes(query) ||
+      (o.sclass   || '').toLowerCase().includes(query) ||
+      (o.mobile   || '').includes(query)               ||
+      (o.location || '').toLowerCase().includes(query) ||
+      (o.notes    || '').toLowerCase().includes(query) ||
+      orderNumStr.includes(query)   // search by #047 or just 47
     );
   });
 
-  // Pending banner: show total pending + how many are from today
+  // Pending banner: total count + how many from today
   const now          = new Date();
   const todayStart   = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const pendingAll   = savedOrders.filter(o => o.paymentMode === 'pending');
@@ -1425,19 +1563,16 @@ function renderOrders(query) {
     const p = (o.date || '').split('/');
     return new Date(p[2], p[1] - 1, p[0]).getTime() === todayStart.getTime();
   });
-
   const banner = $('pending-banner');
   if (pendingAll.length > 0) {
     banner.style.display = 'flex';
     $('pending-count').textContent = pendingAll.length;
     $('pending-today').textContent = pendingToday.length > 0
-      ? `${pendingToday.length} from today`
-      : 'none today';
+      ? `${pendingToday.length} from today` : 'none today';
     banner.onclick = () => {
       setDateFilter('all');
       $('tab-orders').querySelector('.search-box input').value = '';
       renderOrders('');
-      // Scroll to first pending order
       setTimeout(() => {
         const first = document.querySelector('.badge.pending');
         if (first) first.closest('.order-card')?.scrollIntoView({ behavior: 'smooth' });
@@ -1447,7 +1582,7 @@ function renderOrders(query) {
     banner.style.display = 'none';
   }
 
-  const totalAmt = filtered.reduce((sum, o) => sum + o.finalAmt, 0);
+  const totalAmt = filtered.reduce((s, o) => s + o.finalAmt, 0);
   $('orders-summary').textContent =
     `${filtered.length} order${filtered.length !== 1 ? 's' : ''} - Total: ${rupees(totalAmt)}`;
 
@@ -1460,15 +1595,16 @@ function renderOrders(query) {
   }
 
   $('orders-list').innerHTML = filtered.map(o => {
-    const mode = o.paymentMode || 'cash';
-    const loc  = o.location    || 'badagaon';
+    const mode       = o.paymentMode || 'cash';
+    const loc        = o.location    || 'badagaon';
+    const orderLabel = o.orderNum ? `<span style="font-size:11px;font-weight:700;color:var(--text-3);font-family:monospace;margin-right:4px">#${String(o.orderNum).padStart(3,'0')}</span>` : '';
 
     return `
       <div class="order-card" id="card-${o.id}">
         <div class="order-card-top">
           <div>
             <div class="order-name">
-              ${o.sname || ''}
+              ${orderLabel}${o.sname || ''}
               <span style="font-size:12px;font-weight:400;color:#888">${o.sclass || ''}</span>
             </div>
             <div class="order-meta">
@@ -1479,7 +1615,7 @@ function renderOrders(query) {
               <span class="badge ${loc}">${LOC_LABEL[loc]}</span>
               <button class="action-btn" onclick="openEditOrder(${o.id})">Edit Order</button>
               <button class="action-btn" onclick="toggleEditPayment(${o.id})">Edit Payment</button>
-              <button class="action-btn whatsapp" onclick="copyWhatsApp(${o.id})">WhatsApp</button>
+              <button class="action-btn bill" onclick="copyWhatsApp(${o.id})">Bill</button>
             </div>
             ${o.notes ? `<div style="font-size:12px;color:var(--orange);margin-top:5px;font-style:italic">Note: ${o.notes}</div>` : ''}
             ${o.discount > 0 ? `<div class="discount-badge">Discount: - ${rupees(o.discount)}</div>` : ''}
@@ -1507,7 +1643,7 @@ function renderOrders(query) {
           </div>` : ''}
         </div>
 
-        <!-- Edit payment panel, hidden until toggled -->
+        <!-- Edit payment panel — hidden until Edit Payment is tapped -->
         <div class="edit-panel" id="edit-${o.id}">
           <div class="edit-panel-title">Update Payment</div>
           <div class="edit-pay-toggle">
@@ -1525,13 +1661,12 @@ function renderOrders(query) {
           </div>
           <button class="update-btn" onclick="applyEditPayment(${o.id})">Save Changes</button>
         </div>
-
       </div>`;
   }).join('');
 }
 
 /* ══════════════════════════════════════════════════════
-   DELETE ORDER
+   DELETE ORDER / EDIT PAYMENT PANEL
 ══════════════════════════════════════════════════════ */
 
 function deleteOrder(id) {
@@ -1541,19 +1676,12 @@ function deleteOrder(id) {
   renderOrders($('tab-orders').querySelector('.search-box input')?.value || '');
 }
 
-/* ══════════════════════════════════════════════════════
-   EDIT PAYMENT PANEL
-   Quick panel on each card to change payment status/amount
-══════════════════════════════════════════════════════ */
-
-function toggleEditPayment(id) {
-  $('edit-' + id).classList.toggle('open');
-}
+function toggleEditPayment(id) { $('edit-' + id).classList.toggle('open'); }
 
 function setEditPay(id, mode) {
-  ['pending', 'cash', 'online'].forEach(m => {
+  ['pending','cash','online'].forEach(m => {
     const btn = $(`ep-${m}-${id}`);
-    btn.classList.remove('cash-active', 'online-active', 'pending-active');
+    btn.classList.remove('cash-active','online-active','pending-active');
     if (m === mode) btn.classList.add(mode + '-active');
   });
   $('edit-' + id).dataset.chosenMode = mode;
@@ -1562,14 +1690,10 @@ function setEditPay(id, mode) {
 function applyEditPayment(id) {
   const panel   = $('edit-' + id);
   const newMode = panel.dataset.chosenMode ||
-    ['pending', 'cash', 'online'].find(m =>
-      $(`ep-${m}-${id}`).classList.contains(m + '-active')
-    ) || 'cash';
-  const newAmt = parseInt($(`ep-amt-${id}`).value) || 0;
-
-  const idx = savedOrders.findIndex(o => o.id === id);
+    ['pending','cash','online'].find(m => $(`ep-${m}-${id}`).classList.contains(m+'-active')) || 'cash';
+  const newAmt  = parseInt($(`ep-amt-${id}`).value) || 0;
+  const idx     = savedOrders.findIndex(o => o.id === id);
   if (idx === -1) return;
-
   savedOrders[idx].paymentMode = newMode;
   savedOrders[idx].finalAmt    = newAmt;
   savedOrders[idx].discount    = Math.max(0, savedOrders[idx].subtotal - newAmt);
@@ -1580,31 +1704,27 @@ function applyEditPayment(id) {
 /* ══════════════════════════════════════════════════════
    FULL ORDER EDIT SCREEN
    Opens a fixed overlay pre-filled with the order's data.
+   Rebuilds item rows using parseItemLabel to restore sizes.
 ══════════════════════════════════════════════════════ */
 
 function openEditOrder(id) {
   const order = savedOrders.find(o => o.id === id);
   if (!order) return;
 
-  eoOrderId   = id;
-  itemCounter = 0;
-
-  // Match location so prices are correct
+  eoOrderId       = id;
+  itemCounter     = 0;
   currentLocation = order.location || 'badagaon';
   buildAddButtons('add-btns-eo', true);
 
-  // Fill form fields
   $('eo-sname').value  = order.sname  || '';
   $('eo-sclass').value = order.sclass || '';
   $('eo-pname').value  = order.pname  || '';
   $('eo-mobile').value = order.mobile || '';
   $('eo-notes').value  = order.notes  || '';
   setEoPay(order.paymentMode || 'cash');
-
-  // Rebuild item rows from saved data
   $('eo-items-container').innerHTML = '';
 
-  // Map item1 name back to combo type key
+  // Map item1 name back to combo type key for restoring combos
   const comboTypeByItem1 = {
     'Pant':       'pant-shirt',
     'Lower':      'lower-tshirt',
@@ -1615,19 +1735,17 @@ function openEditOrder(id) {
     if (savedItem.isSuitSet) {
       const m = savedItem.label.match(/x (\d+)$/);
       eoAddCombo('suit-set', null, null, m ? parseInt(m[1]) : 1);
-
     } else if (savedItem.isCombo) {
       const m     = savedItem.label.match(/x (\d+)$/);
       const qty   = m ? parseInt(m[1]) : 1;
       const clean = savedItem.label.replace(/ x \d+$/, '');
       const parts = clean.split(' + ');
-      const [name1, size1] = parseItemLabel(parts[0]);
-      const [,      size2] = parseItemLabel(parts[1]);
-      eoAddCombo(comboTypeByItem1[name1] || 'pant-shirt', size1, size2, qty);
-
+      const [n1, s1] = parseItemLabel(parts[0]);
+      const [,   s2] = parseItemLabel(parts[1]);
+      eoAddCombo(comboTypeByItem1[n1] || 'pant-shirt', s1, s2, qty);
     } else {
-      const m    = savedItem.label.match(/x (\d+)$/);
-      const qty  = m ? parseInt(m[1]) : 1;
+      const m   = savedItem.label.match(/x (\d+)$/);
+      const qty = m ? parseInt(m[1]) : 1;
       const [name, size] = parseItemLabel(savedItem.label.replace(/ x \d+$/, ''));
       eoAddItem(name, size, qty);
     }
@@ -1647,37 +1765,30 @@ function parseItemLabel(str) {
 function closeEditOrder() {
   $('edit-order-screen').classList.remove('open');
   eoOrderId = null;
-  // Rebuild new-order buttons (in case location changed during edit)
+  // Rebuild new-order buttons in case location changed during edit
   buildAddButtons('add-btns-new', false);
 }
 
 function saveEditOrder() {
   const sname = $('eo-sname').value.trim();
   if (!sname) { alert('Please enter student name'); return; }
-  if (!$('eo-items-container').querySelector('[id^="item-"]')) {
-    alert('Please add at least one item');
-    return;
-  }
+  if (!$('eo-items-container').querySelector('[id^="item-"]')) { alert('Please add at least one item'); return; }
 
   const { items, subtotal } = collectItems('eo-items-container');
   const idx = savedOrders.findIndex(o => o.id === eoOrderId);
   if (idx === -1) { alert('Order not found'); return; }
 
-  const orig     = savedOrders[idx];
-  const discount = Math.max(0, orig.discount || 0);
-
+  const discount = Math.max(0, savedOrders[idx].discount || 0);
   savedOrders[idx] = {
-    ...orig,
+    ...savedOrders[idx],
     sname,
     sclass:      $('eo-sclass').value.trim(),
     pname:       $('eo-pname').value.trim(),
     mobile:      $('eo-mobile').value.trim(),
     notes:       $('eo-notes').value.trim(),
     paymentMode: eoPayMode,
-    items,
-    subtotal,
-    discount,
-    finalAmt:    Math.max(0, subtotal - discount)
+    items, subtotal, discount,
+    finalAmt: Math.max(0, subtotal - discount)
   };
 
   saveLocal();
@@ -1686,28 +1797,30 @@ function saveEditOrder() {
   renderOrders($('tab-orders').querySelector('.search-box input')?.value || '');
 }
 
+
 /* ══════════════════════════════════════════════════════
    WHATSAPP COPY
-   Formats bill as plain text for pasting in WhatsApp
+   Formats order as plain text, copies to clipboard.
+   Uses clipboard API with execCommand fallback for older Android.
 ══════════════════════════════════════════════════════ */
 
 function copyWhatsApp(id) {
   const order = savedOrders.find(o => o.id === id);
   if (!order) return;
 
-  const PAY_LABEL = { cash: 'Cash', online: 'Online', pending: 'Pending' };
+  const PAY_LABEL  = { cash: 'Cash', online: 'Online', pending: 'Pending' };
+  const orderLabel = order.orderNum ? ` | #${String(order.orderNum).padStart(3,'0')}` : '';
 
   const itemLines = (order.items || [])
-    .map(i => `  ${i.label}  -  Rs.${i.lineTotal.toLocaleString('en-IN')}`)
+    .map(i => `  ${i.label}  =  Rs.${i.lineTotal.toLocaleString('en-IN')}`)
     .join('\n');
 
   const discountLine = order.finalAmt !== order.subtotal
-    ? `\n  Discount  -  - Rs.${order.discount.toLocaleString('en-IN')}`
-    : '';
+    ? `\n  Discount  =  - Rs.${order.discount.toLocaleString('en-IN')}` : '';
 
   const message =
 `*Golden Gate International School*
-*Uniform Bill*
+*Uniform Bill${orderLabel}*
 -------------------------
 Student : ${order.sname || ''}${order.sclass ? ' (' + order.sclass + ')' : ''}
 ${order.pname  ? 'Parent  : ' + order.pname  : ''}${order.mobile ? '\nMobile  : ' + order.mobile : ''}
@@ -1723,7 +1836,6 @@ Thank you!`;
   navigator.clipboard.writeText(message)
     .then(() => alert('Copied! Now open WhatsApp and paste.'))
     .catch(() => {
-      // Fallback for older Android browsers
       const ta = document.createElement('textarea');
       ta.value = message;
       document.body.appendChild(ta);
@@ -1736,38 +1848,81 @@ Thank you!`;
 
 /* ══════════════════════════════════════════════════════
    EXPORT CSV
-   Downloads all orders as .csv — open in Excel or Sheets
+   Downloads all orders as .csv — open in Excel or Sheets.
 ══════════════════════════════════════════════════════ */
 
 function exportCSV() {
   if (!savedOrders.length) { alert('No orders to export.'); return; }
 
-  const headers = ['Date', 'Location', 'Student', 'Class', 'Parent', 'Mobile', 'Notes',
-                   'Items', 'Subtotal', 'Discount', 'Total', 'Payment'];
-
+  const headers = ['Order#','Date','Location','Student','Class','Parent','Mobile','Notes',
+                   'Items','Subtotal','Discount','Total','Payment'];
   const rows = savedOrders.map(o => [
-    o.date,
-    o.location    || 'badagaon',
-    o.sname       || '',
-    o.sclass      || '',
-    o.pname       || '',
-    o.mobile      || '',
-    o.notes       || '',
+    o.orderNum ? '#' + String(o.orderNum).padStart(3,'0') : '',
+    o.date, o.location || 'badagaon', o.sname || '', o.sclass || '',
+    o.pname || '', o.mobile || '', o.notes || '',
     (o.items || []).map(i => i.label + ' = Rs.' + i.lineTotal).join(' | '),
-    o.subtotal,
-    o.discount    || 0,
-    o.finalAmt,
-    o.paymentMode
+    o.subtotal, o.discount || 0, o.finalAmt, o.paymentMode
   ]);
-
-  const csv = [headers, ...rows]
-    .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-    .join('\n');
-
-  const link     = document.createElement('a');
-  link.href      = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  link.download  = `uniform-orders-${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.csv`;
+  const csv  = [headers,...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const link = document.createElement('a');
+  link.href     = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  link.download = `uniform-orders-${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.csv`;
   link.click();
+}
+
+/* ══════════════════════════════════════════════════════
+   EXPORT JSON — full backup
+   Use this regularly! localStorage is wiped if browser
+   cache is cleared or you switch phones/devices.
+══════════════════════════════════════════════════════ */
+
+function exportJSON() {
+  if (!savedOrders.length) { alert('No orders to export.'); return; }
+  const backup = { exportedAt: new Date().toISOString(), orderCounter, orders: savedOrders };
+  const link   = document.createElement('a');
+  link.href     = URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
+  link.download = `uniform-backup-${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.json`;
+  link.click();
+}
+
+/* ══════════════════════════════════════════════════════
+   IMPORT JSON — restore from backup
+   Merges with existing orders (skips duplicates by ID).
+   Also restores orderCounter so numbering stays correct.
+══════════════════════════════════════════════════════ */
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed   = JSON.parse(e.target.result);
+      // Support both plain array (old) and object with metadata (new)
+      const imported = Array.isArray(parsed) ? parsed : (parsed.orders || []);
+      const importRC = parsed.orderCounter || 0;
+
+      if (!imported.length) { alert('No orders found in this file.'); return; }
+
+      const existingIds = new Set(savedOrders.map(o => o.id));
+      const newOrders   = imported.filter(o => o.id && !existingIds.has(o.id));
+
+      if (newOrders.length === 0) {
+        alert('No new orders found — all already exist.');
+      } else {
+        savedOrders  = [...savedOrders, ...newOrders].sort((a,b) => b.id - a.id);
+        orderCounter = Math.max(orderCounter, importRC);
+        saveLocal();
+        saveCounter();
+        renderOrders('');
+        alert(`Imported ${newOrders.length} order${newOrders.length !== 1 ? 's' : ''} successfully.`);
+      }
+    } catch (err) {
+      alert('Import failed: ' + err.message + '\nMake sure you select a valid backup JSON file.');
+    }
+    event.target.value = ''; // reset so same file can be re-imported if needed
+  };
+  reader.readAsText(file);
 }
 
 /* ══════════════════════════════════════════════════════
