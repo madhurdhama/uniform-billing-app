@@ -1,0 +1,622 @@
+/* ─── Design tokens ─────────────────────────────── */
+    :root {
+      --green:     #16a34a;  --green-bg:  #dcfce7;
+      --blue:      #1d4ed8;  --blue-bg:   #dbeafe;
+      --orange:    #d97706;  --orange-bg: #fef3c7;
+      --purple:    #6d28d9;  --purple-bg: #ede9fe;
+      --pink:      #be185d;  --pink-bg:   #fce7f3;
+      --accent:    #2563eb;  --accent-bg: #eff6ff;
+      --text:      #1a1a1a;
+      --text-2:    #555;
+      --text-3:    #999;
+      --border:    #e5e7eb;
+      --border-2:  #d1d5db;
+      --surface:   #f9fafb;
+      --bg:        #f3f4f6;
+    }
+
+    /* ─── Reset ─────────────────────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .app { max-width: 600px; margin: 0 auto; padding: 1rem; }
+
+    /* ─── Header ─────────────────────────────────────── */
+    .header { text-align: center; padding: 1rem 0 1.25rem; }
+    .header h1 { font-size: 18px; font-weight: 700; }
+    .header p  { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+    /* ─── Location pill ──────────────────────────────── */
+    .location-row { display: flex; justify-content: center; margin-bottom: 1rem; }
+    .location-pill {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .loc-btn {
+      padding: 5px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      background: none;
+      border-radius: 16px;
+      cursor: pointer;
+      color: var(--text-3);
+      transition: all 0.15s;
+    }
+    .loc-btn.active { background: var(--text); color: #fff; }
+
+    /* ─── Tabs ───────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 1rem;
+    }
+    .tab {
+      flex: 1;
+      padding: 9px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      background: none;
+      border-radius: 9px;
+      cursor: pointer;
+      color: var(--text-2);
+    }
+    .tab.active {
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* ─── Section cards ──────────────────────────────── */
+    .section {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+
+    /* ─── Form fields ────────────────────────────────── */
+    .field { margin-bottom: 10px; }
+    .field label {
+      font-size: 12px;
+      color: var(--text-2);
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    .field input, .field select {
+      width: 100%;
+      padding: 9px 11px;
+      font-size: 14px;
+      border: 1px solid var(--border-2);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--accent);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
+    }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* ─── Payment toggle ─────────────────────────────── */
+    /* Active color matches badge color for visual consistency */
+    .payment-toggle {
+      display: flex;
+      border: 1px solid var(--border-2);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+    .pay-btn {
+      flex: 1;
+      padding: 9px 8px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      background: var(--surface);
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pay-btn:not(:last-child) { border-right: 1px solid var(--border-2); }
+    #pay-cash.active,    #eo-pay-cash.active    { background: var(--green-bg);  color: var(--green);  }
+    #pay-online.active,  #eo-pay-online.active  { background: var(--blue-bg);   color: var(--blue);   }
+    #pay-pending.active, #eo-pay-pending.active { background: var(--orange-bg); color: var(--orange); }
+
+    /* ─── Item table ─────────────────────────────────── */
+    .col-labels {
+      display: grid;
+      grid-template-columns: 1fr 80px 52px 78px 28px;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    .col-labels span { font-size: 11px; color: var(--text-3); font-weight: 500; }
+
+    /* Single item row */
+    .item-row {
+      display: grid;
+      grid-template-columns: 1fr 80px 52px 78px 28px;
+      gap: 5px;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+
+    /* Combo row (two items with separate sizes) */
+    .combo-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+    }
+    .combo-top {
+      display: grid;
+      grid-template-columns: 1fr 52px 78px 28px;
+      gap: 5px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .combo-sub { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 4px; }
+    .combo-label { font-size: 11px; color: var(--text-3); padding-left: 2px; font-weight: 500; }
+
+    /* Shared input styles for item/combo rows */
+    .item-row select, .item-row input,
+    .combo-top select, .combo-top input,
+    .combo-sub select {
+      padding: 7px 8px;
+      font-size: 13px;
+      border: 1px solid var(--border-2);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      width: 100%;
+    }
+    .item-row input:focus, .item-row select:focus,
+    .combo-top input:focus, .combo-top select:focus,
+    .combo-sub select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.08);
+    }
+    .item-price { font-size: 13px; font-weight: 600; color: var(--text); text-align: right; }
+    .remove-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text-3);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .remove-btn:hover { background: #fee2e2; color: #dc2626; }
+
+    /* ─── Add item buttons ───────────────────────────── */
+    .add-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .add-btn {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: none;
+      border-radius: 20px;
+      padding: 9px 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+      min-height: 40px;
+    }
+    .add-btn:hover { background: #dbeafe; }
+    .add-btn.combo { color: var(--purple); background: var(--purple-bg); }
+    .add-btn.combo:hover { background: #ddd6fe; }
+    .add-btn.quickset {
+      color: var(--green);
+      background: var(--green-bg);
+      font-weight: 700;
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 4px;
+    }
+    .add-btn.quickset:hover { background: #bbf7d0; }
+
+    /* ─── Total card ─────────────────────────────────── */
+    .total-card {
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 1rem;
+      border: 1px solid var(--border);
+    }
+    .total-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-2); margin-bottom: 4px; }
+    .total-final {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ─── Save button ────────────────────────────────── */
+    .save-btn {
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background 0.15s;
+    }
+    .save-btn:hover  { background: #1d4ed8; }
+    .save-btn:active { transform: scale(0.99); }
+
+    /* ─── Search box ─────────────────────────────────── */
+    .search-box input {
+      width: 100%;
+      padding: 9px 12px;
+      font-size: 14px;
+      border: 1px solid var(--border-2);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      margin-bottom: 8px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+    .total-count { font-size: 12px; color: var(--text-3); margin-bottom: 8px; }
+
+    /* ─── Pending banner ─────────────────────────────── */
+    /* Compact card: total pending count + how many from today */
+    .pending-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--orange-bg);
+      border: 1px solid #fcd34d;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .pending-banner-left { display: flex; align-items: center; gap: 8px; }
+    .pending-count { font-size: 22px; font-weight: 700; color: var(--orange); line-height: 1; }
+    .pending-label { font-size: 12px; font-weight: 600; color: var(--orange); }
+    .pending-today { font-size: 11px; color: #92400e; margin-top: 1px; }
+    .pending-tap   { font-size: 11px; color: #92400e; }
+
+    /* ─── Date filter pills ──────────────────────────── */
+    .date-filter { display: flex; gap: 5px; margin-bottom: 10px; }
+    .date-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border-2);
+      border-radius: 20px;
+      background: var(--surface);
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .date-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+    /* ─── Order card ─────────────────────────────────── */
+    .order-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .order-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .order-name   { font-size: 15px; font-weight: 600; }
+    .order-meta   { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+    .order-amount { font-size: 16px; font-weight: 700; }
+
+    /* ─── Badges (payment + location) ───────────────── */
+    /* All same pill shape — color encodes the meaning   */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      margin-top: 4px;
+    }
+    .badge.cash     { background: var(--green-bg);  color: var(--green);  }
+    .badge.online   { background: var(--blue-bg);   color: var(--blue);   }
+    .badge.pending  { background: var(--orange-bg); color: var(--orange); }
+    .badge.badagaon { background: var(--purple-bg); color: var(--purple); }
+    .badge.baghpat  { background: var(--pink-bg);   color: var(--pink);   }
+    .discount-badge { font-size: 11px; color: #dc2626; margin-top: 2px; }
+
+    /* ─── Item lines inside order card ──────────────── */
+    .order-items { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .order-item-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-2);
+      margin-bottom: 4px;
+    }
+    .order-final-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ─── Card action buttons ────────────────────────── */
+    .card-actions { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+    .action-btn {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid var(--border-2);
+      background: var(--surface);
+      color: var(--text-2);
+      transition: background 0.12s;
+    }
+    .action-btn:hover { background: var(--border); }
+    .action-btn.bill { color: var(--green); border-color: #86efac; background: var(--green-bg); }
+    .action-btn.bill:hover { background: #bbf7d0; }
+    .del-order {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-3);
+      padding: 3px 6px;
+      border-radius: 5px;
+      margin-left: 4px;
+    }
+    .del-order:hover { background: #fee2e2; color: #dc2626; }
+    .empty { text-align: center; padding: 2.5rem; color: var(--text-3); font-size: 14px; }
+
+    /* ─── Edit payment panel ─────────────────────────── */
+    /* Hidden inside each card; slides open on Edit Payment tap */
+    .edit-panel {
+      display: none;
+      background: #f8f9ff;
+      border: 1px solid #dbeafe;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 10px;
+    }
+    .edit-panel.open { display: block; }
+    .edit-panel-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+    .edit-pay-toggle {
+      display: flex;
+      border: 1px solid var(--border-2);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .edit-pay-btn {
+      flex: 1;
+      padding: 8px 6px;
+      font-size: 12px;
+      font-weight: 500;
+      border: none;
+      background: var(--surface);
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .edit-pay-btn:not(:last-child) { border-right: 1px solid var(--border-2); }
+    .edit-pay-btn.cash-active    { background: var(--green-bg);  color: var(--green);  }
+    .edit-pay-btn.online-active  { background: var(--blue-bg);   color: var(--blue);   }
+    .edit-pay-btn.pending-active { background: var(--orange-bg); color: var(--orange); }
+    .edit-amount-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .edit-amount-row label { font-size: 12px; color: var(--text-2); white-space: nowrap; font-weight: 500; }
+    .edit-amount-row input {
+      flex: 1;
+      padding: 7px 10px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid var(--border-2);
+      border-radius: 8px;
+      background: #fff;
+      outline: none;
+      color: var(--text);
+    }
+    .edit-amount-row input:focus { border-color: var(--accent); }
+    .edit-orig { font-size: 11px; color: var(--text-3); margin-bottom: 10px; }
+    .update-btn {
+      width: 100%;
+      padding: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .update-btn:hover  { background: #1d4ed8; }
+    .update-btn:active { transform: scale(0.99); }
+
+    /* ─── Full order edit screen ─────────────────────── */
+    /* Fixed overlay that slides over everything          */
+    #edit-order-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 100;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    #edit-order-screen.open { display: block; }
+    .edit-screen-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.2rem; }
+    .back-btn {
+      background: #fff;
+      border: 1px solid var(--border-2);
+      border-radius: 9px;
+      padding: 7px 13px;
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--text-2);
+      font-weight: 500;
+    }
+    .back-btn:hover { background: var(--surface); }
+    .edit-screen-title { font-size: 17px; font-weight: 700; }
+
+    /* ─── Bottom sheet modal (shared by all pickers) ─── */
+    /* Used by Quick Set, Single Item, Combo pickers       */
+    .sheet-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .sheet-modal.open { display: flex; }
+    .sheet {
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      padding: 1.25rem 1.25rem 2rem;
+      width: 100%;
+      max-width: 600px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .sheet-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .sheet-sub   { font-size: 12px; color: var(--text-3); margin-bottom: 1rem; }
+    .sheet-label { font-size: 11px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* Grid of selectable chips (sizes, items) */
+    .chip-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .chip-grid.wide { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    .chip {
+      padding: 10px 6px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1.5px solid var(--border-2);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text-2);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.12s;
+      line-height: 1.3;
+    }
+    .chip:hover  { border-color: var(--accent); color: var(--accent); }
+    .chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* Quantity stepper inside sheet */
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 12px 0;
+    }
+    .qty-row label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+    .qty-stepper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border-2);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .qty-stepper button {
+      padding: 7px 14px;
+      font-size: 18px;
+      font-weight: 500;
+      border: none;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .qty-stepper button:hover { background: var(--border); }
+    .qty-stepper span {
+      min-width: 32px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .sheet-confirm {
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+    .sheet-confirm:hover { background: #1d4ed8; }
+    .sheet-cancel {
+      width: 100%;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      background: none;
+      border: none;
+      color: var(--text-3);
+      cursor: pointer;
+      margin-top: 8px;
+    }
