@@ -205,11 +205,11 @@ function selectChip(containerId, value, el) {
 
 function openQsSheet(target) {
   sheetTarget = target;
-  qsSize      = null;
   $('qs-qty').textContent = '1';
 
   const sizes = [26, 28, 30, 32, 34, 36, 38, 40, 42, 44];
-  buildChips('qs-sizes', sizes, null, 'selectQsSize');
+  qsSize = String(sizes[0]);
+  buildChips('qs-sizes', sizes, qsSize, 'selectQsSize');
   openSheet('qs-modal');
 }
 
@@ -218,7 +218,6 @@ function selectQsSize(size, el) {
 }
 
 function confirmQuickSet() {
-  if (!qsSize) { alert('Please select a size'); return; }
   closeSheet('qs-modal');
 
   const isEo   = sheetTarget === 'eo';
@@ -375,8 +374,10 @@ function _addItem(containerId, prefix, recalcFn, defaultItem, defaultSize, defau
 
 /* ══════════════════════════════════════════════════════
    ADD COMBO ROW (internal)
-   Handles two-item combos (with separate sizes) and
-   the fixed Suit Set (Suit + Trouser + Jacket).
+   Regular combos show as one row with a small expand
+   toggle — tap to reveal each item with its own × button
+   so either item can be removed independently.
+   Suit Set stays as one fixed row (no individual sizes).
 ══════════════════════════════════════════════════════ */
 
 function _addCombo(containerId, prefix, recalcFn, type, defaultSize1, defaultSize2, defaultQty) {
@@ -401,11 +402,17 @@ function _addCombo(containerId, prefix, recalcFn, type, defaultSize1, defaultSiz
       <div style="font-size:11px;color:var(--text-3);padding:2px 0 4px">
         Suit ${rupees(p['Suit']['All'])} + Trouser ${rupees(p['Trouser']['All'])} + Jacket ${rupees(p['Jacket']['All'])} = ${rupees(unit)} each
       </div>`;
+
   } else {
     const cfg = COMBOS[type];
     row.dataset.type  = 'combo';
     row.dataset.item1 = cfg.item1;
     row.dataset.item2 = cfg.item2;
+
+    // Sub-item IDs — each item inside the combo has its own remove button
+    const sid1 = id + 'a';
+    const sid2 = id + 'b';
+
     row.innerHTML = `
       <div class="combo-top">
         <div style="font-size:12px;font-weight:600;color:var(--text-2)">${cfg.label}</div>
@@ -414,16 +421,17 @@ function _addCombo(containerId, prefix, recalcFn, type, defaultSize1, defaultSiz
         <button class="remove-btn" onclick="removeItem('${id}','${recalcFn}')">&#215;</button>
       </div>
       <div class="combo-sub">
-        <div>
-          <div class="combo-label">${cfg.item1} Size</div>
-          <select id="s1-${id}" onchange="syncSize2('${id}');${recalcFn}()">${getSizeOptions(cfg.item1, defaultSize1)}</select>
+        <div class="combo-item-row">
+          <div class="combo-label">${cfg.item1}</div>
+          <select id="s1-${id}" onchange="${recalcFn}()">${getSizeOptions(cfg.item1, defaultSize1)}</select>
         </div>
-        <div>
-          <div class="combo-label">${cfg.item2} Size</div>
+        <div class="combo-item-row">
+          <div class="combo-label">${cfg.item2}</div>
           <select id="s2-${id}" onchange="${recalcFn}()">${getSizeOptions(cfg.item2, defaultSize2 || defaultSize1)}</select>
         </div>
       </div>`;
   }
+
   $(containerId).appendChild(row);
   window[recalcFn]();
 }
@@ -445,12 +453,6 @@ function removeItem(id, recalcFn) {
   window[recalcFn]();
 }
 
-// When size1 of a combo changes, auto-match size2 to same value
-function syncSize2(id) {
-  const s1 = $('s1-' + id), s2 = $('s2-' + id);
-  if (!s1 || !s2) return;
-  for (let opt of s2.options) { if (opt.value === s1.value) { s2.value = s1.value; break; } }
-}
 
 /* ══════════════════════════════════════════════════════
    RECALCULATE TOTALS
@@ -458,8 +460,8 @@ function syncSize2(id) {
    shows per-line breakdown when qty > 1, updates grand total.
 ══════════════════════════════════════════════════════ */
 
-function _recalc(containerId, breakdownId, totalId) {
-  let subtotal = 0, html = '';
+function _recalc(containerId, totalId) {
+  let subtotal = 0;
 
   $(containerId).querySelectorAll('[id^="item-"]').forEach(row => {
     const id      = row.id.replace('item-', '');
@@ -469,43 +471,37 @@ function _recalc(containerId, breakdownId, totalId) {
     if (!qtyEl) return;
 
     const qty = parseInt(qtyEl.value) || 1;
-    let unit = 0, label = '';
+    let unit = 0;
 
     if (type === 'single') {
       const is = $('isel-' + id), ss = $('ssel-' + id);
       if (!is) return;
-      unit  = getUnitPrice(is.value, ss.value);
-      label = `${is.value} (${ss.value}) x${qty}`;
+      unit = getUnitPrice(is.value, ss.value);
     } else if (type === 'suit-set') {
       const p = getPrices();
-      unit  = p['Suit']['All'] + p['Trouser']['All'] + p['Jacket']['All'];
-      label = `Suit Set x${qty}`;
+      unit = p['Suit']['All'] + p['Trouser']['All'] + p['Jacket']['All'];
     } else if (type === 'combo') {
       const s1 = $('s1-' + id), s2 = $('s2-' + id);
       if (!s1) return;
-      unit  = getUnitPrice(row.dataset.item1, s1.value) + getUnitPrice(row.dataset.item2, s2.value);
-      label = `${row.dataset.item1}+${row.dataset.item2} x${qty}`;
+      unit = getUnitPrice(row.dataset.item1, s1.value) + getUnitPrice(row.dataset.item2, s2.value);
     }
 
     const line = unit * qty;
     subtotal += line;
     priceEl.textContent = rupees(line);
-    // Show breakdown line only when qty > 1
-    if (qty > 1) html += `<div class="total-row"><span>${label}</span><span>${rupees(line)}</span></div>`;
   });
 
-  $(breakdownId).innerHTML = html;
-  $(totalId).textContent   = rupees(subtotal);
+  $(totalId).textContent = rupees(subtotal);
   return subtotal;
 }
 
-/* ── Public wrappers called by HTML onclick and sheet confirmations ── */
-function addItem(di, ds, dq)         { _addItem('items-container',   'n', 'recalc',   di, ds, dq); }
-function addCombo(type, s1, s2, qty) { _addCombo('items-container',  'n', 'recalc',   type, s1, s2, qty); }
-function recalc()                    { _recalc('items-container',   'item-breakdown', 'grand-total'); }
+/* ── Public wrappers ── */
+function addItem(di, ds, dq)         { _addItem('items-container',  'n', 'recalc',   di, ds, dq); }
+function addCombo(type, s1, s2, qty) { _addCombo('items-container', 'n', 'recalc',   type, s1, s2, qty); }
+function recalc()                    { _recalc('items-container',   'grand-total'); }
 function eoAddItem(di, ds, dq)         { _addItem('eo-items-container',  'e', 'eoRecalc', di, ds, dq); }
 function eoAddCombo(type, s1, s2, qty) { _addCombo('eo-items-container', 'e', 'eoRecalc', type, s1, s2, qty); }
-function eoRecalc()                    { _recalc('eo-items-container', 'eo-breakdown', 'eo-grand-total'); }
+function eoRecalc()                    { _recalc('eo-items-container',   'eo-grand-total'); }
 
 /* ══════════════════════════════════════════════════════
    COLLECT ITEMS
@@ -687,47 +683,76 @@ function renderOrders(query) {
   $('orders-summary').textContent =
     `${filtered.length} order${filtered.length !== 1 ? 's' : ''} - Total: ${rupees(totalAmt)}`;
 
-  const PAY_LABEL = { cash: 'Cash', online: 'Online', pending: 'Pending' };
-  const LOC_LABEL = { badagaon: 'Badagaon', baghpat: 'Baghpat' };
-
   if (filtered.length === 0) {
     $('orders-list').innerHTML = '<div class="empty">No orders found</div>';
     return;
   }
 
   $('orders-list').innerHTML = filtered.map(o => {
-    const mode       = o.paymentMode || 'cash';
-    const loc        = o.location    || 'badagaon';
-    const orderLabel = o.orderNum ? `<span style="font-size:11px;font-weight:700;color:var(--text-3);font-family:monospace;margin-right:4px">#${String(o.orderNum).padStart(3,'0')}</span>` : '';
+    const mode     = o.paymentMode || 'cash';
+    const loc      = o.location    || 'badagaon';
+    const orderNum = o.orderNum ? `<span class="order-num">#${String(o.orderNum).padStart(3,'0')}</span>` : '';
+    const PAY_TEXT = { cash: 'Cash', online: 'Online', pending: 'Pending' };
+    const LOC_TEXT = { badagaon: 'Badagaon', baghpat: 'Baghpat' };
+    const itemCount = (o.items || []).length;
+
+    const menuIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <circle cx="8" cy="2.5" r="1.4"/>
+      <circle cx="8" cy="8"   r="1.4"/>
+      <circle cx="8" cy="13.5" r="1.4"/>
+    </svg>`;
 
     return `
       <div class="order-card" id="card-${o.id}">
+
         <div class="order-card-top">
-          <div>
+          <div style="flex:1;min-width:0">
+
+            <!-- Name + class -->
             <div class="order-name">
-              ${orderLabel}${o.sname || ''}
-              <span style="font-size:12px;font-weight:400;color:#888">${o.sclass || ''}</span>
+              ${orderNum}${o.sname || ''}
+              <span style="font-size:12px;font-weight:400;color:var(--text-3)">${o.sclass || ''}</span>
             </div>
-            <div class="order-meta">
-              ${o.pname ? o.pname + ' - ' : ''}${o.mobile || ''} - ${o.date}
+
+            <!-- Parent · mobile · location · date below name -->
+            <div class="order-contact">
+              ${[o.pname, o.mobile, LOC_TEXT[loc], o.date].filter(Boolean).join(' · ')}
             </div>
-            <div class="card-actions">
-              <span class="badge ${mode}">${PAY_LABEL[mode]}</span>
-              <span class="badge ${loc}">${LOC_LABEL[loc]}</span>
-              <button class="action-btn" onclick="openEditOrder(${o.id})">Edit Order</button>
-              <button class="action-btn" onclick="toggleEditPayment(${o.id})">Edit Payment</button>
-              <button class="action-btn bill" onclick="copyWhatsApp(${o.id})">Bill</button>
+
+            <!-- Payment badge only -->
+            <div class="order-meta" style="display:flex;align-items:center;gap:5px;margin-top:5px">
+              <span class="badge ${mode}">${PAY_TEXT[mode]}</span>
             </div>
-            ${o.notes ? `<div style="font-size:12px;color:var(--orange);margin-top:5px;font-style:italic">Note: ${o.notes}</div>` : ''}
+
+            ${o.notes ? `<div style="font-size:12px;color:var(--orange);margin-top:4px;font-style:italic">${o.notes}</div>` : ''}
             ${o.discount > 0 ? `<div class="discount-badge">Discount: - ${rupees(o.discount)}</div>` : ''}
           </div>
-          <div style="display:flex;align-items:center;gap:6px">
+
+          <!-- Amount + menu top-right -->
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-left:10px;flex-shrink:0">
+            <div class="menu-wrap" id="menu-wrap-${o.id}">
+              <button class="menu-btn" onclick="toggleMenu(${o.id})" title="More options">${menuIcon}</button>
+              <div class="menu-dropdown" id="menu-${o.id}">
+                <button class="menu-item" onclick="closeMenu(${o.id});openEditOrder(${o.id})">Edit Order</button>
+                <button class="menu-item" onclick="closeMenu(${o.id});toggleEditPayment(${o.id})">Edit Payment</button>
+                <button class="menu-item destructive" onclick="closeMenu(${o.id});deleteOrder(${o.id})">Delete</button>
+              </div>
+            </div>
             <div class="order-amount">${rupees(o.finalAmt)}</div>
-            <button class="del-order" onclick="deleteOrder(${o.id})">&#10005;</button>
           </div>
         </div>
 
-        <div class="order-items">
+        <!-- Bottom bar: Send Bill left, items toggle right -->
+        <div class="card-bottom">
+          <button class="action-btn" onclick="openWhatsApp(${o.id})">Send Bill</button>
+          <button class="items-toggle-btn" onclick="toggleItems(${o.id})">
+            ${itemCount} item${itemCount !== 1 ? 's' : ''}
+            <span class="items-chevron" id="chev-${o.id}">▸</span>
+          </button>
+        </div>
+
+        <!-- Collapsible item lines -->
+        <div class="order-items" id="items-${o.id}" style="display:none">
           ${(o.items || []).map(i => `
             <div class="order-item-line">
               <span>${i.label}</span>
@@ -744,7 +769,7 @@ function renderOrders(query) {
           </div>` : ''}
         </div>
 
-        <!-- Edit payment panel — hidden until Edit Payment is tapped -->
+        <!-- Edit payment panel -->
         <div class="edit-panel" id="edit-${o.id}">
           <div class="edit-panel-title">Update Payment</div>
           <div class="edit-pay-toggle">
@@ -762,9 +787,48 @@ function renderOrders(query) {
           </div>
           <button class="update-btn" onclick="applyEditPayment(${o.id})">Save Changes</button>
         </div>
+
       </div>`;
   }).join('');
 }
+
+/* ══════════════════════════════════════════════════════
+   COLLAPSIBLE ITEM LINES
+   Tap "N items ▸" to expand/collapse the item list.
+══════════════════════════════════════════════════════ */
+
+function toggleItems(id) {
+  const panel = $('items-' + id);
+  const chev  = $('chev-'  + id);
+  const open  = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  chev.textContent    = open ? '▸' : '▾';
+}
+
+/* ══════════════════════════════════════════════════════
+   THREE-DOT MENU
+   Each card has its own dropdown. Tapping ••• opens it;
+   tapping outside or choosing an action closes it.
+══════════════════════════════════════════════════════ */
+
+function toggleMenu(id) {
+  const menu = $('menu-' + id);
+  const isOpen = menu.classList.contains('open');
+  // Close all other open menus first
+  document.querySelectorAll('.menu-dropdown.open').forEach(m => m.classList.remove('open'));
+  if (!isOpen) menu.classList.add('open');
+}
+
+function closeMenu(id) {
+  $('menu-' + id)?.classList.remove('open');
+}
+
+// Close any open menu when tapping anywhere outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.menu-wrap')) {
+    document.querySelectorAll('.menu-dropdown.open').forEach(m => m.classList.remove('open'));
+  }
+});
 
 /* ══════════════════════════════════════════════════════
    DELETE ORDER / EDIT PAYMENT PANEL
@@ -907,19 +971,18 @@ function saveEditOrder() {
 
 
 /* ══════════════════════════════════════════════════════
-   WHATSAPP COPY
-   Formats order as plain text, copies to clipboard.
-   Uses clipboard API with execCommand fallback for older Android.
+   WHATSAPP BILL
+   Opens WhatsApp directly with pre-filled message.
+   Fallback: copies to clipboard if WhatsApp not installed.
 ══════════════════════════════════════════════════════ */
 
-function copyWhatsApp(id) {
+function openWhatsApp(id) {
   const order = savedOrders.find(o => o.id === id);
   if (!order) return;
 
   const PAY_LABEL  = { cash: 'Cash', online: 'Online', pending: 'Pending' };
   const orderLabel = order.orderNum ? ` | #${String(order.orderNum).padStart(3,'0')}` : '';
 
-  // Each item on its own line: "  Item Name = Rs.X"
   const itemLines = (order.items || [])
     .map(i => `  ${i.label} = Rs.${i.lineTotal.toLocaleString('en-IN')}`)
     .join('\n');
@@ -927,7 +990,7 @@ function copyWhatsApp(id) {
   const discountLine = order.finalAmt !== order.subtotal
     ? `\n  Discount = - Rs.${order.discount.toLocaleString('en-IN')}` : '';
 
-  // Build contact lines — avoid blank line when pname is empty
+  // Build contact lines cleanly — no blank lines
   const contactLines = [
     order.pname  ? `Parent  : ${order.pname}`  : '',
     order.mobile ? `Mobile  : ${order.mobile}` : ''
@@ -947,17 +1010,25 @@ Payment : ${PAY_LABEL[order.paymentMode || 'pending']}
 -------------------------
 Thank you!`;
 
-  navigator.clipboard.writeText(message)
-    .then(() => alert('Copied! Now open WhatsApp and paste.'))
-    .catch(() => {
-      const ta = document.createElement('textarea');
-      ta.value = message;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      alert('Copied! Now open WhatsApp and paste.');
-    });
+  // Open WhatsApp directly with pre-filled text
+  // wa.me with no phone number opens WhatsApp to choose a contact
+  const url = 'https://wa.me/?text=' + encodeURIComponent(message);
+  const opened = window.open(url, '_blank');
+
+  // Fallback: if popup blocked or WhatsApp not available, copy to clipboard
+  if (!opened) {
+    navigator.clipboard.writeText(message)
+      .then(() => alert('Copied! Open WhatsApp and paste.'))
+      .catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = message;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        alert('Copied! Open WhatsApp and paste.');
+      });
+  }
 }
 
 /* ══════════════════════════════════════════════════════
