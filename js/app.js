@@ -645,16 +645,17 @@ function saveOrder() {
   savedOrders.unshift(order);
   saveLocal();
   toast(`Order #${String(orderCounter).padStart(3,'0')} saved — ${sname}, ${rupees(subtotal)}`);
-  resetForm();
+  resetForm({ focusStudentName: false });
 }
 
-function resetForm() {
+function resetForm({ focusStudentName = true } = {}) {
   ['sname', 'sclass', 'pname', 'mobile', 'notes'].forEach(id => $(id).value = '');
   $('items-container').innerHTML = '';
   itemCounter = 0;
   setPayment('pending');
   recalc();
-  $('sname').focus();
+  document.activeElement?.blur?.();
+  if (focusStudentName) $('sname').focus();
 }
 
 /* ══════════════════════════════════════════════════════
