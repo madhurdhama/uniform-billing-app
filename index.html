@@ -177,6 +177,11 @@
             <button class="filter-opt"        id="fopt-today" onclick="setDateFilter('today');updateFilterBar()">Today</button>
             <button class="filter-opt"        id="fopt-week"  onclick="setDateFilter('week');updateFilterBar()">This Week</button>
           </div>
+          <div class="filter-section-label" style="margin-top:10px">Payment</div>
+          <div class="filter-group">
+            <button class="filter-opt active" id="fopt-pay-all"     onclick="setPaymentFilter('all')">All</button>
+            <button class="filter-opt"        id="fopt-pay-pending" onclick="setPaymentFilter('pending')">Pending / Partial</button>
+          </div>
           <div class="filter-section-label" style="margin-top:10px">Location</div>
           <div class="filter-group">
             <button class="filter-opt active" id="fopt-loc-all"      onclick="setLocationFilter('all')">All</button>

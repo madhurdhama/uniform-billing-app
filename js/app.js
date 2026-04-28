@@ -53,6 +53,7 @@ let eoOrderId          = null;
 let itemCounter        = 0;
 let dateFilter         = 'all';
 let locationFilter     = 'all';
+let paymentFilter      = 'all';
 let analyticsDate      = 'today';
 let analyticsLoc       = 'all';
 let orderCounter       = parseInt(localStorage.getItem('uniform_order_counter') || '0');
@@ -181,6 +182,12 @@ function setPayment(mode) {
   ['cash', 'online', 'pending'].forEach(m => $('pay-' + m).classList.toggle('active', m === mode));
   const f = $('paid-amt-field');
   if (f) f.style.display = (mode === 'cash' || mode === 'online') ? '' : 'none';
+}
+function setPaymentFilter(f) {
+  paymentFilter = f;
+  ['all','pending'].forEach(k => $('fopt-pay-'+k)?.classList.toggle('active', k === f));
+  renderOrders($('tab-orders').querySelector('.search-box input')?.value || '');
+  updateFilterBar();
 }
 
 /* ══════════════════════════════════════════════════════
@@ -755,17 +762,19 @@ function updateFilterBar() {
   const pills = [];
   if (dateFilter !== 'all')     pills.push(`<span class="filter-pill">${dateLabels[dateFilter]}</span>`);
   if (locationFilter !== 'all') pills.push(`<span class="filter-pill loc">${locLabels[locationFilter]}</span>`);
+  if (paymentFilter !== 'all')  pills.push(`<span class="filter-pill" style="background:#fef3c7;color:#d97706">Pending / Partial</span>`);
   if (el) el.innerHTML = pills.length
     ? pills.join('') + ` <button class="filter-clear-btn" onclick="clearFilters()">✕ Clear</button>` : '';
-  const isActive = dateFilter !== 'all' || locationFilter !== 'all';
+  const isActive = dateFilter !== 'all' || locationFilter !== 'all' || paymentFilter !== 'all';
   if (dot) dot.style.display = isActive ? 'block' : 'none';
   if (btn) btn.classList.toggle('active', isActive);
 }
 
 function clearFilters() {
-  dateFilter = 'all'; locationFilter = 'all';
+  dateFilter = 'all'; locationFilter = 'all'; paymentFilter = 'all';
   ['all','today','week'].forEach(k => $('fopt-'+k)?.classList.toggle('active', k === 'all'));
   ['all','badagaon','baghpat'].forEach(k => $('fopt-loc-'+k)?.classList.toggle('active', k === 'all'));
+  ['all','pending'].forEach(k => $('fopt-pay-'+k)?.classList.toggle('active', k === 'all'));
   renderOrders($('tab-orders').querySelector('.search-box input')?.value || '');
   updateFilterBar();
 }
@@ -775,6 +784,10 @@ document.addEventListener('click', function(e) {
 });
 
 function matchesDateFilter(order) {
+  if (paymentFilter === 'pending') {
+    const s = paymentStatus(order);
+    if (s !== 'pending' && s !== 'partial') return false;
+  }
   if (locationFilter !== 'all') {
     if ((order.location || 'badagaon') !== locationFilter) return false;
   }
@@ -825,13 +838,8 @@ function renderOrders(query) {
     $('pending-today').textContent = pendingToday.length > 0
       ? `${pendingToday.length} from today` : 'none today';
     banner.onclick = () => {
-      setDateFilter('all');
       $('tab-orders').querySelector('.search-box input').value = '';
-      renderOrders('');
-      setTimeout(() => {
-        const first = document.querySelector('.badge.pending, .badge.partial');
-        if (first) first.closest('.order-card')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      setPaymentFilter('pending');
     };
   } else {
     banner.style.display = 'none';
