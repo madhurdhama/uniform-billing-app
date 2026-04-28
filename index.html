@@ -333,6 +333,32 @@
 
 <div id="toast-container"></div>
 
+<!-- BOTTOM SHEET — EDIT PAYMENT -->
+<div class="sheet-modal" id="ep-modal" onclick="closeSheet('ep-modal',event)">
+  <div class="sheet">
+    <div class="sheet-title">Add Payment Entry</div>
+    <div id="ep-history"></div>
+    <div class="sheet-label" style="margin-top:14px">Payment Mode</div>
+    <div class="edit-pay-toggle">
+      <button class="edit-pay-btn" id="ep-pending" onclick="epSetMode('pending')">Pending</button>
+      <button class="edit-pay-btn" id="ep-cash"    onclick="epSetMode('cash')">Cash</button>
+      <button class="edit-pay-btn" id="ep-online"  onclick="epSetMode('online')">Online</button>
+    </div>
+    <div class="sheet-label">Amount Received</div>
+    <input id="ep-amt" type="number" placeholder="e.g. 1000" min="0"
+      style="width:100%;padding:9px 11px;font-size:14px;border:1px solid var(--border-2);border-radius:8px;background:var(--surface);color:var(--text);outline:none;margin-bottom:4px">
+    <div id="ep-discount-row">
+      <div class="sheet-label">Discount Amount <span style="font-weight:400;color:var(--text-3);text-transform:none">(optional)</span></div>
+      <input id="ep-discount" type="number" placeholder="e.g. 60" min="0"
+        style="width:100%;padding:9px 11px;font-size:14px;border:1px solid var(--border-2);border-radius:8px;background:var(--surface);color:var(--text);outline:none;margin-bottom:4px"
+        oninput="epSyncFromDiscount()">
+    </div>
+    <div id="ep-orig" style="font-size:11px;color:var(--text-3);margin-bottom:2px"></div>
+    <button class="sheet-confirm" onclick="applyPaySheet()">Add Payment Entry</button>
+    <button class="sheet-cancel"  onclick="closeSheet('ep-modal')">Cancel</button>
+  </div>
+</div>
+
 <!-- Delete modal -->
 <div class="modal-backdrop" id="del-modal" onclick="if(event.target===this)closeDelModal()">
   <div class="modal-box">

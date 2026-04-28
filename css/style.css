@@ -469,6 +469,8 @@
     .badge.pending  { background: var(--orange-bg); color: var(--orange); }
     .badge.badagaon { background: var(--purple-bg); color: var(--purple); }
     .badge.baghpat  { background: var(--pink-bg);   color: var(--pink);   }
+    .badge.partial { background: #fef3c7; color: #d97706; }
+    .badge.split   { background: #ede9fe; color: #6d28d9; }
 
     /* ─── Collapsible item lines ─────────────────────── */
     .items-toggle-btn {
