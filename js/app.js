@@ -77,8 +77,7 @@ let analyticsBranch = 'all';  // was: analyticsLoc
 let orderCounter = parseInt(localStorage.getItem('uniform_order_counter') || '0');
 
 // Orders are stored under 'uniform_orders'. Each order object carries a `branch` field.
-let savedOrders = JSON.parse(localStorage.getItem('uniform_orders') || localStorage.getItem('uniform_orders2') || '[]');
-
+let savedOrders = JSON.parse(localStorage.getItem('uniform_orders') || '[]');
 let sheetTarget          = null;
 let pendingDeleteId      = null;
 let paySheetOrderId      = null;
@@ -279,14 +278,8 @@ function buildDeliveryUnits(items) {
   return units;
 }
 
-// Legacy orders created before the delivery-tracking feature was added have no
-// `deliveryUnits` array. We generate the units on the fly and mark them all as
-// already given so they don't incorrectly show as pending.
 function ensureDeliveryUnits(order) {
-  if (Array.isArray(order.deliveryUnits)) return order.deliveryUnits;
-  const units = buildDeliveryUnits(order.items);
-  units.forEach(u => u.given = true);
-  return units;
+  return order.deliveryUnits || [];
 }
 
 function pendingItemCount(order) { return ensureDeliveryUnits(order).filter(u => !u.given).length; }
@@ -1659,8 +1652,6 @@ function importJSON(event) {
       if (!newOrders.length) { toast('All orders already exist'); return; }
 
       savedOrders = [...savedOrders, ...newOrders].sort((a, b) => a.id - b.id);
-      savedOrders.forEach((o, i) => { o.orderNum = i + 1; });
-      orderCounter = savedOrders.length;
       savedOrders.sort((a, b) => b.id - a.id);
 
       saveLocal(); saveCounter();
