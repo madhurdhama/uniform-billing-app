@@ -1535,14 +1535,18 @@ function openWhatsApp(id) {
   const pendNote  = totalPend > 0
     ? `\n⚠️ ${totalPend} item${totalPend !== 1 ? 's' : ''} not yet delivered` : '';
 
-  const studentLine = `${order.studentName || ''}${order.studentClass ? ', ' + order.studentClass : ''}`;
-  const mobileLine  = order.mobile ? `📞 ${order.mobile}` : '';
-  const notesLine   = order.notes  ? `📝 ${order.notes}`  : '';
+  const studentLine = order.studentName ? `Student: ${order.studentName}${order.studentClass ? ` (${order.studentClass})` : ''}` : '';
+  const parentLine  = order.parentName  ? `Parent: ${order.parentName}`  : '';
+  const mobileLine  = order.mobile      ? `Mobile: ${order.mobile}`      : '';
+  const notesLine   = order.notes       ? `Note: ${order.notes}`         : '';
+
+  const detailLines = [studentLine, parentLine, mobileLine, notesLine].filter(Boolean).join('\n');
 
   const message =
 `*Golden Gate International School*
 *Uniform Bill${orderLabel}* — ${order.date}
-${studentLine}${mobileLine ? '\n' + mobileLine : ''}${notesLine ? '\n' + notesLine : ''}
+
+${detailLines}
 
 *Items:*
 ${itemLines}${pendNote}
