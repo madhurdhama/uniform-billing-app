@@ -45,7 +45,6 @@ const COMBO_TYPE_BY_ITEM1 = {
   'Half Lower': 'half-set'
 };
 
-// Human-readable branch display names
 const BRANCH_LABEL = { badagaon: 'Badagaon', baghpat: 'Baghpat' };
 
 
@@ -53,41 +52,36 @@ const BRANCH_LABEL = { badagaon: 'Badagaon', baghpat: 'Baghpat' };
    2. APP STATE
 ---------------------------------------------------------- */
 
-// currentBranch drives which price table is active for new orders.
-// Persisted to localStorage so the user's last choice is remembered.
 let currentBranch = localStorage.getItem('uniform_branch') || 'badagaon';
-
-
-let prices = PRICES[currentBranch];
+let prices        = PRICES[currentBranch];
 
 let newOrderPayMode = 'pending';
 let editOrderId     = null;
 let itemCounter     = 0;
 
-// Active filter state — 'all' means no filter applied
 let dateFilter     = 'all';
-let branchFilter   = 'all';   // was: locationFilter
+let branchFilter   = 'all';
 let paymentFilter  = 'all';
 let deliveryFilter = 'all';
 
-// Analytics panel filter state
 let analyticsDate   = 'today';
-let analyticsBranch = 'all';  // was: analyticsLoc
+let analyticsBranch = 'all';
 
 let orderCounter = parseInt(localStorage.getItem('uniform_order_counter') || '0');
 
 // Orders are stored under 'uniform_orders'. Each order object carries a `branch` field.
 let savedOrders = JSON.parse(localStorage.getItem('uniform_orders') || '[]');
+
 let sheetTarget          = null;
 let pendingDeleteId      = null;
 let paySheetOrderId      = null;
 let pendingPayDeleteId   = null;
 let deliverySheetOrderId = null;
 
+// 'new' or 'edit' — tells sheet handlers which item container to target
 const sheet = { quickSetSize: null, comboType: null, comboSize: null, singleItem: null, singleSize: null };
 
-// ctx holds live references to the DOM inputs for the current form context
-// ('new' = new-order tab, 'edit' = edit-order screen)
+// Live DOM input refs for the active form; rebuilt by buildStudentFields()
 const ctx = {
   new:  { name: null, cls: null, parent: null, mobile: null, notes: null },
   edit: { name: null, cls: null, parent: null, mobile: null, notes: null }
@@ -105,10 +99,6 @@ const saveCounter = () => localStorage.setItem('uniform_order_counter', String(o
 
 function cloneTemplate(id) {
   return document.getElementById(id).content.cloneNode(true).firstElementChild;
-}
-
-function getUnitPrice(itemName, size) {
-  return prices[itemName]?.[size] || prices[itemName]?.[parseInt(size)] || 0;
 }
 
 function buildSizeOptions(itemName, selectedSize) {
@@ -142,8 +132,7 @@ function toast(message, type = 'info', duration = 2500) {
   setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); }, duration);
 }
 
-// Prepend country code 91 for WhatsApp deep-links.
-// Raw input may include spaces, dashes, or a leading zero.
+// Prepends country code 91 for WhatsApp deep-links; strips spaces, dashes, leading zeros
 function normaliseMobile(raw) {
   const digits = (raw || '').replace(/\D/g, '').replace(/^0+/, '');
   return digits.length === 10 ? '91' + digits : digits;
@@ -362,8 +351,6 @@ function closeAnalytics() {
 ---------------------------------------------------------- */
 
 function buildAddButtons(containerId, isEdit) {
-  // sheetTarget ('new' or 'edit') tells the sheet confirm handlers which
-  // item container to add rows into when the user confirms their selection.
   const t    = isEdit ? 'edit' : 'new';
   const wrap = $(containerId);
   wrap.innerHTML = '';
@@ -1494,8 +1481,8 @@ function saveEditOrder() {
       `Payment entries will be adjusted. Proceed?`
     )) return;
 
-  // Cap each existing payment so the sum never exceeds the new (lower) subtotal.
-  // Payments are processed in order; 'remaining' tracks how much of the new total is still uncovered.
+  // Cap each existing payment so totals don't exceed the new (lower) subtotal.
+  // We work through payments in order, reducing 'remaining' as we go.
   let remaining = subtotal;
   const adjustedPayments = [...getPayments(orig)].map(p => {
     const amt = Math.min(p.amount || 0, remaining);
@@ -1503,8 +1490,8 @@ function saveEditOrder() {
     return { ...p, amount: amt };
   });
 
-  // Carry over given/pending state for items that still exist in the edited order.
-  // New items not previously in the order start as pending (given: false).
+  // Preserve given/pending state for items that still exist in the edited order.
+  // Keys that no longer appear start as pending (given: false by default).
   const givenKeys = new Set(ensureDeliveryUnits(orig).filter(u => u.given).map(u => u.key));
   const newUnits  = buildDeliveryUnits(items);
   newUnits.forEach(u => { if (givenKeys.has(u.key)) u.given = true; });
@@ -1673,7 +1660,7 @@ function importJSON(event) {
 let priceBranch = currentBranch;
 
 function showPriceList() {
-  // Sync toggle to match current branch when opening
+  priceBranch = currentBranch; // Sync toggle to match current branch when opening
   ['badagaon', 'baghpat'].forEach(b => {
     $('pl-branch-' + b)?.classList.toggle('pl-branch-btn-active', b === priceBranch);
   });
@@ -1848,7 +1835,6 @@ document.addEventListener('click', e => {
 buildStudentFields('new-student-fields', 'new');
 buildItemsSection('new-items-section', 'items-container', 'add-btns-new', 'grand-total', 'Subtotal', false);
 
-// Highlight the active branch button to match the persisted preference
 ['badagaon', 'baghpat'].forEach(b => $('branch-' + b)?.classList.toggle('active', b === currentBranch));
 
 recalcNew();
