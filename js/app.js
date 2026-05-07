@@ -861,18 +861,9 @@ function renderAnalytics() {
   collSec.appendChild(makeAnRow('Balance outstanding',   ordersWithBalance.length, pendingAmt,  '#d97706'));
   const divider = document.createElement('div'); divider.className = 'an-divider'; divider.style.margin = '8px 0 10px';
   collSec.appendChild(divider);
-  collSec.appendChild(makeAnRow('Cash',    cashOrders.length,    cashAmt,          '#16a34a'));
-  collSec.appendChild(makeAnRow('Online',  onlineOrders.length,  onlineAmt,        '#1d4ed8'));
-  if (splitOrders.length)   collSec.appendChild(makeAnRow('Split',   splitOrders.length,   sumC(splitOrders),   '#6d28d9'));
-  if (partialOrders.length) collSec.appendChild(makeAnRow('Partial', partialOrders.length, sumC(partialOrders), '#d97706'));
-  if (pendingOrders.length) collSec.appendChild(makeAnRow('Pending', pendingOrders.length, 0,                   '#9ca3af'));
+  collSec.appendChild(makeAnRow('Cash',   cashOrders.length,   cashAmt,   '#16a34a'));
+  collSec.appendChild(makeAnRow('Online', onlineOrders.length, onlineAmt, '#1d4ed8'));
   wrap.appendChild(collSec);
-
-  const dvSec = makeAnSection('Delivery Status');
-  dvSec.appendChild(makeAnRowPlain('Orders with pending items', ordersWithPending.length, '#e11d48'));
-  dvSec.appendChild(makeAnRowPlain('Items not delivered',         totalPendItems,           '#e11d48'));
-  dvSec.appendChild(makeAnRowPlain('Fully delivered orders',    fullyDelivered.length,    '#16a34a'));
-  wrap.appendChild(dvSec);
 
   if (analyticsBranch === 'all') {
     const branchSec = makeAnSection('By Branch');
@@ -1773,15 +1764,15 @@ function renderPriceList() {
   const suitTotal = suitItems.reduce((s, [item, sz]) => s + (p[item]?.[sz] || 0), 0);
   wrap.appendChild(makeSection(
     'Suit Set',
-    ['Item', 'Price'],
+    ['Item', { label: 'Price', total: true }],
     [
       ...suitItems.map(([item, sz]) => [
         { val: item, name: true },
-        { val: rupees(p[item]?.[sz] || 0), single: true, colspan: 2 }
+        { val: rupees(p[item]?.[sz] || 0), total: true }
       ]),
       [
         { val: 'Set Total', name: true, style: 'font-weight:700;color:var(--text)' },
-        { val: rupees(suitTotal), single: true, colspan: 2, style: 'font-weight:800;color:var(--text)' }
+        { val: rupees(suitTotal), total: true, style: 'font-weight:800' }
       ]
     ]
   ));
@@ -1789,12 +1780,12 @@ function renderPriceList() {
   // ── ACCESSORIES ───────────────────────────────────────────
   wrap.appendChild(makeSection(
     'Accessories',
-    ['Item', 'Price'],
+    ['Item', { label: 'Price', total: true }],
     [['Tie', 'Small'], ['Tie', 'Large'], ['Belt', 'All'], ['Socks', 'Pair']].map(([item, sz], i) => {
       const label = (sz === 'All' || sz === 'Pair') ? item : `${item} — ${sz}`;
       return [
         { val: label, name: true },
-        { val: rupees(p[item]?.[sz] || 0), single: true, colspan: 2 }
+        { val: rupees(p[item]?.[sz] || 0), total: true }
       ];
     })
   ));

@@ -434,35 +434,35 @@ input, select, button, textarea { font-family: inherit; }
   min-height: 40px;
   font-size: 13px;
   font-weight: 600;
-  border: 1.5px solid #bfdbfe;
+  border: 1.5px solid #c7d2fe;
   border-radius: 20px;
   cursor: pointer;
-  color: #1d4ed8;
-  background: #eff6ff;
+  color: #4338ca;
+  background: #eef2ff;
   transition: background 0.15s, border-color 0.15s;
 }
-.add-btn:hover { background: #dbeafe; border-color: #93c5fd; }
+.add-btn:hover { background: #e0e7ff; border-color: #a5b4fc; }
 
 .add-btn.combo {
-  color: #065f46;
-  background: #ecfdf5;
-  border-color: #6ee7b7;
+  color: #3730a3;
+  background: #e0e7ff;
+  border-color: #a5b4fc;
 }
-.add-btn.combo:hover { background: #d1fae5; border-color: #34d399; }
+.add-btn.combo:hover { background: #c7d2fe; border-color: #818cf8; }
 
 .add-btn.quickset {
   width: 100%;
   border-radius: 10px;
   margin-bottom: 8px;
   font-weight: 700;
-  color: #1e3a8a;
-  background: #e0f2fe;
-  border-color: #7dd3fc;
+  color: #3730a3;
+  background: #e0e7ff;
+  border-color: #a5b4fc;
   box-shadow: none;
 }
 .add-btn.quickset:hover {
-  background: #bae6fd;
-  border-color: #38bdf8;
+  background: #c7d2fe;
+  border-color: #818cf8;
   box-shadow: none;
 }
 
@@ -1509,7 +1509,10 @@ input, select, button, textarea { font-family: inherit; }
   cursor: pointer;
   transition: all 0.15s;
 }
-.pl-branch-btn-active { background: var(--accent); color: #fff; }
+.pl-branch-btn-active { background: var(--green-bg); color: var(--green); }
+/* Per-branch active colors on price list toggle — match new-order branch pill */
+#pl-branch-badagaon.pl-branch-btn-active { background: #d1fae5; color: #065f46; }
+#pl-branch-baghpat.pl-branch-btn-active  { background: #dbeafe; color: #1e3a8a; }
 
 .pl-table {
   width: 100%;
@@ -1539,17 +1542,17 @@ input, select, button, textarea { font-family: inherit; }
 .pl-td-single { padding: 9px 10px; font-weight: 700; color: var(--text);   text-align: right; }
 
 .pl-th-total  {
-  color: var(--accent);
-  background: var(--accent-bg);
-  border-left: 1.5px solid #bfdbfe;
+  color: #4338ca;
+  background: #eef2ff;
+  border-left: 1.5px solid #c7d2fe;
 }
 .pl-td-total {
   padding: 9px 10px;
   font-weight: 800;
-  color: var(--accent);
+  color: #4338ca;
   text-align: right;
-  background: var(--accent-bg);
-  border-left: 1.5px solid #bfdbfe;
+  background: #eef2ff;
+  border-left: 1.5px solid #c7d2fe;
 }
 
 .pl-na { color: var(--text-3); font-weight: 400; }
