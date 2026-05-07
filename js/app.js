@@ -1522,14 +1522,8 @@ function openWhatsApp(id) {
     const uPQ  = item.itemType === 'suit-set' ? 3
       : item.itemType === 'combo' ? [item.item1Name, item.item2Name].filter(Boolean).length : 1;
     dvOffset += qty * uPQ;
-    return `  • ${item.label} — Rs.${item.lineTotal.toLocaleString('en-IN')}`;
+    return `  • ${item.label} = Rs.${item.lineTotal.toLocaleString('en-IN')}`;
   }).join('\n');
-
-  const payLines = payments.length
-    ? payments.map(p =>
-        `  • ${p.mode.charAt(0).toUpperCase() + p.mode.slice(1)} — Rs.${p.amount.toLocaleString('en-IN')} (${p.date})`
-      ).join('\n')
-    : '  • No payment received yet';
 
   const totalPend = dvUnits.filter(u => !u.given).length;
   const pendNote  = totalPend > 0
@@ -1542,6 +1536,26 @@ function openWhatsApp(id) {
 
   const detailLines = [studentLine, parentLine, mobileLine, notesLine].filter(Boolean).join('\n');
 
+  const payLines = payments.length
+    ? payments.map(p =>
+        `  • ${p.mode.charAt(0).toUpperCase() + p.mode.slice(1)} = Rs.${p.amount.toLocaleString('en-IN')} (${p.date})`
+      ).join('\n')
+    : '';
+
+  const discountLine = discount > 0 ? `  • Discount = -Rs.${discount.toLocaleString('en-IN')}` : '';
+
+  const paymentSection = (payLines || discountLine)
+    ? `\n*Payments:*\n${[payLines, discountLine].filter(Boolean).join('\n')}\n`
+    : '';
+
+  const upiLink = balance > 0
+    ? `upi://pay?pa=madhurdhama@okaxis&pn=Golden%20Gate%20Uniforms&am=${balance}&cu=INR&tn=Uniform%20Bill%20${encodeURIComponent(orderLabel.trim())}`
+    : '';
+
+  const balanceLine = balance > 0
+    ? `👆 *Tap to Pay Rs.${balance.toLocaleString('en-IN')}:* ${upiLink}`
+    : '✅ Fully Paid';
+
   const message =
 `*Golden Gate International School*
 *Uniform Bill${orderLabel}* — ${order.date}
@@ -1552,14 +1566,10 @@ ${detailLines}
 ${itemLines}${pendNote}
 
 *Total: Rs.${order.subtotal.toLocaleString('en-IN')}*
+${paymentSection}
+${balanceLine}
 
-*Payments:*
-${payLines}${discount > 0 ? `\n  • Discount — Rs.${discount.toLocaleString('en-IN')}` : ''}
-
-Collected: Rs.${collected.toLocaleString('en-IN')}
-${balance > 0 ? `⚠️ *Balance Due: Rs.${balance.toLocaleString('en-IN')}*` : '✅ Fully Paid'}
-
-_Exchange Policy: No returns. Size exchange only within 7 days of delivery in unused condition. Larger size — pay the difference. Smaller size — we refund the difference._`;
+_*Exchange Policy:*_ No returns. Size exchange only within 7 days of delivery in unused condition. Larger size — pay the difference. Smaller size — we refund the difference.`;
 
   if (order.mobile) {
     window.open(`https://wa.me/${normaliseMobile(order.mobile)}?text=${encodeURIComponent(message)}`, '_blank');
