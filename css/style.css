@@ -66,7 +66,6 @@ input, select, button, textarea { font-family: inherit; }
   padding: 0 14px 100px;
 }
 
-/* ── Header ── */
 .header {
   position: sticky;
   top: 0;
@@ -83,12 +82,15 @@ input, select, button, textarea { font-family: inherit; }
   align-items: center;
   justify-content: space-between;
   height: 60px;
+  gap: 8px;
 }
 
 .header-title-group {
   display: flex;
   align-items: center;
   gap: 11px;
+  flex: 1;
+  min-width: 0;
 }
 
 .header-logo {
@@ -160,6 +162,112 @@ input, select, button, textarea { font-family: inherit; }
   margin: 3px 8px;
 }
 
+/* ── Branch header dropdown ── */
+.branch-header-wrap {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.branch-header-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  height: 34px;
+  border-radius: 20px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.branch-header-badge.branch-badagaon {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
+}
+.branch-header-badge.branch-badagaon:hover { background: #a7f3d0; }
+
+.branch-header-badge.branch-baghpat {
+  background: #dbeafe;
+  color: #1e3a8a;
+  border-color: #93c5fd;
+}
+.branch-header-badge.branch-baghpat:hover { background: #bfdbfe; }
+
+.branch-header-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.branch-header-badge.branch-badagaon .branch-header-dot { background: #059669; }
+.branch-header-badge.branch-baghpat  .branch-header-dot { background: #2563eb; }
+
+.branch-header-chevron {
+  opacity: 0.6;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.branch-header-badge.open .branch-header-chevron { transform: rotate(180deg); }
+
+/* The dropdown panel */
+.branch-header-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 160px;
+  overflow: hidden;
+  z-index: 200;
+  padding: 6px;
+}
+.branch-header-dropdown.open { display: block; }
+
+.branch-dropdown-label {
+  padding: 6px 10px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.branch-dropdown-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.12s;
+  text-align: left;
+}
+.branch-dropdown-opt:hover { background: var(--surface); }
+.branch-dropdown-opt.active { color: var(--text); background: var(--surface); }
+
+.branch-dropdown-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.bdot-badagaon { background: #059669; }
+.bdot-baghpat  { background: #2563eb; }
+
 /* ── Tabs ── */
 .tabs {
   display: flex;
@@ -219,10 +327,7 @@ input, select, button, textarea { font-family: inherit; }
   margin-bottom: 14px;
 }
 
-.payment-section {
-  background: var(--card);
-  border-color: var(--border);
-}
+.payment-section { background: var(--card); border-color: var(--border); }
 .payment-section .section-title { color: var(--text-3); }
 
 .field { margin-bottom: 12px; }
@@ -270,9 +375,8 @@ input, select, button, textarea { font-family: inherit; }
 }
 
 /* ----------------------------------------------------------
-   5. BRANCH PILL & PAYMENT TOGGLE
+   5. PAYMENT TOGGLE
 ---------------------------------------------------------- */
-.branch-pill,
 .payment-toggle {
   display: flex;
   background: var(--surface);
@@ -281,11 +385,9 @@ input, select, button, textarea { font-family: inherit; }
   overflow: hidden;
   padding: 3px;
   gap: 3px;
+  margin-top: 4px;
 }
 
-.payment-toggle { margin-top: 4px; }
-
-.branch-btn,
 .pay-btn {
   flex: 1;
   padding: 9px 8px;
@@ -298,17 +400,6 @@ input, select, button, textarea { font-family: inherit; }
   text-align: center;
   transition: background 0.15s, color 0.15s;
   border-radius: 6px;
-}
-
-#branch-badagaon.active {
-  background: #d1fae5;
-  color: #065f46;
-  box-shadow: none;
-}
-#branch-baghpat.active {
-  background: #dbeafe;
-  color: #1e3a8a;
-  box-shadow: none;
 }
 
 #pay-pending.active { background: #fef3c7; color: #92400e; }
@@ -458,13 +549,15 @@ input, select, button, textarea { font-family: inherit; }
   color: #3730a3;
   background: #e0e7ff;
   border-color: #a5b4fc;
-  box-shadow: none;
 }
-.add-btn.quickset:hover {
-  background: #c7d2fe;
-  border-color: #818cf8;
-  box-shadow: none;
+.add-btn.quickset:hover { background: #c7d2fe; border-color: #818cf8; }
+
+.add-btn.adjustment {
+  color: #6d28d9;
+  background: #f5f3ff;
+  border-color: #ddd6fe;
 }
+.add-btn.adjustment:hover { background: #ede9fe; border-color: #c4b5fd; }
 
 /* ----------------------------------------------------------
    8. TOTAL CARD & SAVE BUTTON
@@ -584,41 +677,20 @@ input, select, button, textarea { font-family: inherit; }
   min-width: 0;
 }
 
-.pending-banner {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-}
+.pending-banner  { background: #fffbeb; border: 1px solid #fde68a; }
 .pending-banner:hover { background: #fef3c7; }
-
-.delivery-banner {
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
-}
+.delivery-banner { background: #fff1f2; border: 1px solid #fecdd3; }
 .delivery-banner:hover { background: #ffe4e6; }
 
-.pending-count {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--orange);
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.delivery-count-num {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--red);
-  line-height: 1;
-  flex-shrink: 0;
-}
+.pending-count      { font-size: 15px; font-weight: 700; color: var(--orange); line-height: 1; flex-shrink: 0; }
+.delivery-count-num { font-size: 15px; font-weight: 700; color: var(--red);    line-height: 1; flex-shrink: 0; }
 
 .pending-banner-left { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; }
 .pending-banner-info { min-width: 0; }
 .pending-label { font-size: 12px; font-weight: 600; color: var(--orange); line-height: 1.3; }
 .pending-today { font-size: 11px; font-weight: 400; color: #92400e; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.delivery-label { font-size: 12px; font-weight: 600; color: var(--red); line-height: 1.3; }
+.delivery-label { font-size: 12px; font-weight: 600; color: var(--red);    line-height: 1.3; }
 .delivery-sub   { font-size: 11px; font-weight: 400; color: #991b1b; margin-top: 1px; }
-.pending-tap { display: none; }
 
 .order-card {
   background: var(--card);
@@ -654,10 +726,17 @@ input, select, button, textarea { font-family: inherit; }
 .badge.pending { background: var(--orange-bg); color: var(--orange); }
 .badge.partial { background: #fef3c7;          color: #d97706;       }
 .badge.split   { background: #ede9fe;          color: #7c3aed;       }
+.badge.refund  { background: #ede9fe;          color: #7c3aed;       }
 
-/* Branch badge colours — used on the edit-order screen header */
-.badge.badagaon { background: var(--green-bg); color: var(--green); }
-.badge.baghpat  { background: var(--blue-bg);  color: var(--blue);  }
+/* order card branch badge */
+.badge.badagaon,
+.badge.baghpat {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+#eo-branch-badge.badagaon { background: #d1fae5; color: #059669; }
+#eo-branch-badge.baghpat  { background: #dbeafe; color: #2563eb; }
 
 .badge.delivery-pending {
   background: #fff1f2;
@@ -674,8 +753,24 @@ input, select, button, textarea { font-family: inherit; }
   border-radius: 50%;
   flex-shrink: 0;
 }
-.dot-pending { background: #e11d48; }
-.dot-given   { background: var(--green); }
+.dot-pending    { background: #e11d48; }
+.dot-given      { background: var(--green); }
+.dot-adjustment { background: #7c3aed; }
+
+.card-meta-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: 0.02em;
+  margin: -14px -14px 14px -14px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
 
 /* ----------------------------------------------------------
    11. ORDER CARD DETAIL
@@ -702,7 +797,7 @@ input, select, button, textarea { font-family: inherit; }
   border-color: var(--accent);
 }
 .oc-details-icon { opacity: 0.6; flex-shrink: 0; }
-.items-chevron { font-size: 10px; }
+.items-chevron   { font-size: 10px; }
 
 .order-items { margin-top: 10px; }
 
@@ -943,8 +1038,6 @@ input, select, button, textarea { font-family: inherit; }
   min-height: 20px;
 }
 
-.filter-pill { display: none !important; }
-
 .filter-clear-btn {
   padding: 4px 10px;
   font-size: 12px;
@@ -963,7 +1056,8 @@ input, select, button, textarea { font-family: inherit; }
 ---------------------------------------------------------- */
 #analytics-screen,
 #pricelist-screen,
-#qr-screen {
+#qr-screen,
+#settings-screen {
   position: fixed;
   inset: 0;
   background: var(--bg);
@@ -985,7 +1079,6 @@ input, select, button, textarea { font-family: inherit; }
 }
 
 .an-header-card { padding-bottom: 0.75rem !important; }
-
 .an-filter-row  { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
 .an-filter-group { display: flex; align-items: center; gap: 10px; }
 
@@ -1257,7 +1350,6 @@ input, select, button, textarea { font-family: inherit; }
 .edit-pay-btn.cash-active   { background: #d1fae5; color: #065f46; }
 .edit-pay-btn.online-active { background: #dbeafe; color: #1e3a8a; }
 
-/*--- Payment Sheet ---*/
 .ep-info-block {
   background: var(--surface);
   border: 1.5px solid var(--border);
@@ -1266,13 +1358,8 @@ input, select, button, textarea { font-family: inherit; }
   margin-bottom: 4px;
 }
 
-.ep-info-section {
-  padding: 10px 12px;
-}
-
-.ep-info-section + .ep-info-section {
-  border-top: 1px solid var(--border);
-}
+.ep-info-section { padding: 10px 12px; }
+.ep-info-section + .ep-info-section { border-top: 1px solid var(--border); }
 
 .ep-totals-row {
   display: flex;
@@ -1333,8 +1420,8 @@ input, select, button, textarea { font-family: inherit; }
 }
 
 .modal-title { font-size: 17px; font-weight: 800; text-align: center; margin-bottom: 8px; }
-.modal-sub { font-size: 13px; font-weight: 500; line-height: 1.5; text-align: center; color: var(--text-2); margin-bottom: 20px; }
-.modal-btns { display: flex; gap: 10px; }
+.modal-sub   { font-size: 13px; font-weight: 500; line-height: 1.5; text-align: center; color: var(--text-2); margin-bottom: 20px; }
+.modal-btns  { display: flex; gap: 10px; }
 
 .modal-cancel {
   flex: 1;
@@ -1468,8 +1555,8 @@ input, select, button, textarea { font-family: inherit; }
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
   transition: transform 0.2s;
 }
-.dv-switch input:checked + .dv-slider             { background: var(--green); }
-.dv-switch input:checked + .dv-slider::before     { transform: translateX(18px); }
+.dv-switch input:checked + .dv-slider         { background: var(--green); }
+.dv-switch input:checked + .dv-slider::before { transform: translateX(18px); }
 
 .dv-mark-all-btn {
   font-size: 13px;
@@ -1488,7 +1575,6 @@ input, select, button, textarea { font-family: inherit; }
 /* ----------------------------------------------------------
    20. PRICE LIST TABLE & QR SCREEN
 ---------------------------------------------------------- */
-
 .pl-branch-toggle {
   display: flex;
   margin-left: auto;
@@ -1509,8 +1595,7 @@ input, select, button, textarea { font-family: inherit; }
   cursor: pointer;
   transition: all 0.15s;
 }
-.pl-branch-btn-active { background: var(--green-bg); color: var(--green); }
-/* Per-branch active colors on price list toggle — match new-order branch pill */
+.pl-branch-btn-active                         { background: var(--green-bg); color: var(--green); }
 #pl-branch-badagaon.pl-branch-btn-active { background: #d1fae5; color: #065f46; }
 #pl-branch-baghpat.pl-branch-btn-active  { background: #dbeafe; color: #1e3a8a; }
 
@@ -1541,7 +1626,7 @@ input, select, button, textarea { font-family: inherit; }
 .pl-td-price  { padding: 9px 10px; font-weight: 600; color: var(--text-2); text-align: right; }
 .pl-td-single { padding: 9px 10px; font-weight: 700; color: var(--text);   text-align: right; }
 
-.pl-th-total  {
+.pl-th-total {
   color: #4338ca;
   background: #eef2ff;
   border-left: 1.5px solid #c7d2fe;
@@ -1560,6 +1645,174 @@ input, select, button, textarea { font-family: inherit; }
 .section .pl-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -4px; }
 .pl-table-wrap .pl-table { min-width: 340px; }
 
-/* QR overlay — image fills nicely */
 #qr-screen img[src=""] { display: none; }
 #qr-screen .section    { margin-top: 4px; }
+
+/* ----------------------------------------------------------
+   21. ADJUSTMENT SHEET
+---------------------------------------------------------- */
+
+.adj-sign-toggle {
+  display: flex;
+  background: var(--surface);
+  border: 1.5px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 3px;
+}
+
+.adj-sign-btn {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-3);
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.adj-sign-btn.plus-active  { background: #d1fae5; color: #065f46; }
+.adj-sign-btn.minus-active { background: #fee2e2; color: #dc2626; }
+
+.adj-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--surface);
+  border: 1.5px solid #ddd6fe;
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  margin-bottom: 8px;
+}
+
+.adj-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.adj-row-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5b21b6;
+}
+
+.adj-row-note {
+  font-size: 11px;
+  color: var(--text-3);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adj-row-price {
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.adj-row-price.positive { color: #059669; }
+.adj-row-price.negative { color: #dc2626; }
+
+/* ----------------------------------------------------------
+   22. SETTINGS SCREEN
+---------------------------------------------------------- */
+
+.settings-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e40af;
+  line-height: 1.5;
+}
+
+.settings-field-hint {
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-3);
+  line-height: 1.4;
+}
+
+.settings-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid var(--accent);
+  border-radius: 20px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.settings-upload-btn:hover { background: var(--accent); color: #fff; }
+
+.settings-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid var(--border-2);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.settings-clear-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+
+/* ----------------------------------------------------------
+   23. DATE PICKER INPUTS (filter & analytics)
+---------------------------------------------------------- */
+
+.filter-date-input {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent-bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.filter-date-input:focus {
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+.an-date-input {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent-bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.an-date-input:focus {
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.12);
+}

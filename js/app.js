@@ -47,6 +47,10 @@ const COMBO_TYPE_BY_ITEM1 = {
 
 const BRANCH_LABEL = { badagaon: 'Badagaon', baghpat: 'Baghpat' };
 
+// Default payment details — overridden per-device via Settings
+const DEFAULT_UPI_ID     = 'madhurdhama@okhdfcbank';
+const DEFAULT_UPI_NUMBER = '6398913135';
+
 
 /* ----------------------------------------------------------
    2. APP STATE
@@ -59,18 +63,18 @@ let newOrderPayMode = 'pending';
 let editOrderId     = null;
 let itemCounter     = 0;
 
-let dateFilter     = 'all';
+let dateFilter        = 'all';
+let specificDateFilter = '';
 let branchFilter   = 'all';
 let paymentFilter  = 'all';
 let deliveryFilter = 'all';
 
-let analyticsDate   = 'today';
-let analyticsBranch = 'all';
+let analyticsDate        = 'today';
+let analyticsSpecificDate = '';
+let analyticsBranch      = 'all';
 
 let orderCounter = parseInt(localStorage.getItem('uniform_order_counter') || '0');
-
-// Orders are stored under 'uniform_orders'. Each order object carries a `branch` field.
-let savedOrders = JSON.parse(localStorage.getItem('uniform_orders') || '[]');
+let savedOrders  = JSON.parse(localStorage.getItem('uniform_orders') || '[]');
 
 let sheetTarget          = null;
 let pendingDeleteId      = null;
@@ -78,10 +82,11 @@ let paySheetOrderId      = null;
 let pendingPayDeleteId   = null;
 let deliverySheetOrderId = null;
 
-// 'new' or 'edit' — tells sheet handlers which item container to target
 const sheet = { quickSetSize: null, comboType: null, comboSize: null, singleItem: null, singleSize: null };
 
-// Live DOM input refs for the active form; rebuilt by buildStudentFields()
+let adjSign     = 1;    // +1 = charge, -1 = refund
+let priceBranch = currentBranch; // tracks branch in price list overlay
+
 const ctx = {
   new:  { name: null, cls: null, parent: null, mobile: null, notes: null },
   edit: { name: null, cls: null, parent: null, mobile: null, notes: null }
@@ -132,15 +137,12 @@ function toast(message, type = 'info', duration = 2500) {
   setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); }, duration);
 }
 
-// Prepends country code 91 for WhatsApp deep-links; strips spaces, dashes, leading zeros
 function normaliseMobile(raw) {
   const digits = (raw || '').replace(/\D/g, '').replace(/^0+/, '');
   return digits.length === 10 ? '91' + digits : digits;
 }
 
-function getSearchValue() {
-  return $('orders-search')?.value || '';
-}
+function getSearchValue() { return $('orders-search')?.value || ''; }
 
 function clearSearch(inputId) {
   const input = $(inputId);
@@ -159,6 +161,86 @@ function updateSearchClear(input) {
 
 
 /* ----------------------------------------------------------
+   3b. SETTINGS HELPERS
+---------------------------------------------------------- */
+
+function loadSettings() {
+  return {
+    upiId:     localStorage.getItem('uniform_upi_id')     || DEFAULT_UPI_ID,
+    upiNumber: localStorage.getItem('uniform_upi_number') || DEFAULT_UPI_NUMBER,
+    qrDataUrl: localStorage.getItem('uniform_qr_image')   || ''   // base64 data URL or ''
+  };
+}
+
+function showSettings() {
+  const s = loadSettings();
+  $('settings-upi-id').value     = s.upiId     === DEFAULT_UPI_ID     ? '' : s.upiId;
+  $('settings-upi-number').value = s.upiNumber === DEFAULT_UPI_NUMBER ? '' : s.upiNumber;
+
+  // Show QR preview if one is saved
+  const preview = $('settings-qr-preview');
+  if (s.qrDataUrl) {
+    preview.src   = s.qrDataUrl;
+    preview.style.display = 'block';
+    $('settings-qr-current').textContent = 'Custom QR saved on this device';
+  } else {
+    preview.style.display = 'none';
+    $('settings-qr-current').textContent = 'Using GooglePay_QR.png (default)';
+  }
+
+  $('settings-screen').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSettings() {
+  $('settings-screen').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function saveSettingsForm() {
+  const upiId     = ($('settings-upi-id').value     || '').trim();
+  const upiNumber = ($('settings-upi-number').value || '').trim();
+
+  if (upiId)     localStorage.setItem('uniform_upi_id',     upiId);
+  else           localStorage.removeItem('uniform_upi_id');
+
+  if (upiNumber) localStorage.setItem('uniform_upi_number', upiNumber);
+  else           localStorage.removeItem('uniform_upi_number');
+
+  // QR image is saved live on file select — nothing extra needed here
+  toast('Settings saved');
+  closeSettings();
+}
+
+function clearSettingsQR() {
+  localStorage.removeItem('uniform_qr_image');
+  $('settings-qr-preview').style.display = 'none';
+  $('settings-qr-current').textContent   = 'Using GooglePay_QR.png (default)';
+  $('settings-qr-file').value            = '';
+  toast('Custom QR removed — using default');
+}
+
+function handleQRFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { toast('Please select an image file', 'error'); return; }
+  if (file.size > 2 * 1024 * 1024)    { toast('Image too large — max 2 MB', 'error'); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    localStorage.setItem('uniform_qr_image', dataUrl);
+    const preview = $('settings-qr-preview');
+    preview.src   = dataUrl;
+    preview.style.display = 'block';
+    $('settings-qr-current').textContent = 'Custom QR saved ✓';
+    toast('QR image saved');
+  };
+  reader.readAsDataURL(file);
+}
+
+
+/* ----------------------------------------------------------
    4. FORM HELPERS
 ---------------------------------------------------------- */
 
@@ -166,14 +248,14 @@ function buildStudentFields(containerId, ctxKey) {
   const wrap = $(containerId);
   wrap.innerHTML = '';
   wrap.appendChild(cloneTemplate('tpl-student-fields'));
-  ctx[ctxKey].name   = wrap.querySelector('.sf-name');
-  ctx[ctxKey].cls    = wrap.querySelector('.sf-class');
-  ctx[ctxKey].parent = wrap.querySelector('.sf-parent');
-  ctx[ctxKey].mobile = wrap.querySelector('.sf-mobile');
-  ctx[ctxKey].notes  = wrap.querySelector('.sf-notes');
+  ctx[ctxKey].name    = wrap.querySelector('.sf-name');
+  ctx[ctxKey].cls     = wrap.querySelector('.sf-class');
+  ctx[ctxKey].parent  = wrap.querySelector('.sf-parent');
+  ctx[ctxKey].mobile  = wrap.querySelector('.sf-mobile');
+  ctx[ctxKey].address = wrap.querySelector('.sf-address');
+  ctx[ctxKey].notes   = wrap.querySelector('.sf-notes');
 
-  // Wire up Enter-key navigation between fields for faster data entry
-  const fields = [ctx[ctxKey].name, ctx[ctxKey].cls, ctx[ctxKey].parent, ctx[ctxKey].mobile, ctx[ctxKey].notes];
+  const fields = [ctx[ctxKey].name, ctx[ctxKey].cls, ctx[ctxKey].parent, ctx[ctxKey].mobile, ctx[ctxKey].address, ctx[ctxKey].notes];
   fields.forEach((field, i) => {
     if (!field) return;
     field.addEventListener('keydown', e => {
@@ -213,26 +295,28 @@ function buildItemsSection(wrapId, itemsCtnId, addBtnsId, totalId, totalLabel, i
 function readStudentFields(ctxKey) {
   const c = ctx[ctxKey];
   return {
-    studentName:  (c.name?.value   || '').trim(),
-    studentClass: (c.cls?.value    || '').trim(),
-    parentName:   (c.parent?.value || '').trim(),
-    mobile:       (c.mobile?.value || '').trim(),
-    notes:        (c.notes?.value  || '').trim()
+    studentName:  (c.name?.value    || '').trim(),
+    studentClass: (c.cls?.value     || '').trim(),
+    parentName:   (c.parent?.value  || '').trim(),
+    mobile:       (c.mobile?.value  || '').trim(),
+    address:      (c.address?.value || '').trim(),
+    notes:        (c.notes?.value   || '').trim()
   };
 }
 
 function writeStudentFields(ctxKey, order) {
   const c = ctx[ctxKey];
-  if (c.name)   c.name.value   = order.studentName  || '';
-  if (c.cls)    c.cls.value    = order.studentClass || '';
-  if (c.parent) c.parent.value = order.parentName   || '';
-  if (c.mobile) c.mobile.value = order.mobile       || '';
-  if (c.notes)  c.notes.value  = order.notes        || '';
+  if (c.name)    c.name.value    = order.studentName  || '';
+  if (c.cls)     c.cls.value     = order.studentClass || '';
+  if (c.parent)  c.parent.value  = order.parentName   || '';
+  if (c.mobile)  c.mobile.value  = order.mobile       || '';
+  if (c.address) c.address.value = order.address      || '';
+  if (c.notes)   c.notes.value   = order.notes        || '';
 }
 
 function clearStudentFields(ctxKey) {
   const c = ctx[ctxKey];
-  ['name', 'cls', 'parent', 'mobile', 'notes'].forEach(k => { if (c[k]) c[k].value = ''; });
+  ['name', 'cls', 'parent', 'mobile', 'address', 'notes'].forEach(k => { if (c[k]) c[k].value = ''; });
 }
 
 
@@ -240,13 +324,11 @@ function clearStudentFields(ctxKey) {
    5. DELIVERY HELPERS
 ---------------------------------------------------------- */
 
-// Builds the flat list of individual physical items that need to be handed
-// over. Each unit gets a unique key so its given/pending state can be
-// toggled independently even when the same item appears multiple times.
 function buildDeliveryUnits(items) {
   const units = [];
   let seq = 0;
   (items || []).forEach(item => {
+    if (item.itemType === 'adjustment') return;
     const qty = item.qty || 1;
     if (item.itemType === 'single') {
       for (let q = 0; q < qty; q++)
@@ -267,12 +349,8 @@ function buildDeliveryUnits(items) {
   return units;
 }
 
-function ensureDeliveryUnits(order) {
-  return order.deliveryUnits || [];
-}
-
-function pendingItemCount(order) { return ensureDeliveryUnits(order).filter(u => !u.given).length; }
-function allItemsDelivered(order){ return pendingItemCount(order) === 0; }
+function ensureDeliveryUnits(order) { return order.deliveryUnits || []; }
+function pendingItemCount(order)    { return ensureDeliveryUnits(order).filter(u => !u.given).length; }
 
 
 /* ----------------------------------------------------------
@@ -301,28 +379,57 @@ function paymentStatus(order) {
 function toggleHamburger() { $('hamburger-menu').classList.toggle('open'); }
 function closeHamburger()  { $('hamburger-menu').classList.remove('open'); }
 
-// Called when the user taps a branch button on the New Order form.
-// Warns before switching if items are already in the cart (prices differ per branch).
+// Toggle the branch dropdown open/closed
+function toggleBranchDropdown() {
+  const dropdown = $('branch-header-dropdown');
+  const badge    = $('branch-header-badge');
+  const isOpen   = dropdown.classList.contains('open');
+  dropdown.classList.toggle('open', !isOpen);
+  badge.classList.toggle('open', !isOpen);
+}
+
+function closeBranchDropdown() {
+  $('branch-header-dropdown')?.classList.remove('open');
+  $('branch-header-badge')?.classList.remove('open');
+}
+
+// Update the header badge to reflect the current branch
+function syncBranchBadge() {
+  const badge = $('branch-header-badge');
+  if (!badge) return;
+  badge.className = `branch-header-badge branch-${currentBranch}`;
+  $('branch-header-label').textContent = BRANCH_LABEL[currentBranch];
+
+  ['badagaon', 'baghpat'].forEach(b => {
+    $('bdopt-' + b)?.classList.toggle('active', b === currentBranch);
+  });
+}
+
 function setBranch(branch) {
+  // Confirm if items are already on the form
   const ctn = $('items-container');
   if (ctn?.querySelector('.js-item-row')) {
-    if (!confirm(`Switch to ${BRANCH_LABEL[branch]}? Current items will be cleared.`)) return;
+    if (!confirm(`Switch to ${BRANCH_LABEL[branch]}? Current items will be cleared.`)) {
+      closeBranchDropdown();
+      return;
+    }
   }
   currentBranch = branch;
   prices = PRICES[branch];
   localStorage.setItem('uniform_branch', branch);
-  ['badagaon', 'baghpat'].forEach(b => $('branch-' + b).classList.toggle('active', b === branch));
+  syncBranchBadge();
+  closeBranchDropdown();
   if (ctn) ctn.innerHTML = '';
   itemCounter = 0;
   recalcNew();
+  toast(`Switched to ${BRANCH_LABEL[branch]}`);
 }
 
 function setNewOrderPayMode(mode) {
   newOrderPayMode = mode;
   ['cash', 'online', 'pending'].forEach(m => $('pay-' + m).classList.toggle('active', m === mode));
-  const show = mode !== 'pending';
   const row = $('payment-extra-row');
-  if (row) row.style.display = show ? 'grid' : 'none';
+  if (row) row.style.display = mode !== 'pending' ? 'grid' : 'none';
 }
 
 function showTab(tab) {
@@ -334,16 +441,8 @@ function showTab(tab) {
   if (tab === 'orders') renderOrders('');
 }
 
-function showAnalytics() {
-  renderAnalytics();
-  $('analytics-screen').style.display = 'block';
-  document.body.style.overflow = 'hidden';
-}
-
-function closeAnalytics() {
-  $('analytics-screen').style.display = 'none';
-  document.body.style.overflow = '';
-}
+function showAnalytics() { renderAnalytics(); $('analytics-screen').style.display = 'block'; document.body.style.overflow = 'hidden'; }
+function closeAnalytics() { $('analytics-screen').style.display = 'none'; document.body.style.overflow = ''; }
 
 
 /* ----------------------------------------------------------
@@ -361,16 +460,23 @@ function buildAddButtons(containerId, isEdit) {
     wrap.appendChild(b);
   };
 
-  btn('add-btn quickset', 'Full Set (Pant+Shirt+Lower+T-Shirt+Tie+Belt+2Socks)', () => openQuickSetSheet(t));
+  btn('add-btn quickset', '✦ Complete Uniform', () => openQuickSetSheet(t));
   Object.entries(COMBOS).forEach(([key, cfg]) => btn('add-btn combo', cfg.label, () => openComboSheet(t, key)));
-  btn('add-btn combo', 'Suit Set',      () => openComboSheet(t, 'suit-set'));
-  btn('add-btn',       '+ Single Item', () => openSingleItemSheet(t));
+  btn('add-btn combo',      'Suit Set',      () => openComboSheet(t, 'suit-set'));
+  btn('add-btn',            '+ Single Item', () => openSingleItemSheet(t));
+  btn('add-btn adjustment', '± Adjust',     () => openAdjSheet(t));
 }
 
 function openSheet(id)  { $(id).classList.add('open'); }
 function closeSheet(id, event) {
   if (event && event.target !== $(id)) return;
   $(id).classList.remove('open');
+}
+
+// Returns { ctr, pfx, fn } based on whether we're in new or edit context
+function sheetCtx(target) {
+  const e = target === 'edit';
+  return { ctr: e ? 'edit-items-container' : 'items-container', pfx: e ? 'e' : 'n', fn: e ? 'recalcEdit' : 'recalcNew' };
 }
 
 function stepQty(spanId, delta) {
@@ -409,10 +515,7 @@ function openQuickSetSheet(target) {
 
 function confirmQuickSet() {
   closeSheet('qs-modal');
-  const isEdit = sheetTarget === 'edit';
-  const ctr = isEdit ? 'edit-items-container' : 'items-container';
-  const pfx = isEdit ? 'e' : 'n';
-  const fn  = isEdit ? 'recalcEdit' : 'recalcNew';
+  const { ctr, pfx, fn } = sheetCtx(sheetTarget);
   const size = String(sheet.quickSetSize);
   const qty  = parseInt($('qs-qty').textContent);
   _addCombo(ctr, pfx, fn, 'pant-shirt',   size, size, qty);
@@ -444,13 +547,8 @@ function confirmSingleItem() {
   if (!sheet.singleItem) { toast('Select an item first', 'error'); return; }
   if (!sheet.singleSize) { toast('Select a size first',  'error'); return; }
   closeSheet('si-modal');
-  const isEdit = sheetTarget === 'edit';
-  _addItem(
-    isEdit ? 'edit-items-container' : 'items-container',
-    isEdit ? 'e' : 'n',
-    isEdit ? 'recalcEdit' : 'recalcNew',
-    sheet.singleItem, sheet.singleSize, parseInt($('si-qty').textContent)
-  );
+  const { ctr, pfx, fn } = sheetCtx(sheetTarget);
+  _addItem(ctr, pfx, fn, sheet.singleItem, sheet.singleSize, parseInt($('si-qty').textContent));
 }
 
 // ── Combo sheet ──
@@ -477,19 +575,39 @@ function openComboSheet(target, type) {
 }
 
 function confirmCombo() {
-  const isEdit = sheetTarget === 'edit';
-  const ctr = isEdit ? 'edit-items-container' : 'items-container';
-  const pfx = isEdit ? 'e' : 'n';
-  const fn  = isEdit ? 'recalcEdit' : 'recalcNew';
+  const { ctr, pfx, fn } = sheetCtx(sheetTarget);
   const qty = parseInt($('co-qty').textContent);
-  if (sheet.comboType === 'suit-set') {
-    closeSheet('co-modal');
-    _addCombo(ctr, pfx, fn, 'suit-set', null, null, qty);
-    return;
-  }
+  if (sheet.comboType === 'suit-set') { closeSheet('co-modal'); _addCombo(ctr, pfx, fn, 'suit-set', null, null, qty); return; }
   if (!sheet.comboSize) { toast('Select a size first', 'error'); return; }
   closeSheet('co-modal');
   _addCombo(ctr, pfx, fn, sheet.comboType, sheet.comboSize, sheet.comboSize, qty);
+}
+
+// ── Adjustment sheet ──
+function openAdjSheet(target) {
+  sheetTarget = target;
+  adjSign = 1;
+  $('adj-plus').className  = 'adj-sign-btn plus-active';
+  $('adj-minus').className = 'adj-sign-btn';
+  $('adj-amount').value = '';
+  $('adj-note').value   = '';
+  openSheet('adj-modal');
+  setTimeout(() => $('adj-amount').focus(), 280);
+}
+
+function setAdjSign(sign) {
+  adjSign = sign;
+  $('adj-plus').className  = 'adj-sign-btn' + (sign ===  1 ? ' plus-active'  : '');
+  $('adj-minus').className = 'adj-sign-btn' + (sign === -1 ? ' minus-active' : '');
+}
+
+function confirmAdj() {
+  const rawAmt = parseFloat($('adj-amount').value);
+  if (!rawAmt || rawAmt <= 0) { toast('Enter a positive amount', 'error'); return; }
+  const note = ($('adj-note').value || '').trim();
+  closeSheet('adj-modal');
+  const { ctr, pfx, fn } = sheetCtx(sheetTarget);
+  _addAdjustment(ctr, pfx, fn, adjSign, rawAmt, note);
 }
 
 
@@ -509,20 +627,14 @@ function _addItem(containerId, prefix, recalcFn, defaultItem, defaultSize, defau
   const priceEl = row.querySelector('.ir-price');
   const remBtn  = row.querySelector('.ir-remove');
 
-  itemSel.id = 'isel-' + id;
-  sizeSel.id = 'ssel-' + id;
-  qtyIn.id   = 'qty-'  + id;
-  priceEl.id = 'price-'+ id;
+  itemSel.id = 'isel-' + id; sizeSel.id = 'ssel-' + id;
+  qtyIn.id   = 'qty-'  + id; priceEl.id = 'price-'+ id;
 
   itemSel.appendChild(buildItemOptions(defaultItem || Object.keys(prices)[0]));
   sizeSel.appendChild(buildSizeOptions(defaultItem || Object.keys(prices)[0], defaultSize));
   qtyIn.value = defaultQty || 1;
 
-  itemSel.addEventListener('change', () => {
-    sizeSel.innerHTML = '';
-    sizeSel.appendChild(buildSizeOptions(itemSel.value));
-    window[recalcFn]();
-  });
+  itemSel.addEventListener('change', () => { sizeSel.innerHTML = ''; sizeSel.appendChild(buildSizeOptions(itemSel.value)); window[recalcFn](); });
   sizeSel.addEventListener('change', () => window[recalcFn]());
   qtyIn.addEventListener('input',    () => window[recalcFn]());
   remBtn.addEventListener('click',   () => { row.remove(); window[recalcFn](); });
@@ -543,78 +655,89 @@ function _addCombo(containerId, prefix, recalcFn, type, defaultSize1, defaultSiz
     const price = row.querySelector('.sr-price');
     const info  = row.querySelector('.sr-info');
     const rem   = row.querySelector('.sr-remove');
-
     qtyIn.id = 'qty-' + id; price.id = 'price-' + id;
     qtyIn.value = qty;
-
     const unit = prices.Suit.All + prices.Trouser.All + prices.Jacket.All;
     info.textContent  = `Suit ${rupees(prices.Suit.All)} + Trouser ${rupees(prices.Trouser.All)} + Jacket ${rupees(prices.Jacket.All)} = ${rupees(unit)} each`;
     price.textContent = rupees(unit * qty);
-
     qtyIn.addEventListener('input', () => window[recalcFn]());
     rem.addEventListener('click',   () => { row.remove(); window[recalcFn](); });
     $(containerId).appendChild(row);
-
   } else {
     const cfg  = COMBOS[type];
     const row  = cloneTemplate('tpl-combo-row');
     row.id            = 'item-' + id;
     row.dataset.item1 = cfg.item1;
     row.dataset.item2 = cfg.item2;
-
     const qtyIn   = row.querySelector('.cr-qty');
     const price   = row.querySelector('.cr-price');
     const size1   = row.querySelector('.cr-size1');
     const size2   = row.querySelector('.cr-size2');
     const subRow1 = row.querySelector('.cr-row1');
     const subRow2 = row.querySelector('.cr-row2');
-
     row.querySelector('.cr-label').textContent  = cfg.label;
     row.querySelector('.cr-label1').textContent = cfg.item1;
     row.querySelector('.cr-label2').textContent = cfg.item2;
-
     qtyIn.id = 'qty-' + id; price.id = 'price-' + id;
-    size1.id = 's1-'  + id; size2.id  = 's2-'   + id;
+    size1.id = 's1-'  + id; size2.id = 's2-'   + id;
     qtyIn.value = qty;
-
     size1.appendChild(buildSizeOptions(cfg.item1, defaultSize1));
     size2.appendChild(buildSizeOptions(cfg.item2, defaultSize2 || defaultSize1));
-
     const recalc = () => window[recalcFn]();
     qtyIn.addEventListener('input',  recalc);
     size1.addEventListener('change', recalc);
     size2.addEventListener('change', recalc);
-    row.querySelector('.cr-remove').addEventListener('click', () => { row.remove(); recalc(); });
-
-    row.querySelector('.cr-remove1').addEventListener('click', () => {
-      subRow1.remove();
-      if (!row.querySelectorAll('.combo-item-row').length) row.remove();
-      recalc();
-    });
-    row.querySelector('.cr-remove2').addEventListener('click', () => {
-      subRow2.remove();
-      if (!row.querySelectorAll('.combo-item-row').length) row.remove();
-      recalc();
-    });
-
+    row.querySelector('.cr-remove').addEventListener('click',  () => { row.remove(); recalc(); });
+    row.querySelector('.cr-remove1').addEventListener('click', () => { subRow1.remove(); if (!row.querySelectorAll('.combo-item-row').length) row.remove(); recalc(); });
+    row.querySelector('.cr-remove2').addEventListener('click', () => { subRow2.remove(); if (!row.querySelectorAll('.combo-item-row').length) row.remove(); recalc(); });
     $(containerId).appendChild(row);
   }
-
   window[recalcFn]();
 }
 
-// Walk all item rows in containerId, compute their line totals using pricesObj,
-// update each row's price display, and return the overall subtotal.
+function _addAdjustment(containerId, prefix, recalcFn, sign, amount, note) {
+  itemCounter++;
+  const id  = prefix + itemCounter;
+  const row = cloneTemplate('tpl-adj-row');
+  row.id = 'item-' + id;
+
+  const lineTotal = sign * amount;
+  row.dataset.adjLineTotal = String(lineTotal);
+
+  const labelEl = row.querySelector('.ar-label');
+  const noteEl  = row.querySelector('.ar-note');
+  const priceEl = row.querySelector('.ar-price');
+  const remBtn  = row.querySelector('.ar-remove');
+
+  labelEl.textContent = sign === 1 ? '+ Charge' : '− Refund';
+  if (note) { noteEl.style.display = 'block'; noteEl.textContent = note; }
+
+  priceEl.textContent = sign === 1 ? rupees(amount) : '−' + rupees(amount);
+  priceEl.classList.add(sign === 1 ? 'positive' : 'negative');
+
+  remBtn.addEventListener('click', () => { row.remove(); window[recalcFn](); });
+
+  $(containerId).appendChild(row);
+  window[recalcFn]();
+}
+
 function _recalc(containerId, totalId, pricesObj = prices) {
   let subtotal = 0;
   $(containerId)?.querySelectorAll('.js-item-row').forEach(row => {
-    const id      = row.id.replace('item-', '');
-    const type    = row.dataset.type;
+    const id   = row.id.replace('item-', '');
+    const type = row.dataset.type;
+
+    if (type === 'adjustment') {
+      subtotal += parseFloat(row.dataset.adjLineTotal) || 0;
+      return;
+    }
+
     const qtyEl   = $('qty-'   + id);
     const priceEl = $('price-' + id);
     if (!qtyEl || !priceEl) return;
     const qty = parseInt(qtyEl.value) || 1;
     let unit = 0;
+
     if (type === 'single') {
       const is = $('isel-' + id), ss = $('ssel-' + id);
       if (!is) return;
@@ -626,17 +749,18 @@ function _recalc(containerId, totalId, pricesObj = prices) {
       if (s1) unit += pricesObj[row.dataset.item1]?.[s1.value] || pricesObj[row.dataset.item1]?.[parseInt(s1.value)] || 0;
       if (s2) unit += pricesObj[row.dataset.item2]?.[s2.value] || pricesObj[row.dataset.item2]?.[parseInt(s2.value)] || 0;
     }
+
     const line = unit * qty;
     subtotal  += line;
     priceEl.textContent = rupees(line);
   });
+
   const el = $(totalId); if (el) el.textContent = rupees(subtotal);
   return subtotal;
 }
 
 function recalcNew()  { _recalc('items-container', 'grand-total'); }
 function recalcEdit() {
-  // Use the edited order's own branch prices, not the current new-order branch
   const order = editOrderId ? savedOrders.find(o => o.id === editOrderId) : null;
   _recalc('edit-items-container', 'eo-grand-total', PRICES[order?.branch || 'badagaon']);
 }
@@ -647,6 +771,20 @@ function collectItems(containerId, pricesObj = prices) {
   $(containerId)?.querySelectorAll('.js-item-row').forEach(row => {
     const id   = row.id.replace('item-', '');
     const type = row.dataset.type;
+
+    if (type === 'adjustment') {
+      const lineTotal = parseFloat(row.dataset.adjLineTotal) || 0;
+      const sign      = lineTotal >= 0 ? 1 : -1;
+      const absAmt    = Math.abs(lineTotal);
+      const note      = row.querySelector('.ar-note')?.textContent || '';
+      const label     = note
+        ? `${note} (${sign === 1 ? '+' : '−'}Rs.${absAmt.toLocaleString('en-IN')})`
+        : (sign === 1 ? '+ Charge' : '− Refund') + ` Rs.${absAmt.toLocaleString('en-IN')}`;
+      subtotal += lineTotal;
+      items.push({ label, lineTotal, qty: 1, unit: lineTotal, itemType: 'adjustment', sign, amount: absAmt, note });
+      return;
+    }
+
     const qty  = parseInt($('qty-' + id)?.value) || 1;
     let unit = 0, label = '', extra = {};
 
@@ -656,12 +794,10 @@ function collectItems(containerId, pricesObj = prices) {
       unit  = pricesObj[is.value]?.[ss.value] || pricesObj[is.value]?.[parseInt(ss.value)] || 0;
       label = `${is.value} (${ss.value})${qty > 1 ? ' x ' + qty : ''}`;
       extra = { itemType: 'single', itemName: is.value, itemSize: ss.value };
-
     } else if (type === 'suit-set') {
       unit  = pricesObj.Suit.All + pricesObj.Trouser.All + pricesObj.Jacket.All;
       label = `Suit Set (Suit + Trouser + Jacket)${qty > 1 ? ' x ' + qty : ''}`;
       extra = { itemType: 'suit-set' };
-
     } else if (type === 'combo') {
       const s1 = $('s1-' + id), s2 = $('s2-' + id);
       if (!s1 && !s2) return;
@@ -672,12 +808,9 @@ function collectItems(containerId, pricesObj = prices) {
       if (s1) parts.push(`${n1} (${s1.value})`);
       if (s2) parts.push(`${n2} (${s2.value})`);
       label = parts.join(' + ') + (qty > 1 ? ' x ' + qty : '');
-      extra = {
-        itemType:  'combo',
-        item1Name: s1 ? n1 : null, item1Size: s1 ? s1.value : null,
-        item2Name: s2 ? n2 : null, item2Size: s2 ? s2.value : null
-      };
+      extra = { itemType: 'combo', item1Name: s1 ? n1 : null, item1Size: s1 ? s1.value : null, item2Name: s2 ? n2 : null, item2Size: s2 ? s2.value : null };
     }
+
     subtotal += unit * qty;
     items.push({ label, lineTotal: unit * qty, qty, unit, ...extra });
   });
@@ -693,9 +826,7 @@ function saveOrder() {
   const fields = readStudentFields('new');
   if (!fields.studentName) { toast('Please enter student name', 'error'); return; }
   if (!$('items-container')?.querySelector('.js-item-row')) { toast('Please add at least one item', 'error'); return; }
-  if (fields.mobile && !/^[0-9+\s\-]{7,15}$/.test(fields.mobile)) {
-    toast('Mobile number looks incorrect — please check', 'error'); return;
-  }
+  if (fields.mobile && !/^[0-9+\s\-]{7,15}$/.test(fields.mobile)) { toast('Mobile number looks incorrect', 'error'); return; }
 
   const { items, subtotal } = collectItems('items-container');
   orderCounter++;
@@ -712,15 +843,9 @@ function saveOrder() {
   }
 
   savedOrders.unshift({
-    id:            Date.now(),
-    orderNum:      orderCounter,
-    branch:        currentBranch,   // stored as 'branch' going forward
-    ...fields,
-    payments,
-    items,
-    subtotal,
-    orderDiscount: newDiscount,
-    date:          new Date().toLocaleDateString('en-IN'),
+    id: Date.now(), orderNum: orderCounter, branch: currentBranch, ...fields,
+    payments, items, subtotal, orderDiscount: newDiscount,
+    date: new Date().toLocaleDateString('en-IN'),
     deliveryUnits: buildDeliveryUnits(items).map(u => ({ ...u, given: true }))
   });
 
@@ -746,8 +871,13 @@ function resetNewForm() {
    11. UI — ANALYTICS
 ---------------------------------------------------------- */
 
-function setAnalyticsDate(v)   { analyticsDate   = v; renderAnalytics(); }
+function setAnalyticsDate(v) {
+  analyticsDate = v;
+  renderAnalytics();
+  // The picker row is rebuilt on each render; visibility is handled inside renderAnalytics
+}
 function setAnalyticsBranch(v) { analyticsBranch = v; renderAnalytics(); }
+function setAnalyticsSpecificDate(val) { analyticsSpecificDate = val; renderAnalytics(); }
 
 function makeAnRow(label, count, amt, color) {
   const row = cloneTemplate('tpl-an-row');
@@ -755,14 +885,6 @@ function makeAnRow(label, count, amt, color) {
   row.querySelector('.anr-label').textContent    = label;
   row.querySelector('.anr-count').textContent    = count;
   row.querySelector('.anr-amt').textContent      = rupees(amt);
-  return row;
-}
-
-function makeAnRowPlain(label, count, color) {
-  const row = cloneTemplate('tpl-an-row-plain');
-  row.querySelector('.anrp-dot').style.background = color;
-  row.querySelector('.anrp-label').textContent    = label;
-  row.querySelector('.anrp-count').textContent    = count;
   return row;
 }
 
@@ -777,7 +899,6 @@ function makeAnSection(title) {
 
 function renderAnalytics() {
   function parseDate(str) { const p = (str || '').split('/'); return new Date(p[2], p[1] - 1, p[0]); }
-
   const now   = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   let base    = savedOrders;
@@ -787,17 +908,21 @@ function renderAnalytics() {
   } else if (analyticsDate === 'week') {
     const week = new Date(today); week.setDate(today.getDate() - 6);
     base = base.filter(o => { const d = parseDate(o.date); return d >= week && d <= today; });
+  } else if (analyticsDate === 'specific' && analyticsSpecificDate) {
+    const [y, m, day] = analyticsSpecificDate.split('-').map(Number);
+    const picked = new Date(y, m - 1, day);
+    base = base.filter(o => parseDate(o.date).getTime() === picked.getTime());
   }
 
-  const orders = analyticsBranch === 'all'
-    ? base
-    : base.filter(o => o.branch === analyticsBranch);
+  const orders = analyticsBranch === 'all' ? base : base.filter(o => o.branch === analyticsBranch);
+  const trueValue = o => (o.subtotal || 0) - totalDiscount(o);
+  const sumC      = arr => arr.reduce((s, o) => s + totalCollected(o), 0);
 
-  const sumC = arr => arr.reduce((s, o) => s + totalCollected(o), 0);
-
-  let cashAmt = 0, onlineAmt = 0, pendingAmt = 0;
+  let cashAmt = 0, onlineAmt = 0, balanceAmt = 0, refundOwedAmt = 0;
   orders.forEach(o => {
-    pendingAmt += balanceDue(o);
+    const outstanding = trueValue(o) - totalCollected(o);
+    if (outstanding > 0) balanceAmt    += outstanding;
+    if (outstanding < 0) refundOwedAmt += Math.abs(outstanding);
     getPayments(o).forEach(p => {
       if (p.mode === 'cash')   cashAmt   += p.amount || 0;
       if (p.mode === 'online') onlineAmt += p.amount || 0;
@@ -805,18 +930,14 @@ function renderAnalytics() {
   });
 
   const collected         = cashAmt + onlineAmt;
+  const totalRevenue      = orders.reduce((s, o) => s + trueValue(o), 0);
   const ordersWithPayment = orders.filter(o => totalCollected(o) > 0);
   const ordersWithBalance = orders.filter(o => balanceDue(o) > 0);
+  const refundOrders      = orders.filter(o => o.subtotal <= 0);
   const cashOrders        = orders.filter(o => paymentStatus(o) === 'cash');
   const onlineOrders      = orders.filter(o => paymentStatus(o) === 'online');
-  const splitOrders       = orders.filter(o => paymentStatus(o) === 'split');
-  const partialOrders     = orders.filter(o => paymentStatus(o) === 'partial');
-  const pendingOrders     = orders.filter(o => paymentStatus(o) === 'pending');
   const badagaon          = orders.filter(o => o.branch === 'badagaon');
   const baghpat           = orders.filter(o => o.branch === 'baghpat');
-  const ordersWithPending = orders.filter(o => pendingItemCount(o) > 0);
-  const totalPendItems    = orders.reduce((s, o) => s + pendingItemCount(o), 0);
-  const fullyDelivered    = orders.filter(o => allItemsDelivered(o));
 
   const wrap = $('analytics-content');
   wrap.innerHTML = '';
@@ -827,9 +948,8 @@ function renderAnalytics() {
 
   const makeSegBtn = (value, label, current, setter) => {
     const b = document.createElement('button');
-    b.className   = 'an-seg-btn' + (current === value ? ' active' : '');
-    b.textContent = label;
-    b.onclick     = () => setter(value);
+    b.className = 'an-seg-btn' + (current === value ? ' active' : '');
+    b.textContent = label; b.onclick = () => setter(value);
     return b;
   };
 
@@ -843,22 +963,50 @@ function renderAnalytics() {
   };
 
   const filterRow = document.createElement('div'); filterRow.className = 'an-filter-row';
-  filterRow.appendChild(makeFilterGroup('Period', [['today','Today'],['week','Week'],['all','All Time']], analyticsDate,   setAnalyticsDate));
-  filterRow.appendChild(makeFilterGroup('Branch', [['all','All'],['badagaon','Badagaon'],['baghpat','Baghpat']],           analyticsBranch, setAnalyticsBranch));
+
+  // Period row with buttons
+  const periodGrp = document.createElement('div'); periodGrp.className = 'an-filter-group';
+  const periodLbl = document.createElement('label'); periodLbl.className = 'an-filter-label'; periodLbl.textContent = 'Period';
+  const periodSeg = document.createElement('div');   periodSeg.className = 'an-seg';
+  [['today','Today'],['week','Week'],['all','All Time'],['specific','Date ↓']].forEach(([v,l]) => {
+    periodSeg.appendChild(makeSegBtn(v, l, analyticsDate, setAnalyticsDate));
+  });
+  periodGrp.appendChild(periodLbl); periodGrp.appendChild(periodSeg);
+  filterRow.appendChild(periodGrp);
+
+  // Date picker — shown only when 'specific' selected
+  const datePickerRow = document.createElement('div');
+  datePickerRow.className = 'an-filter-group';
+  datePickerRow.id = 'an-specific-date-row';
+  datePickerRow.style.display = analyticsDate === 'specific' ? 'flex' : 'none';
+  const dpLbl = document.createElement('label'); dpLbl.className = 'an-filter-label'; dpLbl.textContent = 'Date';
+  const dpInp = document.createElement('input');
+  dpInp.type  = 'date'; dpInp.id = 'an-specific-date-input';
+  dpInp.className = 'an-date-input';
+  dpInp.style.colorScheme = 'light';
+  if (!analyticsSpecificDate) {
+    const today = new Date();
+    analyticsSpecificDate = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  }
+  dpInp.value = analyticsSpecificDate;
+  dpInp.addEventListener('change', e => setAnalyticsSpecificDate(e.target.value));
+  datePickerRow.appendChild(dpLbl); datePickerRow.appendChild(dpInp);
+  filterRow.appendChild(datePickerRow);
+
+  filterRow.appendChild(makeFilterGroup('Branch', [['all','All'],['badagaon','Badagaon'],['baghpat','Baghpat']], analyticsBranch, setAnalyticsBranch));
 
   const totBlock = document.createElement('div'); totBlock.className = 'an-total-block';
-  totBlock.innerHTML = `
-    <div class="an-total-label">Total Revenue</div>
-    <div class="an-total-amt">${rupees(collected + pendingAmt)}</div>
-    <div class="an-total-sub">${orders.length} order${orders.length !== 1 ? 's' : ''}</div>`;
+  const refundNote = refundOrders.length ? ` · ${refundOrders.length} refund${refundOrders.length !== 1 ? 's' : ''}` : '';
+  totBlock.innerHTML = `<div class="an-total-label">Total Revenue</div><div class="an-total-amt">${rupees(totalRevenue)}</div><div class="an-total-sub">${orders.length} order${orders.length !== 1 ? 's' : ''}${refundNote}</div>`;
 
-  headerCard.appendChild(filterRow);
-  headerCard.appendChild(totBlock);
+  headerCard.appendChild(filterRow); headerCard.appendChild(totBlock);
   wrap.appendChild(headerCard);
 
   const collSec = makeAnSection('Collection');
-  collSec.appendChild(makeAnRow('Any payment received',  ordersWithPayment.length, collected,   '#16a34a'));
-  collSec.appendChild(makeAnRow('Balance outstanding',   ordersWithBalance.length, pendingAmt,  '#d97706'));
+  collSec.appendChild(makeAnRow('Any payment received', ordersWithPayment.length, collected,      '#16a34a'));
+  collSec.appendChild(makeAnRow('Balance outstanding',  ordersWithBalance.length, balanceAmt,    '#d97706'));
+  if (refundOwedAmt > 0)
+    collSec.appendChild(makeAnRow('Refunds given',      refundOrders.length,      refundOwedAmt, '#7c3aed'));
   const divider = document.createElement('div'); divider.className = 'an-divider'; divider.style.margin = '8px 0 10px';
   collSec.appendChild(divider);
   collSec.appendChild(makeAnRow('Cash',   cashOrders.length,   cashAmt,   '#16a34a'));
@@ -882,68 +1030,84 @@ function toggleFilterSheet() { $('filter-dropdown').classList.toggle('open'); }
 
 function setDateFilter(f) {
   dateFilter = f;
-  ['all', 'today', 'week'].forEach(k => $('fopt-' + k)?.classList.toggle('active', k === f));
-  renderOrders(getSearchValue()); updateFilterBar();
-}
-
-function setBranchFilter(f) {
-  branchFilter = f;
-  ['all', 'badagaon', 'baghpat'].forEach(k => $('fopt-branch-' + k)?.classList.toggle('active', k === f));
-  renderOrders(getSearchValue()); updateFilterBar();
-}
-
-function setDeliveryFilter(f) {
-  deliveryFilter = f;
-  ['all', 'pending-delivery'].forEach(k => $('fopt-del-' + k)?.classList.toggle('active', k === f));
-  renderOrders(getSearchValue()); updateFilterBar();
-}
-
-function setPaymentFilter(f) {
-  paymentFilter = f;
-  ['all', 'pending'].forEach(k => $('fopt-pay-' + k)?.classList.toggle('active', k === f));
-  renderOrders(getSearchValue()); updateFilterBar();
-}
-
-function updateFilterBar() {
-  const el  = $('filter-bar-label');
-  const dot = $('filter-dot');
-  const btn = document.querySelector('.filter-btn');
-  const active = dateFilter !== 'all' || branchFilter !== 'all' || paymentFilter !== 'all' || deliveryFilter !== 'all';
-
-  if (el) {
-    if (active) {
-      el.innerHTML = `<button class="filter-clear-btn" onclick="clearFilters()">✕ Clear filters</button>`;
-    } else {
-      el.innerHTML = '';
+  ['all','today','week','specific'].forEach(k => $('fopt-'+k)?.classList.toggle('active', k===f));
+  const row = $('fopt-specific-row');
+  if (row) {
+    row.style.display = f === 'specific' ? 'block' : 'none';
+    if (f === 'specific') {
+      if (!specificDateFilter) {
+        const today = new Date();
+        specificDateFilter = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      }
+      const inp = $('fopt-specific-date');
+      if (inp) { inp.value = specificDateFilter; inp.style.colorScheme = 'light'; }
+      renderOrders(getSearchValue());
     }
   }
-  if (dot) dot.style.display = active ? 'block' : 'none';
-  if (btn) btn.classList.toggle('active', active);
+  renderOrders(getSearchValue()); updateFilterBar();
+}
+
+function setSpecificDateFilter(val) {
+  specificDateFilter = val;
+  renderOrders(getSearchValue()); updateFilterBar();
+}
+
+function setBranchFilter(f)   { branchFilter   = f; ['all','badagaon','baghpat'].forEach(k => $('fopt-branch-'+k)?.classList.toggle('active', k===f)); renderOrders(getSearchValue()); updateFilterBar(); }
+function setDeliveryFilter(f) { deliveryFilter = f; ['all','pending-delivery'].forEach(k => $('fopt-del-'+k)?.classList.toggle('active', k===f)); renderOrders(getSearchValue()); updateFilterBar(); }
+function setPaymentFilter(f)  { paymentFilter  = f; ['all','pending','refund'].forEach(k => $('fopt-pay-'+k)?.classList.toggle('active', k===f)); renderOrders(getSearchValue()); updateFilterBar(); }
+
+function updateFilterBar() {
+  const active = dateFilter !== 'all' || branchFilter !== 'all' || paymentFilter !== 'all' || deliveryFilter !== 'all';
+  const el = $('filter-bar-label');
+  if (el) el.innerHTML = active ? `<button class="filter-clear-btn" onclick="clearFilters()">✕ Clear filters</button>` : '';
+  const dot = $('filter-dot'); if (dot) dot.style.display = active ? 'block' : 'none';
+  const btn = document.querySelector('.filter-btn'); if (btn) btn.classList.toggle('active', active);
 }
 
 function clearFilters() {
   dateFilter = branchFilter = paymentFilter = deliveryFilter = 'all';
-  ['all', 'today', 'week'].forEach(k      => $('fopt-' + k)?.classList.toggle('active',        k === 'all'));
-  ['all', 'badagaon', 'baghpat'].forEach(k => $('fopt-branch-' + k)?.classList.toggle('active', k === 'all'));
-  ['all', 'pending'].forEach(k            => $('fopt-pay-' + k)?.classList.toggle('active',     k === 'all'));
-  ['all', 'pending-delivery'].forEach(k   => $('fopt-del-' + k)?.classList.toggle('active',     k === 'all'));
+  specificDateFilter = '';
+  ['all','today','week','specific'].forEach(k => $('fopt-'+k)?.classList.toggle('active', k==='all'));
+  ['all','badagaon','baghpat'].forEach(k => $('fopt-branch-'+k)?.classList.toggle('active', k==='all'));
+  ['all','pending','refund'].forEach(k   => $('fopt-pay-'+k)?.classList.toggle('active',   k==='all'));
+  ['all','pending-delivery'].forEach(k   => $('fopt-del-'+k)?.classList.toggle('active',   k==='all'));
+  const row = $('fopt-specific-row'); if (row) row.style.display = 'none';
+  const inp = $('fopt-specific-date'); if (inp) inp.value = '';
   renderOrders(getSearchValue()); updateFilterBar();
 }
 
+// Parse order date string 'D/M/YYYY' → Date (midnight)
+function parseOrderDate(str) {
+  const p = (str || '').split('/');
+  return new Date(p[2], p[1] - 1, p[0]);
+}
+
 function matchesFilter(order) {
+  // Payment filter — refund orders (subtotal <= 0) are always excluded from pending/partial
   if (paymentFilter === 'pending') {
+    if (order.subtotal <= 0) return false;           // exclude refunds entirely
     const s = paymentStatus(order);
     if (s !== 'pending' && s !== 'partial') return false;
   }
+  if (paymentFilter === 'refund') {
+    if (order.subtotal > 0) return false;
+  }
   if (deliveryFilter === 'pending-delivery' && pendingItemCount(order) === 0) return false;
   if (branchFilter !== 'all' && order.branch !== branchFilter) return false;
+  // Date filter
   if (dateFilter === 'all') return true;
-  const p = (order.date || '').split('/');
-  const d = new Date(p[2], p[1] - 1, p[0]);
+  const d     = parseOrderDate(order.date);
   const now   = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  if (dateFilter === 'today') return d.getTime() === today.getTime();
-  if (dateFilter === 'week')  { const w = new Date(today); w.setDate(today.getDate() - 6); return d >= w && d <= today; }
+  if (dateFilter === 'today')    return d.getTime() === today.getTime();
+  if (dateFilter === 'week')     { const w = new Date(today); w.setDate(today.getDate() - 6); return d >= w && d <= today; }
+  if (dateFilter === 'specific') {
+    if (!specificDateFilter) return true; // no date picked yet → show all
+    // input value is 'YYYY-MM-DD'
+    const [y, m, day] = specificDateFilter.split('-').map(Number);
+    const picked = new Date(y, m - 1, day);
+    return d.getTime() === picked.getTime();
+  }
   return true;
 }
 
@@ -958,67 +1122,44 @@ function renderOrders(query) {
   const filtered = savedOrders.filter(o => {
     if (!matchesFilter(o)) return false;
     const num = o.orderNum ? '#' + String(o.orderNum).padStart(3, '0') : '';
-    return (o.studentName  || '').toLowerCase().includes(query) ||
-           (o.studentClass || '').toLowerCase().includes(query) ||
-           (o.parentName   || '').toLowerCase().includes(query) ||
-           (o.mobile       || '').includes(query)               ||
-           (o.branch || '').toLowerCase().includes(query)         ||
-           (o.notes        || '').toLowerCase().includes(query) ||
+    return (o.studentName||'').toLowerCase().includes(query) || (o.studentClass||'').toLowerCase().includes(query) ||
+           (o.parentName||'').toLowerCase().includes(query)  || (o.mobile||'').includes(query)                    ||
+           (o.address||'').toLowerCase().includes(query)     || (o.notes||'').toLowerCase().includes(query)       ||
            num.includes(query);
   });
 
-  const now        = new Date();
-  const today      = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const pendingAll = savedOrders.filter(o => balanceDue(o) > 0 || paymentStatus(o) === 'pending');
-  const pendingTdy = pendingAll.filter(o => {
-    const p = (o.date || '').split('/');
-    return new Date(p[2], p[1] - 1, p[0]).getTime() === today.getTime();
-  });
-
+  const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  // Pending = not refund, and balance owed or no payment at all
+  const pendingAll   = savedOrders.filter(o => o.subtotal > 0 && (balanceDue(o) > 0 || paymentStatus(o) === 'pending'));
+  const pendingTdy   = pendingAll.filter(o => { const p = (o.date||'').split('/'); return new Date(p[2],p[1]-1,p[0]).getTime() === today.getTime(); });
   const pendDelivAll = savedOrders.filter(o => pendingItemCount(o) > 0);
-  const delivBanner  = $('delivery-banner');
+
+  const delivBanner = $('delivery-banner');
   if (delivBanner) {
     if (pendDelivAll.length) {
       const tot = pendDelivAll.reduce((s, o) => s + pendingItemCount(o), 0);
       delivBanner.style.display = 'flex';
       $('delivery-count').textContent       = pendDelivAll.length;
-      $('delivery-items-count').textContent = `${tot} item${tot !== 1 ? 's' : ''} not delivered`;
-      delivBanner.onclick = () => {
-        $('orders-search').value = ''; $('orders-search-clear') && ($('orders-search-clear').style.display = 'none');
-        setDeliveryFilter('pending-delivery');
-      };
-    } else {
-      delivBanner.style.display = 'none';
-    }
+      $('delivery-items-count').textContent = `${tot} item${tot!==1?'s':''} not delivered`;
+      delivBanner.onclick = () => { $('orders-search').value=''; if($('orders-search-clear'))$('orders-search-clear').style.display='none'; setDeliveryFilter('pending-delivery'); };
+    } else { delivBanner.style.display = 'none'; }
   }
 
   const banner = $('pending-banner');
   if (pendingAll.length) {
     banner.style.display = 'flex';
     $('pending-count').textContent = pendingAll.length;
-    // Note: banner always counts across all branches so the note only shows when
-    // a branch filter is active (which would cause the number to appear inconsistent)
     const note = branchFilter !== 'all' ? ' (all branches)' : '';
-    $('pending-today').textContent = pendingTdy.length
-      ? `${pendingTdy.length} today${note}` : `none today${note}`;
-    banner.onclick = () => {
-      $('orders-search').value = ''; $('orders-search-clear') && ($('orders-search-clear').style.display = 'none');
-      setPaymentFilter('pending');
-    };
-  } else {
-    banner.style.display = 'none';
-  }
+    $('pending-today').textContent = pendingTdy.length ? `${pendingTdy.length} today${note}` : `none today${note}`;
+    banner.onclick = () => { $('orders-search').value=''; if($('orders-search-clear'))$('orders-search-clear').style.display='none'; setPaymentFilter('pending'); };
+  } else { banner.style.display = 'none'; }
 
   const bannersRow = $('banners-row');
-  if (bannersRow) {
-    const eitherVisible = pendingAll.length || pendDelivAll.length;
-    bannersRow.style.display = eitherVisible ? 'flex' : 'none';
-  }
+  if (bannersRow) bannersRow.style.display = (pendingAll.length || pendDelivAll.length) ? 'flex' : 'none';
 
-  const totalSub = filtered.reduce((s, o) => s + (o.subtotal || 0), 0);
+  const totalSub = filtered.reduce((s, o) => s + (o.subtotal||0), 0);
   const totalCol = filtered.reduce((s, o) => s + totalCollected(o), 0);
-  $('orders-summary').textContent =
-    `${filtered.length} order${filtered.length !== 1 ? 's' : ''} — Total: ${rupees(totalSub)} | Collected: ${rupees(totalCol)}`;
+  $('orders-summary').textContent = `${filtered.length} order${filtered.length!==1?'s':''} — Total: ${rupees(totalSub)} | Collected: ${rupees(totalCol)}`;
 
   const list = $('orders-list');
   list.innerHTML = '';
@@ -1026,36 +1167,40 @@ function renderOrders(query) {
   if (!filtered.length) {
     const empty = document.createElement('div');
     empty.className = 'empty'; empty.textContent = 'No orders found';
-    list.appendChild(empty);
-    return;
+    list.appendChild(empty); return;
   }
 
-  const STATUS_LABEL = { cash: 'Cash', online: 'Online', split: 'Split', partial: 'Partial', pending: 'Pending' };
+  const STATUS_LABEL = { cash: 'Cash', online: 'Online', split: 'Split', partial: 'Partial', pending: 'Pending', refund: 'Refund' };
 
   filtered.forEach(o => {
-    const status    = paymentStatus(o);
-    const branch    = o.branch;
+    const status    = o.subtotal <= 0 ? 'refund' : paymentStatus(o);
     const payments  = getPayments(o);
     const pendCount = pendingItemCount(o);
 
     const card = cloneTemplate('tpl-order-card');
     card.id    = 'card-' + o.id;
 
+    const strip = document.createElement('div');
+    strip.className = 'card-meta-strip';
+    strip.innerHTML = `<span>${o.date}</span><span>${o.orderNum ? '#' + String(o.orderNum).padStart(3, '0') : ''}</span>`;
+    card.insertAdjacentElement('afterbegin', strip);
+
     card.querySelector('.oc-student-name').textContent  = o.studentName || '';
     card.querySelector('.oc-student-class').textContent = o.studentClass ? ' ' + o.studentClass : '';
-    card.querySelector('.oc-meta').textContent          = `${BRANCH_LABEL[branch]} · ${o.date}`;
 
     const contactEl = card.querySelector('.oc-contact');
     if (o.parentName || o.mobile) contactEl.textContent = [o.parentName, o.mobile].filter(Boolean).join(' · ');
     else contactEl.style.display = 'none';
 
-    const statusBadge = card.querySelector('.oc-status-badge');
-    statusBadge.textContent = STATUS_LABEL[status];
-    statusBadge.classList.add(status);
+    const addressEl = card.querySelector('.oc-address');
+    if (o.address) { addressEl.textContent = o.address; addressEl.style.display = 'block'; }
 
-    const numBadge = card.querySelector('.oc-order-num');
-    if (o.orderNum) numBadge.textContent = '#' + String(o.orderNum).padStart(3, '0');
-    else numBadge.style.display = 'none';
+    const branchBadge = card.querySelector('.oc-branch-badge');
+    branchBadge.textContent = BRANCH_LABEL[o.branch];
+    branchBadge.classList.add(o.branch);
+
+    const statusBadge = card.querySelector('.oc-status-badge');
+    statusBadge.textContent = STATUS_LABEL[status]; statusBadge.classList.add(status);
 
     if (pendCount > 0) {
       const dvBadge = card.querySelector('.oc-delivery-badge');
@@ -1065,18 +1210,18 @@ function renderOrders(query) {
     }
 
     const qpBtn = card.querySelector('.oc-quick-pay');
-    if (status === 'pending' || status === 'partial') {
+    if (status !== 'refund' && (status === 'pending' || status === 'partial')) {
       qpBtn.style.display = 'inline-flex';
       qpBtn.onclick = () => openPaymentSheet(o.id);
     }
 
-    if (o.notes) {
-      const notesEl = card.querySelector('.oc-notes');
-      notesEl.style.display = 'flex';
-      notesEl.querySelector('.oc-notes-text').textContent = o.notes;
-    }
+    if (o.notes) { const ne = card.querySelector('.oc-notes'); ne.style.display='flex'; ne.querySelector('.oc-notes-text').textContent = o.notes; }
 
-    card.querySelector('.oc-amount').textContent = rupees(o.subtotal);
+    const disc    = totalDiscount(o);
+    const effAmt  = o.subtotal - disc;
+    const amtEl   = card.querySelector('.oc-amount');
+    amtEl.textContent = rupees(effAmt);
+    if (effAmt < 0) amtEl.style.color = 'var(--red)';
 
     const menuDrop = card.querySelector('.oc-menu-dropdown');
     card.querySelector('.oc-menu-btn').onclick = e => {
@@ -1085,7 +1230,7 @@ function renderOrders(query) {
       document.querySelectorAll('.menu-dropdown.open').forEach(m => m.classList.remove('open'));
       if (!isOpen) menuDrop.classList.add('open');
     };
-    card.querySelector('.oc-edit-btn').onclick          = () => { menuDrop.classList.remove('open'); openEditOrder(o.id); };
+    card.querySelector('.oc-edit-btn').onclick           = () => { menuDrop.classList.remove('open'); openEditOrder(o.id); };
     card.querySelector('.oc-delivery-menu-btn').onclick  = () => { menuDrop.classList.remove('open'); openDeliverySheet(o.id); };
     card.querySelector('.oc-payment-menu-btn').onclick   = () => { menuDrop.classList.remove('open'); openPaymentSheet(o.id); };
     card.querySelector('.oc-whatsapp-btn').onclick       = () => { menuDrop.classList.remove('open'); openWhatsApp(o.id); };
@@ -1093,22 +1238,35 @@ function renderOrders(query) {
 
     const panel   = card.querySelector('.oc-items-panel');
     const chevron = card.querySelector('.oc-chevron');
-    const togBtn  = card.querySelector('.oc-toggle-btn');
-    togBtn.querySelector('.oc-item-count').textContent = 'Details';
-    togBtn.onclick = () => {
+    card.querySelector('.oc-toggle-btn').onclick = () => {
       const open = panel.style.display !== 'none';
       panel.style.display = open ? 'none' : 'block';
       chevron.textContent = open ? '▸' : '▾';
     };
+    card.querySelector('.oc-item-count').textContent = 'Details';
 
     const units = ensureDeliveryUnits(o);
     let dvOffset = 0;
     (o.items || []).forEach(item => {
-      const qty  = item.qty || 1;
-      // uPQ = units per quantity: how many physical pieces one unit of this row represents
-      const uPQ  = item.itemType === 'suit-set' ? 3
-        : item.itemType === 'combo' ? [item.item1Name, item.item2Name].filter(Boolean).length : 1;
-      const rowUnits  = units.slice(dvOffset, dvOffset + qty * uPQ);
+      if (item.itemType === 'adjustment') {
+        const line = cloneTemplate('tpl-order-item-line');
+        line.querySelector('.oil-dot').classList.add('dot-adjustment');
+        const isCharge = item.lineTotal >= 0;
+        const absAmt   = Math.abs(item.lineTotal || 0);
+        const adjLabel = item.note
+          ? `${item.note} (${isCharge ? '+' : '−'}Rs.${absAmt.toLocaleString('en-IN')})`
+          : (isCharge ? '+ Charge' : '− Refund') + ` Rs.${absAmt.toLocaleString('en-IN')}`;
+        line.querySelector('.oil-label').textContent = adjLabel;
+        const ps = line.querySelector('.oil-price');
+        ps.textContent = (isCharge ? '' : '−') + rupees(absAmt);
+        ps.style.color = isCharge ? 'var(--green)' : 'var(--red)';
+        panel.appendChild(line);
+        return;
+      }
+
+      const qty      = item.qty || 1;
+      const uPQ      = item.itemType === 'suit-set' ? 3 : item.itemType === 'combo' ? [item.item1Name, item.item2Name].filter(Boolean).length : 1;
+      const rowUnits = units.slice(dvOffset, dvOffset + qty * uPQ);
       dvOffset += qty * uPQ;
       const pendUnits = rowUnits.filter(u => !u.given).length;
 
@@ -1116,10 +1274,7 @@ function renderOrders(query) {
       line.querySelector('.oil-dot').classList.add(pendUnits > 0 ? 'dot-pending' : 'dot-given');
       line.querySelector('.oil-label').textContent = item.label;
       line.querySelector('.oil-price').textContent = rupees(item.lineTotal);
-      if (pendUnits > 0) {
-        const pn = line.querySelector('.oil-pend-note');
-        pn.style.display = 'inline'; pn.textContent = `${pendUnits} not delivered`;
-      }
+      if (pendUnits > 0) { const pn = line.querySelector('.oil-pend-note'); pn.style.display='inline'; pn.textContent=`${pendUnits} not delivered`; }
       panel.appendChild(line);
     });
 
@@ -1130,7 +1285,7 @@ function renderOrders(query) {
 
     payments.forEach((p, i) => {
       const pRow = cloneTemplate('tpl-pay-history-row');
-      pRow.querySelector('.phr-label').textContent = `Payment ${i + 1} · ${p.mode.charAt(0).toUpperCase() + p.mode.slice(1)} · ${p.date}`;
+      pRow.querySelector('.phr-label').textContent = `Payment ${i+1} · ${p.mode.charAt(0).toUpperCase()+p.mode.slice(1)} · ${p.date}`;
       pRow.querySelector('.phr-amt').textContent   = rupees(p.amount);
       panel.appendChild(pRow);
     });
@@ -1172,14 +1327,12 @@ function renderDeliverySheet(order) {
   const units      = ensureDeliveryUnits(order);
   const pendCount  = units.filter(u => !u.given).length;
   const givenCount = units.length - pendCount;
-
   $('dv-student').textContent = `${order.studentName}${order.studentClass ? ' · ' + order.studentClass : ''}`;
   $('dv-summary').textContent = pendCount === 0
-    ? `All ${units.length} piece${units.length !== 1 ? 's' : ''} delivered`
+    ? `All ${units.length} piece${units.length!==1?'s':''} delivered`
     : `${pendCount} not delivered · ${givenCount} delivered`;
 
-  const ctn = $('dv-items');
-  ctn.innerHTML = '';
+  const ctn = $('dv-items'); ctn.innerHTML = '';
   units.forEach(u => {
     const row = cloneTemplate('tpl-dv-item');
     const isPending = !u.given;
@@ -1201,22 +1354,15 @@ function toggleItemDelivery(orderId, unitKey, isGiven) {
   const unit  = units.find(u => u.key === unitKey);
   if (unit) unit.given = isGiven;
   savedOrders[idx].deliveryUnits = units;
-  saveLocal();
-  renderDeliverySheet(savedOrders[idx]);
-  renderOrders(getSearchValue());
-  if (units.every(u => u.given))
-    toast(`All items marked delivered for ${savedOrders[idx].studentName}`);
+  saveLocal(); renderDeliverySheet(savedOrders[idx]); renderOrders(getSearchValue());
+  if (units.every(u => u.given)) toast(`All items marked delivered for ${savedOrders[idx].studentName}`);
 }
 
 function markAllDelivered(orderId) {
   const idx = savedOrders.findIndex(o => o.id === orderId);
   if (idx === -1) return;
-  const units = ensureDeliveryUnits(savedOrders[idx]);
-  units.forEach(u => u.given = true);
-  savedOrders[idx].deliveryUnits = units;
-  saveLocal();
-  renderDeliverySheet(savedOrders[idx]);
-  renderOrders(getSearchValue());
+  ensureDeliveryUnits(savedOrders[idx]).forEach(u => u.given = true);
+  saveLocal(); renderDeliverySheet(savedOrders[idx]); renderOrders(getSearchValue());
   toast('All items marked delivered');
 }
 
@@ -1226,23 +1372,20 @@ function markAllDelivered(orderId) {
 ---------------------------------------------------------- */
 
 function refreshPaymentSheetHistory(id) {
-  const order    = savedOrders.find(o => o.id === id);
+  const order = savedOrders.find(o => o.id === id);
   if (!order) return;
-  const payments = getPayments(order);
   const histWrap = $('ep-history');
   histWrap.innerHTML = '';
 
   const infoBlock = document.createElement('div');
   infoBlock.className = 'ep-info-block';
 
+  const payments = getPayments(order);
   if (payments.length) {
-    const histSec = document.createElement('div');
-    histSec.className = 'ep-info-section';
-
+    const histSec = document.createElement('div'); histSec.className = 'ep-info-section';
     const histLabel = document.createElement('div');
     histLabel.style.cssText = 'font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px';
-    histLabel.textContent = 'Payment History';
-    histSec.appendChild(histLabel);
+    histLabel.textContent = 'Payment History'; histSec.appendChild(histLabel);
 
     payments.forEach((p, i) => {
       const entry = cloneTemplate('tpl-pay-entry');
@@ -1256,33 +1399,23 @@ function refreshPaymentSheetHistory(id) {
       entry.style.marginBottom = '2px';
       histSec.appendChild(entry);
     });
-
     infoBlock.appendChild(histSec);
   }
 
-  const totalsSec = document.createElement('div');
-  totalsSec.className = 'ep-info-section';
-
+  const totalsSec = document.createElement('div'); totalsSec.className = 'ep-info-section';
   const makeRow = (label, val, cls) => {
-    const row = document.createElement('div');
-    row.className = 'ep-totals-row';
-    row.innerHTML = `<span class="ep-totals-label">${label}</span><span class="ep-totals-val ${cls || ''}">${val}</span>`;
+    const row = document.createElement('div'); row.className = 'ep-totals-row';
+    row.innerHTML = `<span class="ep-totals-label">${label}</span><span class="ep-totals-val ${cls||''}">${val}</span>`;
     return row;
   };
-
-  const bal = balanceDue(order);
-  const disc = totalDiscount(order);
-  totalsSec.appendChild(makeRow('Order total', rupees(order.subtotal),        ''));
+  const bal = balanceDue(order), disc = totalDiscount(order);
+  totalsSec.appendChild(makeRow('Order total', rupees(order.subtotal), ''));
   totalsSec.appendChild(makeRow('Collected',   rupees(totalCollected(order)), 'green'));
-  if (disc > 0)
-    totalsSec.appendChild(makeRow('Discount', '−' + rupees(disc), 'red'));
-  totalsSec.appendChild(makeRow('Balance due', rupees(bal),                   bal > 0 ? 'orange' : ''));
-
+  if (disc > 0) totalsSec.appendChild(makeRow('Discount', '−'+rupees(disc), 'red'));
+  totalsSec.appendChild(makeRow('Balance due', rupees(bal), bal > 0 ? 'orange' : ''));
   infoBlock.appendChild(totalsSec);
   histWrap.appendChild(infoBlock);
-
-  if (!(parseFloat($('ep-amt').value) || 0))
-    $('ep-amt').value = bal > 0 ? bal : '';
+  if (!(parseFloat($('ep-amt').value) || 0)) $('ep-amt').value = bal > 0 ? bal : '';
 }
 
 function openPaymentSheet(id) {
@@ -1297,53 +1430,41 @@ function openPaymentSheet(id) {
 }
 
 function setPaymentSheetMode(mode) {
-  ['cash', 'online'].forEach(m => { const b = $('ep-' + m); if (b) b.className = 'edit-pay-btn'; });
-  $('ep-' + mode)?.classList.add(mode + '-active');
+  ['cash','online'].forEach(m => { const b = $('ep-'+m); if(b) b.className='edit-pay-btn'; });
+  $('ep-'+mode)?.classList.add(mode+'-active');
   $('ep-modal').dataset.chosenMode = mode;
 }
 
 function syncDiscountAmount() {
   const order = savedOrders.find(o => o.id === paySheetOrderId);
   if (!order) return;
-  const disc = parseFloat($('ep-discount').value) || 0;
-  $('ep-amt').value = Math.max(0, (order.subtotal || 0) - totalCollected(order) - disc);
+  $('ep-amt').value = Math.max(0, (order.subtotal||0) - totalCollected(order) - (parseFloat($('ep-discount').value)||0));
 }
 
 function savePaymentEntry() {
   if (!paySheetOrderId) return;
   const idx = savedOrders.findIndex(o => o.id === paySheetOrderId);
   if (idx === -1) return;
-
   const newMode = $('ep-modal').dataset.chosenMode || 'cash';
   const amtVal  = parseFloat($('ep-amt').value)      || 0;
   const discVal = parseFloat($('ep-discount').value) || 0;
-
   if (amtVal < 0) { toast('Amount cannot be negative', 'error'); return; }
   const curBal = balanceDue(savedOrders[idx]);
-  if (amtVal > curBal && curBal > 0)
-    if (!confirm(`Amount (${rupees(amtVal)}) exceeds balance (${rupees(curBal)}). Continue?`)) return;
-  if (discVal > 0 && amtVal === 0)
-    if (!confirm(`Apply a discount of ${rupees(discVal)} with no payment received?`)) return;
-
+  if (amtVal > curBal && curBal > 0) if (!confirm(`Amount (${rupees(amtVal)}) exceeds balance (${rupees(curBal)}). Continue?`)) return;
+  if (discVal > 0 && amtVal === 0)   if (!confirm(`Apply a discount of ${rupees(discVal)} with no payment received?`)) return;
   const payments = [...getPayments(savedOrders[idx])];
-  if (amtVal > 0)
-    payments.push({ mode: newMode, amount: amtVal, date: new Date().toLocaleDateString('en-IN') });
+  if (amtVal > 0) payments.push({ mode: newMode, amount: amtVal, date: new Date().toLocaleDateString('en-IN') });
   savedOrders[idx].payments      = payments;
   savedOrders[idx].orderDiscount = discVal;
-  saveLocal();
-  closeSheet('ep-modal');
-  renderOrders(getSearchValue());
+  saveLocal(); closeSheet('ep-modal'); renderOrders(getSearchValue());
   toast(amtVal > 0 ? 'Payment added' : `Discount of ${rupees(discVal)} applied`);
 }
 
 function confirmDeletePayEntry(orderId, entryIndex) {
-  const order = savedOrders.find(o => o.id === orderId);
-  if (!order) return;
-  const entry = getPayments(order)[entryIndex];
+  const entry = getPayments(savedOrders.find(o => o.id === orderId))?.[entryIndex];
   if (!entry) return;
   pendingPayDeleteId = { orderId, entryIndex };
-  $('del-modal-sub').textContent =
-    `${entry.mode.charAt(0).toUpperCase() + entry.mode.slice(1)} payment of ${rupees(entry.amount)} on ${entry.date}. This cannot be undone.`;
+  $('del-modal-sub').textContent = `${entry.mode.charAt(0).toUpperCase()+entry.mode.slice(1)} payment of ${rupees(entry.amount)} on ${entry.date}. This cannot be undone.`;
   $('del-modal').dataset.mode = 'payment';
   openDelModal();
 }
@@ -1359,9 +1480,7 @@ function closeDelModal() { $('del-modal').classList.remove('open'); }
 function deleteOrder(id) {
   const order = savedOrders.find(o => o.id === id);
   pendingDeleteId = id;
-  $('del-modal-sub').textContent = order
-    ? `${order.studentName || 'This order'} — ${rupees(order.subtotal)}. This cannot be undone.`
-    : 'This cannot be undone.';
+  $('del-modal-sub').textContent = order ? `Deleting: ${order.studentName||'this order'} — ${rupees(order.subtotal)}. This cannot be undone.` : 'This cannot be undone.';
   $('del-modal').dataset.mode = 'order';
   openDelModal();
 }
@@ -1369,29 +1488,17 @@ function deleteOrder(id) {
 function confirmDelete() {
   const mode = $('del-modal').dataset.mode;
   closeDelModal();
-
   if (mode === 'payment') {
     if (!pendingPayDeleteId) return;
-    const { orderId, entryIndex } = pendingPayDeleteId;
-    pendingPayDeleteId = null;
-    $('del-modal').dataset.mode = '';
-    const idx = savedOrders.findIndex(o => o.id === orderId);
-    if (idx === -1) return;
-    const payments = [...getPayments(savedOrders[idx])];
-    payments.splice(entryIndex, 1);
-    savedOrders[idx].payments      = payments;
-    savedOrders[idx].orderDiscount = savedOrders[idx].orderDiscount || 0;
-    saveLocal();
-    toast('Payment entry deleted');
-    closeSheet('ep-modal');
-    renderOrders(getSearchValue());
+    const { orderId, entryIndex } = pendingPayDeleteId; pendingPayDeleteId = null; $('del-modal').dataset.mode = '';
+    const idx = savedOrders.findIndex(o => o.id === orderId); if (idx === -1) return;
+    const payments = [...getPayments(savedOrders[idx])]; payments.splice(entryIndex, 1);
+    savedOrders[idx].payments = payments; savedOrders[idx].orderDiscount = savedOrders[idx].orderDiscount || 0;
+    saveLocal(); toast('Payment entry deleted'); closeSheet('ep-modal'); renderOrders(getSearchValue());
   } else {
     if (!pendingDeleteId) return;
-    savedOrders     = savedOrders.filter(o => o.id !== pendingDeleteId);
-    pendingDeleteId = null;
-    saveLocal();
-    toast('Order deleted');
-    renderOrders(getSearchValue());
+    savedOrders = savedOrders.filter(o => o.id !== pendingDeleteId); pendingDeleteId = null;
+    saveLocal(); toast('Order deleted'); renderOrders(getSearchValue());
   }
 }
 
@@ -1403,25 +1510,16 @@ function confirmDelete() {
 function openEditOrder(id) {
   const order = savedOrders.find(o => o.id === id);
   if (!order) return;
-  editOrderId = id;
-  itemCounter = 0;
+  editOrderId = id; itemCounter = 0;
 
-  const editBranch = order.branch;
-  const editPrices = PRICES[editBranch];
-
-  // Temporarily override the global prices to the edited order's branch so
-  // _addItem/_addCombo build size options and calculate prices correctly.
-  // Restored immediately after populating rows so the new-order form is unaffected.
-  const savedGlobalBranch = currentBranch;
-  const savedGlobalPrices = prices;
-  currentBranch = editBranch;
-  prices        = editPrices;
+  const editBranch = order.branch, editPrices = PRICES[editBranch];
+  const savedGlobalBranch = currentBranch, savedGlobalPrices = prices;
+  currentBranch = editBranch; prices = editPrices;
 
   buildStudentFields('edit-student-fields', 'edit');
   buildItemsSection('edit-items-section', 'edit-items-container', 'add-btns-eo', 'eo-grand-total', 'Total', true);
   writeStudentFields('edit', order);
 
-  // Show the branch badge in the edit screen header
   const branchBadge = $('eo-branch-badge');
   if (branchBadge) { branchBadge.textContent = BRANCH_LABEL[editBranch]; branchBadge.className = `badge ${editBranch}`; }
 
@@ -1431,26 +1529,21 @@ function openEditOrder(id) {
     if (item.itemType === 'suit-set') {
       _addCombo('edit-items-container', 'e', 'recalcEdit', 'suit-set', null, null, qty);
     } else if (item.itemType === 'combo') {
-      _addCombo('edit-items-container', 'e', 'recalcEdit',
-        COMBO_TYPE_BY_ITEM1[item.item1Name] || 'pant-shirt', item.item1Size, item.item2Size, qty);
+      _addCombo('edit-items-container', 'e', 'recalcEdit', COMBO_TYPE_BY_ITEM1[item.item1Name] || 'pant-shirt', item.item1Size, item.item2Size, qty);
+    } else if (item.itemType === 'adjustment') {
+      _addAdjustment('edit-items-container', 'e', 'recalcEdit', item.sign, item.amount, item.note || '');
     } else {
       _addItem('edit-items-container', 'e', 'recalcEdit', item.itemName, item.itemSize, qty);
     }
   });
 
-  // Restore global state so new-order form continues using the user's chosen branch
-  currentBranch = savedGlobalBranch;
-  prices        = savedGlobalPrices;
-
+  currentBranch = savedGlobalBranch; prices = savedGlobalPrices;
   recalcEdit();
   $('edit-order-screen').classList.add('open');
   window.scrollTo(0, 0);
 }
 
-function closeEditOrder() {
-  $('edit-order-screen').classList.remove('open');
-  editOrderId = null;
-}
+function closeEditOrder() { $('edit-order-screen').classList.remove('open'); editOrderId = null; }
 
 function saveEditOrder() {
   const fields = readStudentFields('edit');
@@ -1459,45 +1552,28 @@ function saveEditOrder() {
 
   const idx = savedOrders.findIndex(o => o.id === editOrderId);
   if (idx === -1) { toast('Order not found', 'error'); return; }
-  const orig        = savedOrders[idx];
-  const savedPrices = prices;
-  prices            = PRICES[orig.branch];
+  const orig = savedOrders[idx];
+  const savedPrices = prices; prices = PRICES[orig.branch];
   const { items, subtotal } = collectItems('edit-items-container');
-  prices            = savedPrices;
+  prices = savedPrices;
   const collected = totalCollected(orig);
 
   if (subtotal < collected)
-    if (!confirm(
-      `Warning: new total (${rupees(subtotal)}) is less than already collected (${rupees(collected)}).\n` +
-      `Payment entries will be adjusted. Proceed?`
-    )) return;
+    if (!confirm(`Warning: new total (${rupees(subtotal)}) is less than already collected (${rupees(collected)}).\nPayment entries will be adjusted. Proceed?`)) return;
 
-  // Cap each existing payment so totals don't exceed the new (lower) subtotal.
-  // We work through payments in order, reducing 'remaining' as we go.
   let remaining = subtotal;
   const adjustedPayments = [...getPayments(orig)].map(p => {
-    const amt = Math.min(p.amount || 0, remaining);
-    remaining = Math.max(0, remaining - amt);
-    return { ...p, amount: amt };
+    const amt = Math.min(p.amount||0, remaining); remaining = Math.max(0, remaining - amt); return { ...p, amount: amt };
   });
 
-  // Preserve given/pending state for items that still exist in the edited order.
-  // Keys that no longer appear start as pending (given: false by default).
   const givenKeys = new Set(ensureDeliveryUnits(orig).filter(u => u.given).map(u => u.key));
   const newUnits  = buildDeliveryUnits(items);
   newUnits.forEach(u => { if (givenKeys.has(u.key)) u.given = true; });
 
-  savedOrders[idx] = {
-    ...orig, ...fields, items, subtotal,
-    payments:      adjustedPayments,
-    orderDiscount: orig.orderDiscount || 0,
-    deliveryUnits: newUnits
-  };
-
+  savedOrders[idx] = { ...orig, ...fields, items, subtotal, payments: adjustedPayments, orderDiscount: orig.orderDiscount||0, deliveryUnits: newUnits };
   saveLocal();
   toast(`Order updated — ${fields.studentName}, ${rupees(subtotal)}`);
-  closeEditOrder();
-  renderOrders(getSearchValue());
+  closeEditOrder(); renderOrders(getSearchValue());
 }
 
 
@@ -1509,52 +1585,53 @@ function openWhatsApp(id) {
   const order = savedOrders.find(o => o.id === id);
   if (!order) return;
 
+  // ── Read payment details from settings (falls back to defaults) ──
+  const settings   = loadSettings();
+  const upiId      = settings.upiId;
+  const upiNumber  = settings.upiNumber;
+
   const payments   = getPayments(order);
   const balance    = balanceDue(order);
-  const collected  = totalCollected(order);
   const discount   = totalDiscount(order);
   const orderLabel = order.orderNum ? ` #${String(order.orderNum).padStart(3, '0')}` : '';
+  const dvUnits    = ensureDeliveryUnits(order);
+  let dvOffset     = 0;
 
-  const dvUnits = ensureDeliveryUnits(order);
-  let dvOffset  = 0;
   const itemLines = (order.items || []).map(item => {
-    const qty  = item.qty || 1;
-    const uPQ  = item.itemType === 'suit-set' ? 3
-      : item.itemType === 'combo' ? [item.item1Name, item.item2Name].filter(Boolean).length : 1;
+    if (item.itemType === 'adjustment') {
+      const isCharge = item.lineTotal >= 0;
+      const absAmt   = Math.abs(item.lineTotal || 0);
+      const sign     = isCharge ? '+' : '−';
+      return item.note
+        ? `  • ${item.note} (${sign}Rs.${absAmt.toLocaleString('en-IN')})`
+        : `  • ${isCharge ? 'Charge' : 'Refund'} ${sign}Rs.${absAmt.toLocaleString('en-IN')}`;
+    }
+    const qty = item.qty || 1;
+    const uPQ = item.itemType === 'suit-set' ? 3 : item.itemType === 'combo' ? [item.item1Name, item.item2Name].filter(Boolean).length : 1;
     dvOffset += qty * uPQ;
     return `  • ${item.label} = Rs.${item.lineTotal.toLocaleString('en-IN')}`;
   }).join('\n');
 
   const totalPend = dvUnits.filter(u => !u.given).length;
-  const pendNote  = totalPend > 0
-    ? `\n⚠️ ${totalPend} item${totalPend !== 1 ? 's' : ''} not yet delivered` : '';
+  const pendNote  = totalPend > 0 ? `\n⚠️ ${totalPend} item${totalPend!==1?'s':''} not yet delivered` : '';
 
-  const studentLine = order.studentName ? `Student: ${order.studentName}${order.studentClass ? ` (${order.studentClass})` : ''}` : '';
-  const parentLine  = order.parentName  ? `Parent: ${order.parentName}`  : '';
-  const mobileLine  = order.mobile      ? `Mobile: ${order.mobile}`      : '';
-  const notesLine   = order.notes       ? `Note: ${order.notes}`         : '';
+  const detailLines = [
+    order.studentName ? `Student: ${order.studentName}${order.studentClass ? ` (${order.studentClass})` : ''}` : '',
+    order.parentName  ? `Parent: ${order.parentName}`  : '',
+    order.mobile      ? `Mobile: ${order.mobile}`      : '',
+    order.address     ? `Address: ${order.address}`    : '',
+    order.notes       ? `Note: ${order.notes}`         : ''
+  ].filter(Boolean).join('\n');
 
-  const detailLines = [studentLine, parentLine, mobileLine, notesLine].filter(Boolean).join('\n');
-
-  const payLines = payments.length
-    ? payments.map(p =>
-        `  • ${p.mode.charAt(0).toUpperCase() + p.mode.slice(1)} = Rs.${p.amount.toLocaleString('en-IN')} (${p.date})`
-      ).join('\n')
-    : '';
-
+  const payLines     = payments.length ? payments.map(p => `  • ${p.mode.charAt(0).toUpperCase()+p.mode.slice(1)} = Rs.${p.amount.toLocaleString('en-IN')} (${p.date})`).join('\n') : '';
   const discountLine = discount > 0 ? `  • Discount = -Rs.${discount.toLocaleString('en-IN')}` : '';
+  const paymentSection = (payLines || discountLine) ? `\n*Payments:*\n${[payLines, discountLine].filter(Boolean).join('\n')}\n` : '';
 
-  const paymentSection = (payLines || discountLine)
-    ? `\n*Payments:*\n${[payLines, discountLine].filter(Boolean).join('\n')}\n`
-    : '';
-
-  const upiLink = balance > 0
-    ? `upi://pay?pa=madhurdhama@okaxis&pn=Golden%20Gate%20Uniforms&am=${balance}&cu=INR&tn=Uniform%20Bill%20${encodeURIComponent(orderLabel.trim())}`
-    : '';
-
+  const upiLink     = balance > 0 ? `upi://pay?pa=${upiId}&pn=Golden%20Gate%20Uniforms&am=${balance}&cu=INR&tn=Uniform%20Bill%20${encodeURIComponent(orderLabel.trim())}` : '';
   const balanceLine = balance > 0
-    ? `👆 *Tap to Pay Rs.${balance.toLocaleString('en-IN')}:* ${upiLink}`
+    ? `⚠️ *Balance Due: Rs.${balance.toLocaleString('en-IN')}*\n\n👆 *Tap to Pay (GPay/PhonePe/Paytm):*\n${upiLink}\n\n *UPI ID:* ${upiId}\n *UPI Number:* ${upiNumber}`
     : '✅ Fully Paid';
+  const exchangePolicy = `\n\n——————————————\n *Exchange Policy*\nNo returns. Size exchange only within 7 days of delivery in unused condition.\n• Larger size → pay the difference\n• Smaller size → we refund the difference`;
 
   const message =
 `*Golden Gate International School*
@@ -1567,9 +1644,7 @@ ${itemLines}${pendNote}
 
 *Total: Rs.${order.subtotal.toLocaleString('en-IN')}*
 ${paymentSection}
-${balanceLine}
-
-_*Exchange Policy:*_ No returns. Size exchange only within 7 days of delivery in unused condition. Larger size — pay the difference. Smaller size — we refund the difference.`;
+${balanceLine}${exchangePolicy}`;
 
   if (order.mobile) {
     window.open(`https://wa.me/${normaliseMobile(order.mobile)}?text=${encodeURIComponent(message)}`, '_blank');
@@ -1595,28 +1670,23 @@ _*Exchange Policy:*_ No returns. Size exchange only within 7 days of delivery in
 
 function exportCSV() {
   if (!savedOrders.length) { toast('No orders to export'); return; }
-  const headers = [
-    'Order#', 'Date', 'Branch', 'Student Name', 'Class', 'Parent Name', 'Mobile', 'Notes',
-    'Items', 'Items Not Delivered', 'Subtotal', 'Collected', 'Discount', 'Balance', 'Status', 'Payment Detail'
-  ];
+  const headers = ['Order#','Date','Branch','Student Name','Class','Parent Name','Mobile','Address','Notes','Items','Items Not Delivered','Subtotal','Collected','Discount','Balance','Status','Payment Detail'];
   const rows = savedOrders.map(o => {
-    const payments   = getPayments(o);
-    const payDetail  = payments.map(p => `${p.mode} Rs.${p.amount} on ${p.date}`).join(' | ');
+    const payments  = getPayments(o);
+    const payDetail = payments.map(p => `${p.mode} Rs.${p.amount} on ${p.date}`).join(' | ');
     const pendLabels = ensureDeliveryUnits(o).filter(u => !u.given).map(u => u.label).join(' | ');
     return [
-      o.orderNum ? '#' + String(o.orderNum).padStart(3, '0') : '',
-      o.date, o.branch,
-      o.studentName || '', o.studentClass || '', o.parentName || '', o.mobile || '', o.notes || '',
-      (o.items || []).map(i => i.label + ' = Rs.' + i.lineTotal).join(' | '),
-      pendLabels || 'All delivered',
-      o.subtotal, totalCollected(o), totalDiscount(o), balanceDue(o),
-      paymentStatus(o), payDetail
+      o.orderNum ? '#'+String(o.orderNum).padStart(3,'0') : '', o.date, o.branch,
+      o.studentName||'', o.studentClass||'', o.parentName||'', o.mobile||'', o.address||'', o.notes||'',
+      (o.items||[]).map(i => i.label + ' = ' + (i.lineTotal<0?'-':'') + 'Rs.' + Math.abs(i.lineTotal)).join(' | '),
+      pendLabels||'All delivered',
+      o.subtotal, totalCollected(o), totalDiscount(o), balanceDue(o), paymentStatus(o), payDetail
     ];
   });
-  const csv  = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const csv  = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const link = document.createElement('a');
-  link.href     = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  link.download = `uniform-orders-${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.csv`;
+  link.href  = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  link.download = `uniform-orders-${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.csv`;
   link.click();
 }
 
@@ -1625,33 +1695,25 @@ function exportJSON() {
   const backup = { exportedAt: new Date().toISOString(), orderCounter, orders: savedOrders };
   const link   = document.createElement('a');
   link.href     = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }));
-  link.download = `uniform-backup-${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.json`;
+  link.download = `uniform-backup-${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.json`;
   link.click();
 }
 
 function importJSON(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
     try {
       const parsed   = JSON.parse(e.target.result);
       const imported = Array.isArray(parsed) ? parsed : (parsed.orders || []);
       if (!imported.length) { toast('No orders found in file', 'error'); return; }
-
       const existingIds = new Set(savedOrders.map(o => o.id));
       const newOrders   = imported.filter(o => o.id && !existingIds.has(o.id));
       if (!newOrders.length) { toast('All orders already exist'); return; }
-
-      savedOrders = [...savedOrders, ...newOrders].sort((a, b) => a.id - b.id);
-      savedOrders.sort((a, b) => b.id - a.id);
-
-      saveLocal(); saveCounter();
-      renderOrders('');
-      toast(`Imported ${newOrders.length} order${newOrders.length !== 1 ? 's' : ''} — order numbers re-sequenced`);
-    } catch (err) {
-      toast('Import failed: ' + err.message, 'error', 4000);
-    }
+      savedOrders = [...savedOrders, ...newOrders].sort((a,b)=>b.id-a.id);
+      saveLocal(); renderOrders('');
+      toast(`Imported ${newOrders.length} order${newOrders.length!==1?'s':''}`);
+    } catch (err) { toast('Import failed: ' + err.message, 'error', 4000); }
     event.target.value = '';
   };
   reader.readAsText(file);
@@ -1662,146 +1724,76 @@ function importJSON(event) {
    20. UI — PRICE LIST OVERLAY
 ---------------------------------------------------------- */
 
-let priceBranch = currentBranch;
-
 function showPriceList() {
-  priceBranch = currentBranch; // Sync toggle to match current branch when opening
-  ['badagaon', 'baghpat'].forEach(b => {
-    $('pl-branch-' + b)?.classList.toggle('pl-branch-btn-active', b === priceBranch);
-  });
+  priceBranch = currentBranch;
+  ['badagaon','baghpat'].forEach(b => $('pl-branch-'+b)?.classList.toggle('pl-branch-btn-active', b===priceBranch));
   renderPriceList();
-  $('pricelist-screen').style.display = 'block';
-  document.body.style.overflow = 'hidden';
+  $('pricelist-screen').style.display = 'block'; document.body.style.overflow = 'hidden';
 }
-
-function closePriceList() {
-  $('pricelist-screen').style.display = 'none';
-  document.body.style.overflow = '';
-}
+function closePriceList() { $('pricelist-screen').style.display = 'none'; document.body.style.overflow = ''; }
 
 function setPriceBranch(branch) {
   priceBranch = branch;
-  ['badagaon', 'baghpat'].forEach(b => {
-    $('pl-branch-' + b)?.classList.toggle('pl-branch-btn-active', b === branch);
-  });
+  ['badagaon','baghpat'].forEach(b => $('pl-branch-'+b)?.classList.toggle('pl-branch-btn-active', b===branch));
   renderPriceList();
 }
 
 function renderPriceList() {
-  const p    = PRICES[priceBranch];
-  const wrap = $('price-list-content');
+  const p = PRICES[priceBranch], wrap = $('price-list-content');
   wrap.innerHTML = '';
-
-  // ── Helpers ───────────────────────────────────────────────
-  // Build a section card with a wrapped table in one call
-  const na = `<span class="pl-na">—</span>`;
-  const pr = v => v ? rupees(v) : na;
+  const pr = v => v ? rupees(v) : `<span class="pl-na">—</span>`;
 
   function makeSection(title, headCols, rows) {
-    const sec = document.createElement('div');
-    sec.className = 'section';
-    sec.style.marginBottom = '12px';
+    const sec = document.createElement('div'); sec.className = 'section'; sec.style.marginBottom = '12px';
     sec.innerHTML = `<div class="section-title">${title}</div>`;
-
-    const table = document.createElement('table');
-    table.className = 'pl-table';
-
-    // thead
+    const table = document.createElement('table'); table.className = 'pl-table';
     const thead = document.createElement('thead');
-    thead.innerHTML = '<tr>' + headCols.map((h, i) =>
-      `<th class="pl-th${i === 0 ? ' pl-th-size' : ''}${h.total ? ' pl-th-total' : ''}">${h.label ?? h}</th>`
-    ).join('') + '</tr>';
+    thead.innerHTML = '<tr>' + headCols.map((h,i) => `<th class="pl-th${i===0?' pl-th-size':''}${h.total?' pl-th-total':''}">${h.label??h}</th>`).join('') + '</tr>';
     table.appendChild(thead);
-
-    // tbody
     const tbody = document.createElement('tbody');
     rows.forEach((cells, i) => {
-      const tr = document.createElement('tr');
-      if (i % 2 === 1) tr.classList.add('pl-row-alt');
-      tr.innerHTML = cells.map((c, ci) => {
-        const cls = ci === 0 ? (c.name ? 'pl-td-name' : 'pl-td-size')
-          : c.total ? 'pl-td-total' : c.single ? 'pl-td-single' : 'pl-td-price';
-        const val = c.val ?? c;
-        const span = c.colspan ? ` colspan="${c.colspan}"` : '';
-        const style = c.style ? ` style="${c.style}"` : '';
+      const tr = document.createElement('tr'); if(i%2===1) tr.classList.add('pl-row-alt');
+      tr.innerHTML = cells.map((c,ci) => {
+        const cls   = ci===0 ? (c.name?'pl-td-name':'pl-td-size') : c.total?'pl-td-total':c.single?'pl-td-single':'pl-td-price';
+        const val   = c.val??c;
+        const span  = c.colspan?` colspan="${c.colspan}"`:'';
+        const style = c.style?` style="${c.style}"` : '';
         return `<td class="${cls}"${span}${style}>${val}</td>`;
       }).join('');
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
-
-    const wrap2 = document.createElement('div');
-    wrap2.className = 'pl-table-wrap';
-    wrap2.appendChild(table);
-    sec.appendChild(wrap2);
-    return sec;
+    const wrap2 = document.createElement('div'); wrap2.className='pl-table-wrap'; wrap2.appendChild(table);
+    sec.appendChild(wrap2); return sec;
   }
 
-  // ── MAIN ITEMS ────────────────────────────────────────────
   if (priceBranch === 'baghpat') {
-    wrap.appendChild(makeSection(
-      'Pant / Shirt / Lower / T-Shirt',
+    wrap.appendChild(makeSection('Pant / Shirt / Lower / T-Shirt',
       ['Size', 'Each', { label: 'Pant+Shirt / Lower+T-Shirt', total: true }],
-      Object.entries(p['Pant']).map(([size, price]) => [
-        size,
-        pr(price),
-        { val: pr(price * 2), total: true }
-      ])
+      Object.entries(p['Pant']).map(([size, price]) => [size, pr(price), { val: pr(price*2), total: true }])
     ));
   } else {
-    const allSizes = [...new Set([...Object.keys(p['Pant']), ...Object.keys(p['Lower'])])]
-      .sort((a, b) => parseInt(a) - parseInt(b));
-    wrap.appendChild(makeSection(
-      'Pant / Shirt / Lower / T-Shirt',
-      ['Size', 'Pant / Shirt', 'Lower / T-Shirt', { label: 'Pant+Shirt', total: true }, { label: 'Lower+T-Shirt', total: true }],
-      allSizes.map(size => {
-        const pp = p['Pant'][size]  || null;
-        const lp = p['Lower'][size] || null;
-        return [size, pr(pp), pr(lp), { val: pr(pp && pp * 2), total: true }, { val: pr(lp && lp * 2), total: true }];
-      })
+    const allSizes = [...new Set([...Object.keys(p['Pant']), ...Object.keys(p['Lower'])])].sort((a,b)=>parseInt(a)-parseInt(b));
+    wrap.appendChild(makeSection('Pant / Shirt / Lower / T-Shirt',
+      ['Size','Pant / Shirt','Lower / T-Shirt',{label:'Pant+Shirt',total:true},{label:'Lower+T-Shirt',total:true}],
+      allSizes.map(size => { const pp=p['Pant'][size]||null, lp=p['Lower'][size]||null; return [size, pr(pp), pr(lp), {val:pr(pp&&pp*2),total:true},{val:pr(lp&&lp*2),total:true}]; })
     ));
   }
 
-  // ── HALF SET ──────────────────────────────────────────────
-  wrap.appendChild(makeSection(
-    'Half Lower & Half T-Shirt',
-    ['Size', 'Half Lower', 'Half T-Shirt', { label: 'Set Total', total: true }],
-    Object.keys(p['Half Lower']).map((size, i) => {
-      const p1 = p['Half Lower'][size] || 0;
-      const p2 = p['Half T-Shirt'][size] || 0;
-      return [size, pr(p1), pr(p2), { val: pr(p1 + p2), total: true }];
-    })
+  wrap.appendChild(makeSection('Half Lower & Half T-Shirt',
+    ['Size','Half Lower','Half T-Shirt',{label:'Set Total',total:true}],
+    Object.keys(p['Half Lower']).map(size => { const p1=p['Half Lower'][size]||0, p2=p['Half T-Shirt'][size]||0; return [size, pr(p1), pr(p2), {val:pr(p1+p2),total:true}]; })
   ));
 
-  // ── SUIT SET ──────────────────────────────────────────────
-  const suitItems = [['Suit', 'All'], ['Trouser', 'All'], ['Jacket', 'All']];
-  const suitTotal = suitItems.reduce((s, [item, sz]) => s + (p[item]?.[sz] || 0), 0);
-  wrap.appendChild(makeSection(
-    'Suit Set',
-    ['Item', { label: 'Price', total: true }],
-    [
-      ...suitItems.map(([item, sz]) => [
-        { val: item, name: true },
-        { val: rupees(p[item]?.[sz] || 0), total: true }
-      ]),
-      [
-        { val: 'Set Total', name: true, style: 'font-weight:700;color:var(--text)' },
-        { val: rupees(suitTotal), total: true, style: 'font-weight:800' }
-      ]
-    ]
-  ));
+  const suitItems = [['Suit','All'],['Trouser','All'],['Jacket','All']];
+  const suitTotal = suitItems.reduce((s,[item,sz])=>s+(p[item]?.[sz]||0),0);
+  wrap.appendChild(makeSection('Suit Set', ['Item',{label:'Price',total:true}], [
+    ...suitItems.map(([item,sz])=>[{val:item,name:true},{val:rupees(p[item]?.[sz]||0),total:true}]),
+    [{val:'Set Total',name:true,style:'font-weight:700;color:var(--text)'},{val:rupees(suitTotal),total:true,style:'font-weight:800'}]
+  ]));
 
-  // ── ACCESSORIES ───────────────────────────────────────────
-  wrap.appendChild(makeSection(
-    'Accessories',
-    ['Item', { label: 'Price', total: true }],
-    [['Tie', 'Small'], ['Tie', 'Large'], ['Belt', 'All'], ['Socks', 'Pair']].map(([item, sz], i) => {
-      const label = (sz === 'All' || sz === 'Pair') ? item : `${item} — ${sz}`;
-      return [
-        { val: label, name: true },
-        { val: rupees(p[item]?.[sz] || 0), total: true }
-      ];
-    })
+  wrap.appendChild(makeSection('Accessories', ['Item',{label:'Price',total:true}],
+    [['Tie','Small'],['Tie','Large'],['Belt','All'],['Socks','Pair']].map(([item,sz]) => [{val:(sz==='All'||sz==='Pair')?item:`${item} — ${sz}`,name:true},{val:rupees(p[item]?.[sz]||0),total:true}])
   ));
 }
 
@@ -1811,14 +1803,14 @@ function renderPriceList() {
 ---------------------------------------------------------- */
 
 function showQR() {
+  // Load QR from settings; fall back to the default file
+  const s       = loadSettings();
+  const qrImg   = $('qr-img');
+  qrImg.src     = s.qrDataUrl || 'GooglePay_QR.png';
   $('qr-screen').style.display = 'block';
   document.body.style.overflow = 'hidden';
 }
-
-function closeQR() {
-  $('qr-screen').style.display = 'none';
-  document.body.style.overflow = '';
-}
+function closeQR() { $('qr-screen').style.display = 'none';  document.body.style.overflow = ''; }
 
 
 /* ----------------------------------------------------------
@@ -1827,9 +1819,9 @@ function closeQR() {
 
 document.addEventListener('click', e => {
   if (!e.target.closest('.header-menu-wrap')) closeHamburger();
-  if (!e.target.closest('.filter-btn-wrap')) $('filter-dropdown')?.classList.remove('open');
-  if (!e.target.closest('.menu-wrap'))
-    document.querySelectorAll('.menu-dropdown.open').forEach(m => m.classList.remove('open'));
+  if (!e.target.closest('.branch-header-wrap')) closeBranchDropdown();
+  if (!e.target.closest('.filter-btn-wrap'))  $('filter-dropdown')?.classList.remove('open');
+  if (!e.target.closest('.menu-wrap'))        document.querySelectorAll('.menu-dropdown.open').forEach(m => m.classList.remove('open'));
 });
 
 
@@ -1839,7 +1831,4 @@ document.addEventListener('click', e => {
 
 buildStudentFields('new-student-fields', 'new');
 buildItemsSection('new-items-section', 'items-container', 'add-btns-new', 'grand-total', 'Subtotal', false);
-
-['badagaon', 'baghpat'].forEach(b => $('branch-' + b)?.classList.toggle('active', b === currentBranch));
-
-recalcNew();
+syncBranchBadge(); // set header badge to persisted branch on load

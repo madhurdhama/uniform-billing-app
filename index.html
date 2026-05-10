@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Uniform Order Manager</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232563eb'/><path d='M8 11.5L11 9Q14 6.5 16 9Q18 6.5 21 9L24 11.5L22 14L20.5 12.5V24H11.5V12.5L10 14Z' fill='white'/></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -28,6 +25,27 @@
           <div class="header-sub">Golden Gate International School</div>
         </div>
       </div>
+
+      <!-- Branch selector -->
+      <div class="branch-header-wrap" id="branch-header-wrap">
+        <button class="branch-header-badge" id="branch-header-badge" onclick="toggleBranchDropdown()" aria-label="Switch branch">
+          <span class="branch-header-dot" id="branch-header-dot"></span>
+          <span class="branch-header-label" id="branch-header-label"></span>
+          <svg class="branch-header-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="branch-header-dropdown" id="branch-header-dropdown">
+          <div class="branch-dropdown-label">Selling at</div>
+          <button class="branch-dropdown-opt" id="bdopt-badagaon" onclick="setBranch('badagaon')">
+            <span class="branch-dropdown-dot bdot-badagaon"></span>
+            Badagaon
+          </button>
+          <button class="branch-dropdown-opt" id="bdopt-baghpat" onclick="setBranch('baghpat')">
+            <span class="branch-dropdown-dot bdot-baghpat"></span>
+            Baghpat
+          </button>
+        </div>
+      </div>
+
       <div class="header-menu-wrap">
         <button class="hamburger-btn" id="hamburger-btn" onclick="toggleHamburger()" title="Menu">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
@@ -47,7 +65,7 @@
           </button>
           <button class="menu-item" onclick="closeHamburger();showQR()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/></svg>
-            Scan & Pay QR
+            Scan &amp; Pay QR
           </button>
           <div class="menu-divider"></div>
           <button class="menu-item" onclick="closeHamburger();exportJSON()">
@@ -61,6 +79,11 @@
           <button class="menu-item" onclick="closeHamburger();exportCSV()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             Export CSV
+          </button>
+          <div class="menu-divider"></div>
+          <button class="menu-item" onclick="closeHamburger();showSettings()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Payment Settings
           </button>
         </div>
       </div>
@@ -110,9 +133,73 @@
         <div class="edit-screen-title">Scan to Pay</div>
       </div>
       <div class="section" style="text-align:center;padding:24px 16px">
-        <!-- SET YOUR QR IMAGE -->
         <img src="GooglePay_QR.png" id="qr-img" alt="Payment QR Code"
           style="width:100%;max-width:420px;border-radius:16px;display:block;margin:0 auto;border:1.5px solid var(--border);box-shadow:var(--shadow-lg)">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS OVERLAY ──────────────────────────── -->
+  <div id="settings-screen" style="display:none">
+    <div class="analytics-screen-inner">
+      <div class="analytics-screen-header">
+        <button class="back-btn" onclick="closeSettings()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div class="edit-screen-title">Payment Settings</div>
+      </div>
+
+      <!-- Info banner -->
+      <div class="settings-info-banner">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>These settings are saved <strong>only on this device</strong>. Each person sets their own UPI details — whoever is collecting payment today.</span>
+      </div>
+
+      <div class="section">
+        <div class="section-title">UPI Details</div>
+
+        <div class="field">
+          <label>UPI ID</label>
+          <input id="settings-upi-id" type="text" placeholder="e.g. yourname@okaxis" autocomplete="off" autocapitalize="none" spellcheck="false">
+          <div class="settings-field-hint">Used in WhatsApp bill payment link. Leave blank to use the default.</div>
+        </div>
+
+        <div class="field" style="margin-bottom:0">
+          <label>UPI / Mobile Number</label>
+          <input id="settings-upi-number" type="tel" placeholder="e.g. 9876543210">
+          <div class="settings-field-hint">Shown in WhatsApp bill as an alternative payment option.</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">QR Code Image</div>
+
+        <div id="settings-qr-current" style="font-size:12px;color:var(--text-3);margin-bottom:12px;font-style:italic"></div>
+
+        <img id="settings-qr-preview" alt="QR Preview"
+          style="display:none;width:100%;max-width:240px;border-radius:12px;border:1.5px solid var(--border);margin-bottom:14px">
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <label class="settings-upload-btn" for="settings-qr-file">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload QR image
+          </label>
+          <input type="file" id="settings-qr-file" accept="image/*" style="display:none" onchange="handleQRFileSelect(this)">
+
+          <button class="settings-clear-btn" onclick="clearSettingsQR()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Reset to default
+          </button>
+        </div>
+        <div class="settings-field-hint" style="margin-top:10px">Max 2 MB. Stored locally on this device only.</div>
+      </div>
+
+      <div class="save-btn-wrap">
+        <button class="save-btn" onclick="saveSettingsForm()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Settings
+        </button>
       </div>
     </div>
   </div>
@@ -135,24 +222,13 @@
 
   <!-- ── NEW ORDER TAB ──────────────────────────────── -->
   <div id="tab-new">
-
-    <!-- Student details -->
     <div class="section" id="new-student-section">
       <div class="section-title">Student Details</div>
       <div id="new-student-fields"></div>
-      <div class="field" style="margin-bottom:0">
-        <label>Branch</label>
-        <div class="branch-pill">
-          <button class="branch-btn active" id="branch-badagaon" onclick="setBranch('badagaon')">Badagaon</button>
-          <button class="branch-btn"        id="branch-baghpat"  onclick="setBranch('baghpat')">Baghpat</button>
-        </div>
-      </div>
     </div>
 
-    <!-- Dress items -->
     <div id="new-items-section"></div>
 
-    <!-- Payment -->
     <div class="section payment-section">
       <div class="section-title">Payment</div>
       <div class="field">
@@ -185,7 +261,6 @@
 
   <!-- ── SAVED ORDERS TAB ───────────────────────────── -->
   <div id="tab-orders" style="display:none">
-
     <div class="banners-row" id="banners-row" style="display:none">
       <div id="pending-banner" class="pending-banner">
         <div class="pending-count" id="pending-count">0</div>
@@ -219,14 +294,20 @@
         <div class="filter-dropdown" id="filter-dropdown">
           <div class="filter-section-label">Date</div>
           <div class="filter-group">
-            <button class="filter-opt active" id="fopt-all"   onclick="setDateFilter('all');updateFilterBar()">All</button>
-            <button class="filter-opt"        id="fopt-today" onclick="setDateFilter('today');updateFilterBar()">Today</button>
-            <button class="filter-opt"        id="fopt-week"  onclick="setDateFilter('week');updateFilterBar()">This Week</button>
+            <button class="filter-opt active" id="fopt-all"      onclick="setDateFilter('all');updateFilterBar()">All</button>
+            <button class="filter-opt"        id="fopt-today"    onclick="setDateFilter('today');updateFilterBar()">Today</button>
+            <button class="filter-opt"        id="fopt-week"     onclick="setDateFilter('week');updateFilterBar()">This Week</button>
+            <button class="filter-opt"        id="fopt-specific" onclick="setDateFilter('specific');updateFilterBar()">Specific Date</button>
+          </div>
+          <div id="fopt-specific-row" style="display:none;margin-top:8px">
+            <input type="date" id="fopt-specific-date" class="filter-date-input"
+              onchange="setSpecificDateFilter(this.value)">
           </div>
           <div class="filter-section-label" style="margin-top:10px">Payment</div>
           <div class="filter-group">
             <button class="filter-opt active" id="fopt-pay-all"     onclick="setPaymentFilter('all')">All</button>
             <button class="filter-opt"        id="fopt-pay-pending" onclick="setPaymentFilter('pending')">Pending / Partial</button>
+            <button class="filter-opt"        id="fopt-pay-refund"  onclick="setPaymentFilter('refund')">Refund</button>
           </div>
           <div class="filter-section-label" style="margin-top:10px">Delivery</div>
           <div class="filter-group">
@@ -267,16 +348,11 @@
       <div class="edit-screen-title">Edit Order</div>
       <span id="eo-branch-badge" class="badge"></span>
     </div>
-
-    <!-- Student details -->
     <div class="section">
       <div class="section-title">Student Details</div>
       <div id="edit-student-fields"></div>
     </div>
-
-    <!-- Dress items -->
     <div id="edit-items-section"></div>
-
     <div class="save-btn-wrap" style="padding-bottom:2rem">
       <button class="save-btn" onclick="saveEditOrder()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -295,7 +371,7 @@
 <div class="sheet-modal" id="qs-modal" onclick="closeSheet('qs-modal',event)">
   <div class="sheet">
     <div class="sheet-title">Full Set</div>
-    <div class="sheet-sub">Adds: Pant + Shirt + Lower + T-Shirt + Tie + Belt + 2xSocks </div>
+    <div class="sheet-sub">Adds: Pant + Shirt + Lower + T-Shirt + Tie + Belt + 2×Socks</div>
     <div class="sheet-label">Pick size — all items use same size</div>
     <div class="chip-grid" id="qs-sizes"></div>
     <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">
@@ -355,6 +431,29 @@
   </div>
 </div>
 
+<!-- Price Adjustment -->
+<div class="sheet-modal" id="adj-modal" onclick="closeSheet('adj-modal',event)">
+  <div class="sheet">
+    <div class="sheet-title">Price Adjustment</div>
+    <div class="sheet-sub">Add a charge (+) or refund (−) to the order total</div>
+
+    <div class="sheet-label">Sign</div>
+    <div class="adj-sign-toggle">
+      <button class="adj-sign-btn plus-active" id="adj-plus"  onclick="setAdjSign(1)">+ Charge</button>
+      <button class="adj-sign-btn"             id="adj-minus" onclick="setAdjSign(-1)">− Refund</button>
+    </div>
+
+    <div class="sheet-label">Amount (Rs.)</div>
+    <input class="sheet-input" id="adj-amount" type="number" placeholder="e.g. 50" min="0">
+
+    <div class="sheet-label">Note <span style="font-weight:400;color:var(--text-3);text-transform:none">(optional)</span></div>
+    <input class="sheet-input" id="adj-note" type="text" placeholder="e.g. Pant 32→34, size up">
+
+    <button class="sheet-confirm" onclick="confirmAdj()">Add Adjustment</button>
+    <button class="sheet-cancel"  onclick="closeSheet('adj-modal')">Cancel</button>
+  </div>
+</div>
+
 <!-- Delivery Tracking -->
 <div class="sheet-modal" id="dv-modal" onclick="closeSheet('dv-modal',event)">
   <div class="sheet">
@@ -363,9 +462,7 @@
     <div id="dv-summary" style="font-size:13px;margin-bottom:14px"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div class="sheet-label" style="margin:0">Items — toggle to mark as given</div>
-      <button class="dv-mark-all-btn" onclick="markAllDelivered(deliverySheetOrderId)">
-        Mark All Delivered
-      </button>
+      <button class="dv-mark-all-btn" onclick="markAllDelivered(deliverySheetOrderId)">Mark All Delivered</button>
     </div>
     <div id="dv-items" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
     <button class="sheet-done" onclick="closeSheet('dv-modal')">Done</button>
@@ -385,14 +482,11 @@
     <div id="ep-discount-row" class="row2" style="gap:10px;margin-top:4px">
       <div>
         <div class="sheet-label">Discount <span style="font-weight:400;color:var(--text-3);text-transform:none">(optional)</span></div>
-        <input id="ep-discount" type="number" placeholder="e.g. 60" min="0"
-          class="sheet-input"
-          oninput="syncDiscountAmount()">
+        <input id="ep-discount" type="number" placeholder="e.g. 60" min="0" class="sheet-input" oninput="syncDiscountAmount()">
       </div>
       <div>
         <div class="sheet-label">Amount Received <span style="font-weight:400;color:var(--text-3);text-transform:none">(blank = full)</span></div>
-        <input id="ep-amt" type="number" placeholder="e.g. 1000" min="0"
-          class="sheet-input">
+        <input id="ep-amt" type="number" placeholder="e.g. 1000" min="0" class="sheet-input">
       </div>
     </div>
     <div id="ep-orig" style="display:none"></div>
@@ -412,7 +506,7 @@
         <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
       </svg>
     </div>
-    <div class="modal-title">Delete?</div>
+    <div class="modal-title">Are you sure?</div>
     <div class="modal-sub" id="del-modal-sub">This cannot be undone.</div>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeDelModal()">Cancel</button>
@@ -426,13 +520,6 @@
      HTML TEMPLATES
 ═════════════════════════════════════════════════════→ -->
 
-<!--
-  tpl-student-fields
-  Shared between New Order and Edit Order.
-  JS: buildStudentFields(containerId, prefix, isNew)
-  New  → prefix="n",  ids: n-name, n-class, n-parent, n-mobile, n-notes
-  Edit → prefix="eo", ids: eo-name, eo-class, eo-parent, eo-mobile, eo-notes
--->
 <template id="tpl-student-fields">
   <div>
     <div class="row2">
@@ -455,6 +542,10 @@
         <input class="sf-mobile" type="tel" placeholder="e.g. 9876543210" maxlength="13">
       </div>
     </div>
+    <div class="field">
+      <label>Address <span style="font-weight:400;color:var(--text-3)">(optional)</span></label>
+      <input class="sf-address" type="text" placeholder="e.g. Village Badagaon">
+    </div>
     <div class="field" style="margin-bottom:0">
       <label>Notes <span style="font-weight:400;color:var(--text-3)">(optional)</span></label>
       <input class="sf-notes" type="text" placeholder="e.g. alteration needed">
@@ -462,11 +553,6 @@
   </div>
 </template>
 
-<!--
-  tpl-items-section
-  Shared between New Order and Edit Order.
-  JS: buildItemsSection(wrapId, itemsCtnId, addBtnsId, totalId, totalLabel, isEdit)
--->
 <template id="tpl-items-section">
   <div class="section">
     <div class="section-title">Dress Items</div>
@@ -492,10 +578,10 @@
           <span class="oc-student-class" style="font-size:12px;font-weight:400;color:var(--text-3)"></span>
         </div>
         <div class="oc-contact order-contact" style="margin-top:3px"></div>
-        <div class="oc-meta   order-contact" style="margin-top:1px"></div>
+        <div class="oc-address order-contact" style="margin-top:1px;display:none"></div>
         <div class="oc-badges" style="margin-top:6px;display:flex;align-items:center;gap:5px;flex-wrap:wrap">
           <span class="oc-status-badge badge"></span>
-          <span class="oc-order-num" style="display:inline-flex;align-items:center;font-size:11px;font-weight:600;font-family:monospace;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280"></span>
+          <span class="oc-branch-badge badge"></span>
         </div>
         <div class="oc-notes" style="font-size:12px;color:var(--orange);margin-top:4px;display:none;align-items:center;gap:4px;font-style:italic">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -513,20 +599,20 @@
               Edit Order
             </button>
             <button class="menu-item oc-delivery-menu-btn">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              Delivery
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
+              Delivery Status
             </button>
             <button class="menu-item oc-payment-menu-btn">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-              Payment
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Record Payment
             </button>
             <button class="menu-item oc-whatsapp-btn">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              Send Bill
+              WhatsApp Bill
             </button>
             <button class="menu-item destructive oc-delete-btn">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-              Delete
+              Delete Order
             </button>
           </div>
         </div>
@@ -618,6 +704,23 @@
         <select class="cr-size2"></select>
         <button class="remove-btn cr-remove2" style="width:24px;height:24px;font-size:14px">&#215;</button>
       </div>
+    </div>
+  </div>
+</template>
+
+<!-- Adjustment Row Template (Rendered in the items container) -->
+<template id="tpl-adj-row">
+  <div class="adj-row js-item-row" data-type="adjustment">
+    <div class="adj-row-left">
+      <span class="item-status-dot dot-adjustment"></span>
+      <div>
+        <div class="adj-row-label ar-label">± Adjustment</div>
+        <div class="adj-row-note ar-note" style="display:none"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <div class="adj-row-price ar-price"></div>
+      <button class="remove-btn ar-remove">&#215;</button>
     </div>
   </div>
 </template>
