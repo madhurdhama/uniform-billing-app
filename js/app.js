@@ -73,8 +73,7 @@ let analyticsDate        = 'today';
 let analyticsSpecificDate = '';
 let analyticsBranch      = 'all';
 
-let orderCounter = parseInt(localStorage.getItem('uniform_order_counter') || '0');
-let savedOrders  = JSON.parse(localStorage.getItem('uniform_orders') || '[]');
+let savedOrders = JSON.parse(localStorage.getItem('uniform_orders') || '[]');
 
 let sheetTarget          = null;
 let pendingDeleteId      = null;
@@ -100,7 +99,19 @@ const ctx = {
 const $           = id => document.getElementById(id);
 const rupees      = n  => 'Rs.' + (n || 0).toLocaleString('en-IN');
 const saveLocal   = () => localStorage.setItem('uniform_orders', JSON.stringify(savedOrders));
-const saveCounter = () => localStorage.setItem('uniform_order_counter', String(orderCounter));
+
+/** Generate a UUID v4, with fallback for older browsers */
+function generateUUID() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback: RFC-4122 v4
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
 
 function cloneTemplate(id) {
   return document.getElementById(id).content.cloneNode(true).firstElementChild;
@@ -139,6 +150,7 @@ function toast(message, type = 'info', duration = 2500) {
 
 function normaliseMobile(raw) {
   const digits = (raw || '').replace(/\D/g, '').replace(/^0+/, '');
+  if (digits.startsWith('91') && digits.length === 12) return digits;
   return digits.length === 10 ? '91' + digits : digits;
 }
 
@@ -168,7 +180,7 @@ function loadSettings() {
   return {
     upiId:     localStorage.getItem('uniform_upi_id')     || DEFAULT_UPI_ID,
     upiNumber: localStorage.getItem('uniform_upi_number') || DEFAULT_UPI_NUMBER,
-    qrDataUrl: localStorage.getItem('uniform_qr_image')   || ''   // base64 data URL or ''
+    qrDataUrl: localStorage.getItem('uniform_qr_image')   || ''
   };
 }
 
@@ -177,7 +189,6 @@ function showSettings() {
   $('settings-upi-id').value     = s.upiId     === DEFAULT_UPI_ID     ? '' : s.upiId;
   $('settings-upi-number').value = s.upiNumber === DEFAULT_UPI_NUMBER ? '' : s.upiNumber;
 
-  // Show QR preview if one is saved
   const preview = $('settings-qr-preview');
   if (s.qrDataUrl) {
     preview.src   = s.qrDataUrl;
@@ -207,7 +218,6 @@ function saveSettingsForm() {
   if (upiNumber) localStorage.setItem('uniform_upi_number', upiNumber);
   else           localStorage.removeItem('uniform_upi_number');
 
-  // QR image is saved live on file select — nothing extra needed here
   toast('Settings saved');
   closeSettings();
 }
@@ -379,7 +389,6 @@ function paymentStatus(order) {
 function toggleHamburger() { $('hamburger-menu').classList.toggle('open'); }
 function closeHamburger()  { $('hamburger-menu').classList.remove('open'); }
 
-// Toggle the branch dropdown open/closed
 function toggleBranchDropdown() {
   const dropdown = $('branch-header-dropdown');
   const badge    = $('branch-header-badge');
@@ -393,7 +402,6 @@ function closeBranchDropdown() {
   $('branch-header-badge')?.classList.remove('open');
 }
 
-// Update the header badge to reflect the current branch
 function syncBranchBadge() {
   const badge = $('branch-header-badge');
   if (!badge) return;
@@ -406,7 +414,6 @@ function syncBranchBadge() {
 }
 
 function setBranch(branch) {
-  // Confirm if items are already on the form
   const ctn = $('items-container');
   if (ctn?.querySelector('.js-item-row')) {
     if (!confirm(`Switch to ${BRANCH_LABEL[branch]}? Current items will be cleared.`)) {
@@ -829,8 +836,6 @@ function saveOrder() {
   if (fields.mobile && !/^[0-9+\s\-]{7,15}$/.test(fields.mobile)) { toast('Mobile number looks incorrect', 'error'); return; }
 
   const { items, subtotal } = collectItems('items-container');
-  orderCounter++;
-  saveCounter();
 
   const newDiscount = parseFloat($('new-discount')?.value) || 0;
   let payments = [];
@@ -843,14 +848,14 @@ function saveOrder() {
   }
 
   savedOrders.unshift({
-    id: Date.now(), orderNum: orderCounter, branch: currentBranch, ...fields,
+    id: Date.now(), uuid: generateUUID(), branch: currentBranch, ...fields,
     payments, items, subtotal, orderDiscount: newDiscount,
     date: new Date().toLocaleDateString('en-IN'),
     deliveryUnits: buildDeliveryUnits(items).map(u => ({ ...u, given: true }))
   });
 
   saveLocal();
-  toast(`Order #${String(orderCounter).padStart(3, '0')} saved — ${fields.studentName}, ${rupees(subtotal)}`);
+  toast(`Order saved — ${fields.studentName}, ${rupees(subtotal)}`);
   resetNewForm();
   showTab('orders');
 }
@@ -874,7 +879,6 @@ function resetNewForm() {
 function setAnalyticsDate(v) {
   analyticsDate = v;
   renderAnalytics();
-  // The picker row is rebuilt on each render; visibility is handled inside renderAnalytics
 }
 function setAnalyticsBranch(v) { analyticsBranch = v; renderAnalytics(); }
 function setAnalyticsSpecificDate(val) { analyticsSpecificDate = val; renderAnalytics(); }
@@ -964,7 +968,6 @@ function renderAnalytics() {
 
   const filterRow = document.createElement('div'); filterRow.className = 'an-filter-row';
 
-  // Period row with buttons
   const periodGrp = document.createElement('div'); periodGrp.className = 'an-filter-group';
   const periodLbl = document.createElement('label'); periodLbl.className = 'an-filter-label'; periodLbl.textContent = 'Period';
   const periodSeg = document.createElement('div');   periodSeg.className = 'an-seg';
@@ -974,7 +977,6 @@ function renderAnalytics() {
   periodGrp.appendChild(periodLbl); periodGrp.appendChild(periodSeg);
   filterRow.appendChild(periodGrp);
 
-  // Date picker — shown only when 'specific' selected
   const datePickerRow = document.createElement('div');
   datePickerRow.className = 'an-filter-group';
   datePickerRow.id = 'an-specific-date-row';
@@ -1076,16 +1078,14 @@ function clearFilters() {
   renderOrders(getSearchValue()); updateFilterBar();
 }
 
-// Parse order date string 'D/M/YYYY' → Date (midnight)
 function parseOrderDate(str) {
   const p = (str || '').split('/');
   return new Date(p[2], p[1] - 1, p[0]);
 }
 
 function matchesFilter(order) {
-  // Payment filter — refund orders (subtotal <= 0) are always excluded from pending/partial
   if (paymentFilter === 'pending') {
-    if (order.subtotal <= 0) return false;           // exclude refunds entirely
+    if (order.subtotal <= 0) return false;
     const s = paymentStatus(order);
     if (s !== 'pending' && s !== 'partial') return false;
   }
@@ -1094,7 +1094,6 @@ function matchesFilter(order) {
   }
   if (deliveryFilter === 'pending-delivery' && pendingItemCount(order) === 0) return false;
   if (branchFilter !== 'all' && order.branch !== branchFilter) return false;
-  // Date filter
   if (dateFilter === 'all') return true;
   const d     = parseOrderDate(order.date);
   const now   = new Date();
@@ -1102,8 +1101,7 @@ function matchesFilter(order) {
   if (dateFilter === 'today')    return d.getTime() === today.getTime();
   if (dateFilter === 'week')     { const w = new Date(today); w.setDate(today.getDate() - 6); return d >= w && d <= today; }
   if (dateFilter === 'specific') {
-    if (!specificDateFilter) return true; // no date picked yet → show all
-    // input value is 'YYYY-MM-DD'
+    if (!specificDateFilter) return true;
     const [y, m, day] = specificDateFilter.split('-').map(Number);
     const picked = new Date(y, m - 1, day);
     return d.getTime() === picked.getTime();
@@ -1121,15 +1119,12 @@ function renderOrders(query) {
 
   const filtered = savedOrders.filter(o => {
     if (!matchesFilter(o)) return false;
-    const num = o.orderNum ? '#' + String(o.orderNum).padStart(3, '0') : '';
     return (o.studentName||'').toLowerCase().includes(query) || (o.studentClass||'').toLowerCase().includes(query) ||
            (o.parentName||'').toLowerCase().includes(query)  || (o.mobile||'').includes(query)                    ||
-           (o.address||'').toLowerCase().includes(query)     || (o.notes||'').toLowerCase().includes(query)       ||
-           num.includes(query);
+           (o.address||'').toLowerCase().includes(query)     || (o.notes||'').toLowerCase().includes(query);
   });
 
   const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  // Pending = not refund, and balance owed or no payment at all
   const pendingAll   = savedOrders.filter(o => o.subtotal > 0 && (balanceDue(o) > 0 || paymentStatus(o) === 'pending'));
   const pendingTdy   = pendingAll.filter(o => { const p = (o.date||'').split('/'); return new Date(p[2],p[1]-1,p[0]).getTime() === today.getTime(); });
   const pendDelivAll = savedOrders.filter(o => pendingItemCount(o) > 0);
@@ -1172,6 +1167,8 @@ function renderOrders(query) {
 
   const STATUS_LABEL = { cash: 'Cash', online: 'Online', split: 'Split', partial: 'Partial', pending: 'Pending', refund: 'Refund' };
 
+  const BRANCH_DOT_COLOR = { badagaon: '#059669', baghpat: '#2563eb' };
+
   filtered.forEach(o => {
     const status    = o.subtotal <= 0 ? 'refund' : paymentStatus(o);
     const payments  = getPayments(o);
@@ -1182,7 +1179,13 @@ function renderOrders(query) {
 
     const strip = document.createElement('div');
     strip.className = 'card-meta-strip';
-    strip.innerHTML = `<span>${o.date}</span><span>${o.orderNum ? '#' + String(o.orderNum).padStart(3, '0') : ''}</span>`;
+    const dotColor = BRANCH_DOT_COLOR[o.branch] || '#94a3b8';
+    strip.innerHTML =
+      `<span>${o.date}</span>` +
+      `<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--text-3)">` +
+        `<span style="width:7px;height:7px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0"></span>` +
+        `${BRANCH_LABEL[o.branch]}` +
+      `</span>`;
     card.insertAdjacentElement('afterbegin', strip);
 
     card.querySelector('.oc-student-name').textContent  = o.studentName || '';
@@ -1195,12 +1198,9 @@ function renderOrders(query) {
     const addressEl = card.querySelector('.oc-address');
     if (o.address) { addressEl.textContent = o.address; addressEl.style.display = 'block'; }
 
-    const branchBadge = card.querySelector('.oc-branch-badge');
-    branchBadge.textContent = BRANCH_LABEL[o.branch];
-    branchBadge.classList.add(o.branch);
-
     const statusBadge = card.querySelector('.oc-status-badge');
     statusBadge.textContent = STATUS_LABEL[status]; statusBadge.classList.add(status);
+    card.querySelector('.oc-branch-badge')?.remove();
 
     if (pendCount > 0) {
       const dvBadge = card.querySelector('.oc-delivery-badge');
@@ -1237,11 +1237,11 @@ function renderOrders(query) {
     card.querySelector('.oc-delete-btn').onclick         = () => { menuDrop.classList.remove('open'); deleteOrder(o.id); };
 
     const panel   = card.querySelector('.oc-items-panel');
-    const chevron = card.querySelector('.oc-chevron');
-    card.querySelector('.oc-toggle-btn').onclick = () => {
+    const toggleBtn = card.querySelector('.oc-toggle-btn');
+    toggleBtn.onclick = () => {
       const open = panel.style.display !== 'none';
       panel.style.display = open ? 'none' : 'block';
-      chevron.textContent = open ? '▸' : '▾';
+      toggleBtn.classList.toggle('expanded', !open);
     };
     card.querySelector('.oc-item-count').textContent = 'Details';
 
@@ -1513,8 +1513,8 @@ function openEditOrder(id) {
   editOrderId = id; itemCounter = 0;
 
   const editBranch = order.branch, editPrices = PRICES[editBranch];
-  const savedGlobalBranch = currentBranch, savedGlobalPrices = prices;
-  currentBranch = editBranch; prices = editPrices;
+  const savedGlobalPrices = prices;
+  prices = editPrices;
 
   buildStudentFields('edit-student-fields', 'edit');
   buildItemsSection('edit-items-section', 'edit-items-container', 'add-btns-eo', 'eo-grand-total', 'Total', true);
@@ -1524,20 +1524,22 @@ function openEditOrder(id) {
   if (branchBadge) { branchBadge.textContent = BRANCH_LABEL[editBranch]; branchBadge.className = `badge ${editBranch}`; }
 
   $('edit-items-container').innerHTML = '';
-  (order.items || []).forEach(item => {
-    const qty = item.qty || 1;
-    if (item.itemType === 'suit-set') {
-      _addCombo('edit-items-container', 'e', 'recalcEdit', 'suit-set', null, null, qty);
-    } else if (item.itemType === 'combo') {
-      _addCombo('edit-items-container', 'e', 'recalcEdit', COMBO_TYPE_BY_ITEM1[item.item1Name] || 'pant-shirt', item.item1Size, item.item2Size, qty);
-    } else if (item.itemType === 'adjustment') {
-      _addAdjustment('edit-items-container', 'e', 'recalcEdit', item.sign, item.amount, item.note || '');
-    } else {
-      _addItem('edit-items-container', 'e', 'recalcEdit', item.itemName, item.itemSize, qty);
-    }
-  });
-
-  currentBranch = savedGlobalBranch; prices = savedGlobalPrices;
+  try {
+    (order.items || []).forEach(item => {
+      const qty = item.qty || 1;
+      if (item.itemType === 'suit-set') {
+        _addCombo('edit-items-container', 'e', 'recalcEdit', 'suit-set', null, null, qty);
+      } else if (item.itemType === 'combo') {
+        _addCombo('edit-items-container', 'e', 'recalcEdit', COMBO_TYPE_BY_ITEM1[item.item1Name] || 'pant-shirt', item.item1Size, item.item2Size, qty);
+      } else if (item.itemType === 'adjustment') {
+        _addAdjustment('edit-items-container', 'e', 'recalcEdit', item.sign, item.amount, item.note || '');
+      } else {
+        _addItem('edit-items-container', 'e', 'recalcEdit', item.itemName, item.itemSize, qty);
+      }
+    });
+  } finally {
+    prices = savedGlobalPrices;
+  }
   recalcEdit();
   $('edit-order-screen').classList.add('open');
   window.scrollTo(0, 0);
@@ -1552,28 +1554,35 @@ function saveEditOrder() {
 
   const idx = savedOrders.findIndex(o => o.id === editOrderId);
   if (idx === -1) { toast('Order not found', 'error'); return; }
-  const orig = savedOrders[idx];
-  const savedPrices = prices; prices = PRICES[orig.branch];
-  const { items, subtotal } = collectItems('edit-items-container');
-  prices = savedPrices;
+  const orig      = savedOrders[idx];
   const collected = totalCollected(orig);
+
+  let items, subtotal;
+  const savedPrices = prices;
+  prices = PRICES[orig.branch];
+  try {
+    ({ items, subtotal } = collectItems('edit-items-container'));
+  } finally {
+    prices = savedPrices;
+  }
 
   if (subtotal < collected)
     if (!confirm(`Warning: new total (${rupees(subtotal)}) is less than already collected (${rupees(collected)}).\nPayment entries will be adjusted. Proceed?`)) return;
 
   let remaining = subtotal;
   const adjustedPayments = [...getPayments(orig)].map(p => {
-    const amt = Math.min(p.amount||0, remaining); remaining = Math.max(0, remaining - amt); return { ...p, amount: amt };
+    const amt = Math.min(p.amount || 0, remaining); remaining = Math.max(0, remaining - amt); return { ...p, amount: amt };
   });
 
   const givenKeys = new Set(ensureDeliveryUnits(orig).filter(u => u.given).map(u => u.key));
   const newUnits  = buildDeliveryUnits(items);
   newUnits.forEach(u => { if (givenKeys.has(u.key)) u.given = true; });
 
-  savedOrders[idx] = { ...orig, ...fields, items, subtotal, payments: adjustedPayments, orderDiscount: orig.orderDiscount||0, deliveryUnits: newUnits };
+  savedOrders[idx] = { ...orig, ...fields, items, subtotal, payments: adjustedPayments, orderDiscount: orig.orderDiscount || 0, deliveryUnits: newUnits };
   saveLocal();
   toast(`Order updated — ${fields.studentName}, ${rupees(subtotal)}`);
-  closeEditOrder(); renderOrders(getSearchValue());
+  closeEditOrder();
+  renderOrders(getSearchValue());
 }
 
 
@@ -1585,7 +1594,6 @@ function openWhatsApp(id) {
   const order = savedOrders.find(o => o.id === id);
   if (!order) return;
 
-  // ── Read payment details from settings (falls back to defaults) ──
   const settings   = loadSettings();
   const upiId      = settings.upiId;
   const upiNumber  = settings.upiNumber;
@@ -1593,7 +1601,6 @@ function openWhatsApp(id) {
   const payments   = getPayments(order);
   const balance    = balanceDue(order);
   const discount   = totalDiscount(order);
-  const orderLabel = order.orderNum ? ` #${String(order.orderNum).padStart(3, '0')}` : '';
   const dvUnits    = ensureDeliveryUnits(order);
   let dvOffset     = 0;
 
@@ -1627,7 +1634,7 @@ function openWhatsApp(id) {
   const discountLine = discount > 0 ? `  • Discount = -Rs.${discount.toLocaleString('en-IN')}` : '';
   const paymentSection = (payLines || discountLine) ? `\n*Payments:*\n${[payLines, discountLine].filter(Boolean).join('\n')}\n` : '';
 
-  const upiLink     = balance > 0 ? `upi://pay?pa=${upiId}&pn=Golden%20Gate%20Uniforms&am=${balance}&cu=INR&tn=Uniform%20Bill%20${encodeURIComponent(orderLabel.trim())}` : '';
+  const upiLink     = balance > 0 ? `upi://pay?pa=${upiId}&pn=Golden%20Gate%20Uniforms&am=${balance}&cu=INR&tn=Uniform%20Bill` : '';
   const balanceLine = balance > 0
     ? `⚠️ *Balance Due: Rs.${balance.toLocaleString('en-IN')}*\n\n👆 *Tap to Pay (GPay/PhonePe/Paytm):*\n${upiLink}\n\n *UPI ID:* ${upiId}\n *UPI Number:* ${upiNumber}`
     : '✅ Fully Paid';
@@ -1635,7 +1642,7 @@ function openWhatsApp(id) {
 
   const message =
 `*Golden Gate International School*
-*Uniform Bill${orderLabel}* — ${order.date}
+*Uniform Bill* — ${order.date}
 
 ${detailLines}
 
@@ -1670,13 +1677,13 @@ ${balanceLine}${exchangePolicy}`;
 
 function exportCSV() {
   if (!savedOrders.length) { toast('No orders to export'); return; }
-  const headers = ['Order#','Date','Branch','Student Name','Class','Parent Name','Mobile','Address','Notes','Items','Items Not Delivered','Subtotal','Collected','Discount','Balance','Status','Payment Detail'];
+  const headers = ['UUID','Date','Branch','Student Name','Class','Parent Name','Mobile','Address','Notes','Items','Items Not Delivered','Subtotal','Collected','Discount','Balance','Status','Payment Detail'];
   const rows = savedOrders.map(o => {
     const payments  = getPayments(o);
     const payDetail = payments.map(p => `${p.mode} Rs.${p.amount} on ${p.date}`).join(' | ');
     const pendLabels = ensureDeliveryUnits(o).filter(u => !u.given).map(u => u.label).join(' | ');
     return [
-      o.orderNum ? '#'+String(o.orderNum).padStart(3,'0') : '', o.date, o.branch,
+      o.uuid, o.date, o.branch,
       o.studentName||'', o.studentClass||'', o.parentName||'', o.mobile||'', o.address||'', o.notes||'',
       (o.items||[]).map(i => i.label + ' = ' + (i.lineTotal<0?'-':'') + 'Rs.' + Math.abs(i.lineTotal)).join(' | '),
       pendLabels||'All delivered',
@@ -1692,7 +1699,7 @@ function exportCSV() {
 
 function exportJSON() {
   if (!savedOrders.length) { toast('No orders to export'); return; }
-  const backup = { exportedAt: new Date().toISOString(), orderCounter, orders: savedOrders };
+  const backup = { exportedAt: new Date().toISOString(), orders: savedOrders };
   const link   = document.createElement('a');
   link.href     = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }));
   link.download = `uniform-backup-${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.json`;
@@ -1707,12 +1714,18 @@ function importJSON(event) {
       const parsed   = JSON.parse(e.target.result);
       const imported = Array.isArray(parsed) ? parsed : (parsed.orders || []);
       if (!imported.length) { toast('No orders found in file', 'error'); return; }
-      const existingIds = new Set(savedOrders.map(o => o.id));
-      const newOrders   = imported.filter(o => o.id && !existingIds.has(o.id));
-      if (!newOrders.length) { toast('All orders already exist'); return; }
-      savedOrders = [...savedOrders, ...newOrders].sort((a,b)=>b.id-a.id);
-      saveLocal(); renderOrders('');
-      toast(`Imported ${newOrders.length} order${newOrders.length!==1?'s':''}`);
+
+      const existingUUIDs = new Set(savedOrders.map(o => o.uuid).filter(Boolean));
+      const newOrders     = imported
+        .filter(o => !o.uuid || !existingUUIDs.has(o.uuid))
+        .map(o => o.uuid ? o : { ...o, uuid: generateUUID() });
+
+      if (!newOrders.length) { toast('All orders already exist — nothing imported'); return; }
+
+      savedOrders = [...savedOrders, ...newOrders].sort((a, b) => b.id - a.id);
+      saveLocal();
+      renderOrders('');
+      toast(`Imported ${newOrders.length} order${newOrders.length !== 1 ? 's' : ''}`);
     } catch (err) { toast('Import failed: ' + err.message, 'error', 4000); }
     event.target.value = '';
   };
@@ -1803,7 +1816,6 @@ function renderPriceList() {
 ---------------------------------------------------------- */
 
 function showQR() {
-  // Load QR from settings; fall back to the default file
   const s       = loadSettings();
   const qrImg   = $('qr-img');
   qrImg.src     = s.qrDataUrl || 'GooglePay_QR.png';
@@ -1831,4 +1843,4 @@ document.addEventListener('click', e => {
 
 buildStudentFields('new-student-fields', 'new');
 buildItemsSection('new-items-section', 'items-container', 'add-btns-new', 'grand-total', 'Subtotal', false);
-syncBranchBadge(); // set header badge to persisted branch on load
+syncBranchBadge();

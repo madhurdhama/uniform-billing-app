@@ -728,7 +728,6 @@ input, select, button, textarea { font-family: inherit; }
 .badge.split   { background: #ede9fe;          color: #7c3aed;       }
 .badge.refund  { background: #ede9fe;          color: #7c3aed;       }
 
-/* order card branch badge */
 .badge.badagaon,
 .badge.baghpat {
   background: #f3f4f6;
@@ -776,28 +775,28 @@ input, select, button, textarea { font-family: inherit; }
    11. ORDER CARD DETAIL
 ---------------------------------------------------------- */
 .items-toggle-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  min-height: 30px;
-  font-size: 11px;
-  font-weight: 700;
-  border: 1.5px solid var(--border-2);
-  border-radius: 20px;
-  background: var(--surface);
+  gap: 4px;
+  padding: 2px 0;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  background: none;
   cursor: pointer;
-  color: var(--text-2);
-  letter-spacing: 0.02em;
-  transition: all 0.15s;
+  color: var(--text-3);
+  letter-spacing: 0.01em;
+  transition: color 0.15s;
 }
-.items-toggle-btn:hover {
-  background: var(--accent-bg);
-  color: var(--accent);
-  border-color: var(--accent);
+.items-toggle-btn:hover { color: var(--text-2); }
+
+.items-chevron {
+  font-size: 16px;
+  display: inline-block;
+  transition: transform 0.18s ease;
+  color: var(--text-3);
 }
-.oc-details-icon { opacity: 0.6; flex-shrink: 0; }
-.items-chevron   { font-size: 10px; }
+.items-toggle-btn.expanded .items-chevron { transform: rotate(90deg); }
 
 .order-items { margin-top: 10px; }
 
@@ -826,39 +825,42 @@ input, select, button, textarea { font-family: inherit; }
   align-items: center;
   justify-content: space-between;
   margin-top: 12px;
-  padding-top: 12px;
+  padding-top: 10px;
   border-top: 1px solid var(--border);
 }
 
-.card-bottom-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.card-bottom-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
 .card-action-btn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 5px 11px;
-  min-height: 30px;
-  font-size: 11px;
-  font-weight: 700;
+  height: 28px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
   border-radius: 20px;
   cursor: pointer;
   letter-spacing: 0.01em;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
 }
+.card-action-btn svg { flex-shrink: 0; width: 11px; height: 11px; }
 
 .oc-quick-pay.card-action-btn {
-  border: 1.5px solid var(--green);
-  background: var(--green-bg);
+  border: 1px solid #86efac;
+  background: #f0fdf4;
   color: var(--green);
 }
-.oc-quick-pay.card-action-btn:hover { background: var(--green); color: #fff; }
+.oc-quick-pay.card-action-btn:hover { background: #dcfce7; border-color: #4ade80; }
 
 .delivery-action.card-action-btn {
-  border: 1.5px solid #e11d48;
-  background: #ffe4e6;
+  border: 1px solid #fda4af;
+  background: #fff1f2;
   color: #e11d48;
 }
-.delivery-action.card-action-btn:hover { background: #e11d48; color: #fff; }
+.delivery-action.card-action-btn:hover { background: #ffe4e6; border-color: #fb7185; }
 
 /* ----------------------------------------------------------
    12. THREE-DOT CARD MENU
