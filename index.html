@@ -26,6 +26,9 @@
         </div>
       </div>
 
+      <!-- Season badge -->
+      <span id="season-header-badge" class="season-header-badge"></span>
+
       <!-- Branch selector -->
       <div class="branch-header-wrap" id="branch-header-wrap">
         <button class="branch-header-badge" id="branch-header-badge" onclick="toggleBranchDropdown()" aria-label="Switch branch">
@@ -68,22 +71,9 @@
             Scan &amp; Pay QR
           </button>
           <div class="menu-divider"></div>
-          <button class="menu-item" onclick="closeHamburger();exportJSON()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Backup (JSON)
-          </button>
-          <button class="menu-item" onclick="closeHamburger();$('import-file').click()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Restore (JSON)
-          </button>
-          <button class="menu-item" onclick="closeHamburger();exportCSV()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            Export CSV
-          </button>
-          <div class="menu-divider"></div>
           <button class="menu-item" onclick="closeHamburger();showSettings()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Payment Settings
+            Settings
           </button>
         </div>
       </div>
@@ -107,15 +97,21 @@
   <!-- ── PRICE LIST OVERLAY ────────────────────────── -->
   <div id="pricelist-screen" style="display:none">
     <div class="analytics-screen-inner">
-      <div class="analytics-screen-header">
+      <div class="analytics-screen-header" style="flex-wrap:wrap;gap:8px">
         <button class="back-btn" onclick="closePriceList()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           Back
         </button>
         <div class="edit-screen-title">Price List</div>
-        <div class="pl-branch-toggle">
-          <button class="pl-branch-btn pl-branch-btn-active" id="pl-branch-badagaon" onclick="setPriceBranch('badagaon')">Badagaon</button>
-          <button class="pl-branch-btn"                      id="pl-branch-baghpat"  onclick="setPriceBranch('baghpat')">Baghpat</button>
+        <div style="display:flex;gap:6px;margin-left:auto;align-items:center">
+          <div class="pl-branch-toggle">
+            <button class="pl-branch-btn pl-branch-btn-active" id="pl-branch-badagaon" onclick="setPriceBranch('badagaon')">Badagaon</button>
+            <button class="pl-branch-btn"                      id="pl-branch-baghpat"  onclick="setPriceBranch('baghpat')">Baghpat</button>
+          </div>
+          <div class="pl-branch-toggle">
+            <button class="pl-branch-btn" id="pl-season-summer" onclick="setPriceListSeason('summer')">☀️ Summer</button>
+            <button class="pl-branch-btn" id="pl-season-winter" onclick="setPriceListSeason('winter')">❄️ Winter</button>
+          </div>
         </div>
       </div>
       <div id="price-list-content"></div>
@@ -147,24 +143,33 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           Back
         </button>
-        <div class="edit-screen-title">Payment Settings</div>
+        <div class="edit-screen-title">Settings</div>
       </div>
 
-      <!-- Info banner -->
-      <div class="settings-info-banner">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>These settings are saved <strong>only on this device</strong>. Each person sets their own UPI details — whoever is collecting payment today.</span>
+      <!-- Season toggle -->
+      <div class="section">
+        <div class="section-title">Season</div>
+        <div class="season-toggle">
+          <button class="season-btn" id="season-summer-btn" onclick="setSeason('summer')">
+            <span class="season-icon">☀️</span>
+            <span class="season-label">Summer</span>
+            <span class="season-desc">Half Lower + T-Shirt<br>Pant + Shirt, Yellow Set</span>
+          </button>
+          <button class="season-btn" id="season-winter-btn" onclick="setSeason('winter')">
+            <span class="season-icon">❄️</span>
+            <span class="season-label">Winter</span>
+            <span class="season-desc">Full Lower + T-Shirt<br>Blazer, Sweater, Winter Cap</span>
+          </button>
+        </div>
       </div>
 
       <div class="section">
         <div class="section-title">UPI Details</div>
-
         <div class="field">
           <label>UPI ID</label>
           <input id="settings-upi-id" type="text" placeholder="e.g. yourname@okaxis" autocomplete="off" autocapitalize="none" spellcheck="false">
           <div class="settings-field-hint">Used in WhatsApp bill payment link. Leave blank to use the default.</div>
         </div>
-
         <div class="field" style="margin-bottom:0">
           <label>UPI / Mobile Number</label>
           <input id="settings-upi-number" type="tel" placeholder="e.g. 9876543210">
@@ -174,25 +179,39 @@
 
       <div class="section">
         <div class="section-title">QR Code Image</div>
-
         <div id="settings-qr-current" style="font-size:12px;color:var(--text-3);margin-bottom:12px;font-style:italic"></div>
-
         <img id="settings-qr-preview" alt="QR Preview"
           style="display:none;width:100%;max-width:240px;border-radius:12px;border:1.5px solid var(--border);margin-bottom:14px">
-
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <label class="settings-upload-btn" for="settings-qr-file">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Upload QR image
           </label>
           <input type="file" id="settings-qr-file" accept="image/*" style="display:none" onchange="handleQRFileSelect(this)">
-
           <button class="settings-clear-btn" onclick="clearSettingsQR()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
             Reset to default
           </button>
         </div>
         <div class="settings-field-hint" style="margin-top:10px">Max 2 MB. Stored locally on this device only.</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Data Management</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="menu-item" style="border:1.5px solid var(--border-2);border-radius:var(--radius-sm);background:var(--surface)" onclick="exportJSON()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Backup Orders
+          </button>
+          <button class="menu-item" style="border:1.5px solid var(--border-2);border-radius:var(--radius-sm);background:var(--surface)" onclick="$('import-file').click()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Restore Orders
+          </button>
+          <button class="menu-item" style="border:1.5px solid var(--border-2);border-radius:var(--radius-sm);background:var(--surface)" onclick="exportCSV()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Export Orders (CSV)
+          </button>
+        </div>
       </div>
 
       <div class="save-btn-wrap">
@@ -707,7 +726,7 @@
   </div>
 </template>
 
-<!-- Adjustment Row Template (Rendered in the items container) -->
+<!-- Adjustment Row Template -->
 <template id="tpl-adj-row">
   <div class="adj-row js-item-row" data-type="adjustment">
     <div class="adj-row-left">

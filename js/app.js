@@ -2,47 +2,67 @@
    1. PRICE DATA
 ---------------------------------------------------------- */
 
-const PRICES = {
+const PRICES_SUMMER = {
   badagaon: {
-    'Tie':          { Small: 50, Large: 100 },
-    'Belt':         { All: 100 },
-    'Socks':        { Pair: 30 },
-    'Suit':         { All: 350 },
-    'Trouser':      { All: 350 },
-    'Jacket':       { All: 300 },
-    'Half Lower':   { 20: 250, 22: 250, 24: 250, 26: 250, 28: 300, 30: 300 },
-    'Half T-Shirt': { 20: 350, 22: 350, 24: 400, 26: 400, 28: 400, 30: 400 },
-    'Lower':        { 26: 300, 28: 300, 30: 325, 32: 325, 34: 350, 36: 350, 38: 375, 40: 400, 42: 425, 44: 450 },
-    'T-Shirt':      { 26: 300, 28: 300, 30: 325, 32: 325, 34: 350, 36: 350, 38: 375, 40: 400, 42: 425, 44: 450 },
-    'Pant':         { 20: 300, 22: 300, 24: 300, 26: 325, 28: 325, 30: 350, 32: 350, 34: 375, 36: 375, 38: 400, 40: 400, 42: 425, 44: 450 },
-    'Shirt':        { 20: 300, 22: 300, 24: 300, 26: 325, 28: 325, 30: 350, 32: 350, 34: 375, 36: 375, 38: 400, 40: 400, 42: 425, 44: 450 }
+    'Tie':                { Small: 50, Large: 100 },
+    'Belt':               { All: 100 },
+    'Socks':              { Pair: 30 },
+    'Suit':               { All: 350 },
+    'Trouser':            { All: 350 },
+    'Jacket':             { All: 300 },
+    'Half Lower':         { 20: 250, 22: 250, 24: 250, 26: 250, 28: 300, 30: 300 },
+    'Half T-Shirt':       { 20: 350, 22: 350, 24: 400, 26: 400, 28: 400, 30: 400 },
+    'Lower':              { 26: 300, 28: 300, 30: 325, 32: 325, 34: 350, 36: 350, 38: 375, 40: 400, 42: 425, 44: 450 },
+    'T-Shirt':            { 26: 300, 28: 300, 30: 325, 32: 325, 34: 350, 36: 350, 38: 375, 40: 400, 42: 425, 44: 450 },
+    'Pant':               { 20: 300, 22: 300, 24: 300, 26: 325, 28: 325, 30: 350, 32: 350, 34: 375, 36: 375, 38: 400, 40: 400, 42: 425, 44: 450 },
+    'Shirt':              { 20: 300, 22: 300, 24: 300, 26: 325, 28: 325, 30: 350, 32: 350, 34: 375, 36: 375, 38: 400, 40: 400, 42: 425, 44: 450 }
   },
   baghpat: {
-    'Tie':          { Small: 50, Large: 100 },
-    'Belt':         { All: 100 },
-    'Socks':        { Pair: 40 },
-    'Suit':         { All: 400 },
-    'Trouser':      { All: 400 },
-    'Jacket':       { All: 300 },
-    'Half Lower':   { 20: 250, 22: 250, 24: 250, 26: 250, 28: 300, 30: 300 },
-    'Half T-Shirt': { 20: 350, 22: 350, 24: 400, 26: 400, 28: 400, 30: 400 },
-    'Lower':        { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
-    'T-Shirt':      { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
-    'Pant':         { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
-    'Shirt':        { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 }
+    'Tie':                { Small: 50, Large: 100 },
+    'Belt':               { All: 100 },
+    'Socks':              { Pair: 40 },
+    'Suit':               { All: 400 },
+    'Trouser':            { All: 400 },
+    'Jacket':             { All: 300 },
+    'Half Lower':         { 20: 250, 22: 250, 24: 250, 26: 250, 28: 300, 30: 300 },
+    'Half T-Shirt':       { 20: 350, 22: 350, 24: 400, 26: 400, 28: 400, 30: 400 },
+    'Lower':              { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
+    'T-Shirt':            { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
+    'Pant':               { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 },
+    'Shirt':              { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400, 32: 425, 34: 425, 36: 450, 38: 450, 40: 475, 42: 475, 44: 500 }
   }
 };
 
+// Winter items — same prices both branches
+const PRICES_WINTER_EXTRA = {
+  'Blazer':             { 26: 650, 28: 650, 30: 700, 32: 700, 34: 750, 36: 800, 38: 850, 40: 900, 42: 950, 44: 1000, 46: 1050 },
+  'Sweater':            { 26: 250, 28: 270, 30: 300, 32: 320, 34: 350, 36: 370, 38: 390, 40: 400, 42: 420, 44: 430, 46: 450 },
+  'Winter Cap':         { All: 50 },
+  'Full Lower':         { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400 },
+  'Full T-Shirt':       { 20: 350, 22: 350, 24: 375, 26: 375, 28: 400, 30: 400 }
+};
+
+// Items that are winter-only (hidden in summer single item sheet)
+const WINTER_ONLY_ITEMS = new Set(['Blazer', 'Sweater', 'Winter Cap', 'Full Lower', 'Full T-Shirt']);
+
+function buildPrices(branch, season) {
+  const base = { ...PRICES_SUMMER[branch] };
+  if (season === 'winter') Object.assign(base, PRICES_WINTER_EXTRA);
+  return base;
+}
+
 const COMBOS = {
-  'pant-shirt':   { item1: 'Pant',       item2: 'Shirt',        label: 'Pant & Shirt Set' },
-  'lower-tshirt': { item1: 'Lower',      item2: 'T-Shirt',      label: 'Lower & T-Shirt Set' },
-  'half-set':     { item1: 'Half Lower', item2: 'Half T-Shirt', label: 'Half Lower & T-Shirt Set' }
+  'pant-shirt':        { item1: 'Pant',       item2: 'Shirt',        label: 'Pant + Shirt' },
+  'lower-tshirt':      { item1: 'Lower',      item2: 'T-Shirt',      label: 'Lower + T-Shirt' },
+  'half-lower-tshirt': { item1: 'Half Lower', item2: 'Half T-Shirt', label: 'Half Lower + T-Shirt' },
+  'full-lower-tshirt': { item1: 'Full Lower', item2: 'Full T-Shirt', label: 'Full Lower + T-Shirt' }
 };
 
 const COMBO_TYPE_BY_ITEM1 = {
   'Pant':       'pant-shirt',
   'Lower':      'lower-tshirt',
-  'Half Lower': 'half-set'
+  'Half Lower': 'half-lower-tshirt',
+  'Full Lower': 'full-lower-tshirt'
 };
 
 const BRANCH_LABEL = { badagaon: 'Badagaon', baghpat: 'Baghpat' };
@@ -56,22 +76,23 @@ const DEFAULT_UPI_NUMBER = '6398913135';
    2. APP STATE
 ---------------------------------------------------------- */
 
-let currentBranch = localStorage.getItem('uniform_branch') || 'badagaon';
-let prices        = PRICES[currentBranch];
+let currentBranch  = localStorage.getItem('uniform_branch')  || 'badagaon';
+let currentSeason  = localStorage.getItem('uniform_season')  || 'summer';
+let prices         = buildPrices(currentBranch, currentSeason);
 
 let newOrderPayMode = 'pending';
 let editOrderId     = null;
 let itemCounter     = 0;
 
-let dateFilter        = 'all';
+let dateFilter         = 'all';
 let specificDateFilter = '';
-let branchFilter   = 'all';
-let paymentFilter  = 'all';
-let deliveryFilter = 'all';
+let branchFilter       = 'all';
+let paymentFilter      = 'all';
+let deliveryFilter     = 'all';
 
-let analyticsDate        = 'today';
+let analyticsDate         = 'today';
 let analyticsSpecificDate = '';
-let analyticsBranch      = 'all';
+let analyticsBranch       = 'all';
 
 let savedOrders = JSON.parse(localStorage.getItem('uniform_orders') || '[]');
 
@@ -83,8 +104,8 @@ let deliverySheetOrderId = null;
 
 const sheet = { quickSetSize: null, comboType: null, comboSize: null, singleItem: null, singleSize: null };
 
-let adjSign     = 1;    // +1 = charge, -1 = refund
-let priceBranch = currentBranch; // tracks branch in price list overlay
+let adjSign     = 1;
+let priceBranch = currentBranch;
 
 const ctx = {
   new:  { name: null, cls: null, parent: null, mobile: null, notes: null },
@@ -96,30 +117,26 @@ const ctx = {
    3. UTILITIES
 ---------------------------------------------------------- */
 
-const $           = id => document.getElementById(id);
-const rupees      = n  => 'Rs.' + (n || 0).toLocaleString('en-IN');
-const saveLocal   = () => localStorage.setItem('uniform_orders', JSON.stringify(savedOrders));
+const $         = id => document.getElementById(id);
+const rupees    = n  => 'Rs.' + (n || 0).toLocaleString('en-IN');
+const saveLocal = () => localStorage.setItem('uniform_orders', JSON.stringify(savedOrders));
 
-/** Generate a UUID v4, with fallback for older browsers */
 function generateUUID() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  // Fallback: RFC-4122 v4
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
     const r = Math.random() * 16 | 0;
     return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
   });
 }
 
-
 function cloneTemplate(id) {
   return document.getElementById(id).content.cloneNode(true).firstElementChild;
 }
 
-function buildSizeOptions(itemName, selectedSize) {
+function buildSizeOptions(itemName, selectedSize, pricesObj) {
+  const p    = pricesObj || prices;
   const frag = document.createDocumentFragment();
-  Object.keys(prices[itemName] || {}).forEach(s => {
+  Object.keys(p[itemName] || {}).forEach(s => {
     const opt = document.createElement('option');
     opt.value = s; opt.textContent = s;
     if (String(s) === String(selectedSize)) opt.selected = true;
@@ -128,9 +145,10 @@ function buildSizeOptions(itemName, selectedSize) {
   return frag;
 }
 
-function buildItemOptions(selectedItem) {
+function buildItemOptions(selectedItem, pricesObj) {
+  const p    = pricesObj || prices;
   const frag = document.createDocumentFragment();
-  Object.keys(prices).forEach(name => {
+  Object.keys(p).forEach(name => {
     const opt = document.createElement('option');
     opt.value = name; opt.textContent = name;
     if (name === selectedItem) opt.selected = true;
@@ -191,13 +209,16 @@ function showSettings() {
 
   const preview = $('settings-qr-preview');
   if (s.qrDataUrl) {
-    preview.src   = s.qrDataUrl;
+    preview.src           = s.qrDataUrl;
     preview.style.display = 'block';
     $('settings-qr-current').textContent = 'Custom QR saved on this device';
   } else {
     preview.style.display = 'none';
     $('settings-qr-current').textContent = 'Using GooglePay_QR.png (default)';
   }
+
+  // Sync season toggle in settings
+  syncSeasonToggleUI();
 
   $('settings-screen').style.display = 'block';
   document.body.style.overflow = 'hidden';
@@ -241,12 +262,64 @@ function handleQRFileSelect(input) {
     const dataUrl = e.target.result;
     localStorage.setItem('uniform_qr_image', dataUrl);
     const preview = $('settings-qr-preview');
-    preview.src   = dataUrl;
+    preview.src           = dataUrl;
     preview.style.display = 'block';
     $('settings-qr-current').textContent = 'Custom QR saved ✓';
     toast('QR image saved');
   };
   reader.readAsDataURL(file);
+}
+
+
+/* ----------------------------------------------------------
+   3c. SEASON HELPERS
+---------------------------------------------------------- */
+
+function setSeason(season) {
+  const ctn = $('items-container');
+  if (ctn?.querySelector('.js-item-row')) {
+    if (!confirm(`Switch to ${season === 'winter' ? 'Winter' : 'Summer'} season? Current items will be cleared.`)) {
+      syncSeasonToggleUI();
+      return;
+    }
+  }
+  currentSeason = season;
+  prices = buildPrices(currentBranch, currentSeason);
+  localStorage.setItem('uniform_season', season);
+  syncSeasonToggleUI();
+  syncSeasonBadge();
+  if (ctn) ctn.innerHTML = '';
+  itemCounter = 0;
+  recalcNew();
+  // Rebuild add buttons so season-specific combos appear/disappear
+  buildAddButtons('add-btns-new', false);
+  toast(`Switched to ${season === 'winter' ? '❄️ Winter' : '☀️ Summer'} season`);
+}
+
+function syncSeasonToggleUI() {
+  const sumBtn = $('season-summer-btn');
+  const winBtn = $('season-winter-btn');
+  if (!sumBtn || !winBtn) return;
+  sumBtn.classList.toggle('season-active-summer', currentSeason === 'summer');
+  winBtn.classList.toggle('season-active-winter', currentSeason === 'winter');
+  sumBtn.classList.toggle('season-inactive', currentSeason !== 'summer');
+  winBtn.classList.toggle('season-inactive', currentSeason !== 'winter');
+}
+
+function syncSeasonBadge() {
+  const badge = $('season-header-badge');
+  if (!badge) return;
+  if (currentSeason === 'winter') {
+    badge.textContent      = '❄️ Winter';
+    badge.style.background = '#dbeafe';
+    badge.style.color      = '#1e3a8a';
+    badge.style.border     = '1.5px solid #93c5fd';
+  } else {
+    badge.textContent      = '☀️ Summer';
+    badge.style.background = '#fef3c7';
+    badge.style.color      = '#92400e';
+    badge.style.border     = '1.5px solid #fde68a';
+  }
 }
 
 
@@ -383,7 +456,7 @@ function paymentStatus(order) {
 
 
 /* ----------------------------------------------------------
-   7. UI — HEADER / TABS / BRANCH
+   7. UI — HEADER / TABS / BRANCH / SEASON
 ---------------------------------------------------------- */
 
 function toggleHamburger() { $('hamburger-menu').classList.toggle('open'); }
@@ -407,7 +480,6 @@ function syncBranchBadge() {
   if (!badge) return;
   badge.className = `branch-header-badge branch-${currentBranch}`;
   $('branch-header-label').textContent = BRANCH_LABEL[currentBranch];
-
   ['badagaon', 'baghpat'].forEach(b => {
     $('bdopt-' + b)?.classList.toggle('active', b === currentBranch);
   });
@@ -422,7 +494,7 @@ function setBranch(branch) {
     }
   }
   currentBranch = branch;
-  prices = PRICES[branch];
+  prices = buildPrices(currentBranch, currentSeason);
   localStorage.setItem('uniform_branch', branch);
   syncBranchBadge();
   closeBranchDropdown();
@@ -459,7 +531,12 @@ function closeAnalytics() { $('analytics-screen').style.display = 'none'; docume
 function buildAddButtons(containerId, isEdit) {
   const t    = isEdit ? 'edit' : 'new';
   const wrap = $(containerId);
+  if (!wrap) return;
   wrap.innerHTML = '';
+
+  // Determine season for this context
+  // For edit, we use the order's season (or current), for new we use currentSeason
+  const season = isEdit ? (editOrderId ? (savedOrders.find(o => o.id === editOrderId)?.season || currentSeason) : currentSeason) : currentSeason;
 
   const btn = (cls, text, handler) => {
     const b = document.createElement('button');
@@ -467,11 +544,19 @@ function buildAddButtons(containerId, isEdit) {
     wrap.appendChild(b);
   };
 
-  btn('add-btn quickset', '✦ Complete Uniform', () => openQuickSetSheet(t));
-  Object.entries(COMBOS).forEach(([key, cfg]) => btn('add-btn combo', cfg.label, () => openComboSheet(t, key)));
-  btn('add-btn combo',      'Suit Set',      () => openComboSheet(t, 'suit-set'));
-  btn('add-btn',            '+ Single Item', () => openSingleItemSheet(t));
-  btn('add-btn adjustment', '± Adjust',     () => openAdjSheet(t));
+  btn('add-btn combo', 'Pant + Shirt',             () => openComboSheet(t, 'pant-shirt'));
+  btn('add-btn combo', 'Lower + T-Shirt',          () => openComboSheet(t, 'lower-tshirt'));
+
+  if (season === 'summer') {
+    btn('add-btn combo', 'Half Lower + T-Shirt', () => openComboSheet(t, 'half-lower-tshirt'));
+  } else {
+    btn('add-btn combo', 'Full Lower + T-Shirt', () => openComboSheet(t, 'full-lower-tshirt'));
+  }
+
+  btn('add-btn combo',      'Suit Set',            () => openComboSheet(t, 'suit-set'));
+  btn('add-btn',            '+ Single Item',        () => openSingleItemSheet(t));
+  btn('add-btn adjustment', '± Adjust',             () => openAdjSheet(t));
+  btn('add-btn quickset',   '✦ Complete Uniform',   () => openQuickSetSheet(t));
 }
 
 function openSheet(id)  { $(id).classList.add('open'); }
@@ -480,7 +565,6 @@ function closeSheet(id, event) {
   $(id).classList.remove('open');
 }
 
-// Returns { ctr, pfx, fn } based on whether we're in new or edit context
 function sheetCtx(target) {
   const e = target === 'edit';
   return { ctr: e ? 'edit-items-container' : 'items-container', pfx: e ? 'e' : 'n', fn: e ? 'recalcEdit' : 'recalcNew' };
@@ -533,14 +617,36 @@ function confirmQuickSet() {
 }
 
 // ── Single Item sheet ──
+// Returns the price object filtered by season for single item picker
+function getSingleItemPrices(forBranch, forSeason) {
+  const p = buildPrices(forBranch || currentBranch, forSeason || currentSeason);
+  if ((forSeason || currentSeason) === 'summer') {
+    // Remove winter-only items in summer
+    const filtered = {};
+    Object.keys(p).forEach(k => { if (!WINTER_ONLY_ITEMS.has(k)) filtered[k] = p[k]; });
+    return filtered;
+  }
+  return p;
+}
+
 function openSingleItemSheet(target) {
   sheetTarget = target;
   sheet.singleItem = sheet.singleSize = null;
   $('si-qty').textContent = '1';
   $('si-sizes').innerHTML = '<div style="color:var(--text-3);font-size:12px">Select an item first</div>';
-  buildChips('si-items', Object.keys(prices), null, (item, el) => {
+
+  // For edit context, use the order's branch/season prices
+  let siPrices = prices;
+  if (target === 'edit' && editOrderId) {
+    const ord = savedOrders.find(o => o.id === editOrderId);
+    siPrices = getSingleItemPrices(ord?.branch || currentBranch, ord?.season || currentSeason);
+  } else {
+    siPrices = getSingleItemPrices();
+  }
+
+  buildChips('si-items', Object.keys(siPrices), null, (item, el) => {
     sheet.singleItem = selectChip('si-items', item, el);
-    const sizes = Object.keys(prices[item] || {});
+    const sizes = Object.keys(siPrices[item] || {});
     let defaultSize = String(sizes[0]);
     if (item === 'Tie') defaultSize = 'Large';
     sheet.singleSize = defaultSize;
@@ -562,15 +668,23 @@ function confirmSingleItem() {
 function openComboSheet(target, type) {
   sheetTarget = target; sheet.comboType = type; sheet.comboSize = null;
   $('co-qty').textContent = '1';
+
+  // Use correct prices for context
+  let ctxPrices = prices;
+  if (target === 'edit' && editOrderId) {
+    const ord = savedOrders.find(o => o.id === editOrderId);
+    ctxPrices = buildPrices(ord?.branch || currentBranch, ord?.season || currentSeason);
+  }
+
   if (type === 'suit-set') {
-    const unit = prices.Suit.All + prices.Trouser.All + prices.Jacket.All;
+    const unit = ctxPrices.Suit.All + ctxPrices.Trouser.All + ctxPrices.Jacket.All;
     $('co-title').textContent  = 'Suit Set';
     $('co-sub').textContent    = `Suit + Trouser + Jacket = ${rupees(unit)} each`;
     $('co-label1').textContent = '';
     $('co-sizes1').innerHTML   = '';
   } else {
     const cfg   = COMBOS[type];
-    const sizes = Object.keys(prices[cfg.item1] || {});
+    const sizes = Object.keys(ctxPrices[cfg.item1] || {});
     $('co-title').textContent  = cfg.label;
     $('co-sub').textContent    = 'Both items use the same size';
     $('co-label1').textContent = 'Select size';
@@ -622,12 +736,13 @@ function confirmAdj() {
    9. UI — ITEM ROWS
 ---------------------------------------------------------- */
 
-function _addItem(containerId, prefix, recalcFn, defaultItem, defaultSize, defaultQty) {
+function _addItem(containerId, prefix, recalcFn, defaultItem, defaultSize, defaultQty, pricesObj) {
   itemCounter++;
   const id  = prefix + itemCounter;
   const row = cloneTemplate('tpl-item-row');
   row.id = 'item-' + id;
 
+  const p       = pricesObj || prices;
   const itemSel = row.querySelector('.ir-item-sel');
   const sizeSel = row.querySelector('.ir-size-sel');
   const qtyIn   = row.querySelector('.ir-qty');
@@ -637,11 +752,11 @@ function _addItem(containerId, prefix, recalcFn, defaultItem, defaultSize, defau
   itemSel.id = 'isel-' + id; sizeSel.id = 'ssel-' + id;
   qtyIn.id   = 'qty-'  + id; priceEl.id = 'price-'+ id;
 
-  itemSel.appendChild(buildItemOptions(defaultItem || Object.keys(prices)[0]));
-  sizeSel.appendChild(buildSizeOptions(defaultItem || Object.keys(prices)[0], defaultSize));
+  itemSel.appendChild(buildItemOptions(defaultItem || Object.keys(p)[0], p));
+  sizeSel.appendChild(buildSizeOptions(defaultItem || Object.keys(p)[0], defaultSize, p));
   qtyIn.value = defaultQty || 1;
 
-  itemSel.addEventListener('change', () => { sizeSel.innerHTML = ''; sizeSel.appendChild(buildSizeOptions(itemSel.value)); window[recalcFn](); });
+  itemSel.addEventListener('change', () => { sizeSel.innerHTML = ''; sizeSel.appendChild(buildSizeOptions(itemSel.value, null, p)); window[recalcFn](); });
   sizeSel.addEventListener('change', () => window[recalcFn]());
   qtyIn.addEventListener('input',    () => window[recalcFn]());
   remBtn.addEventListener('click',   () => { row.remove(); window[recalcFn](); });
@@ -650,10 +765,11 @@ function _addItem(containerId, prefix, recalcFn, defaultItem, defaultSize, defau
   window[recalcFn]();
 }
 
-function _addCombo(containerId, prefix, recalcFn, type, defaultSize1, defaultSize2, defaultQty) {
+function _addCombo(containerId, prefix, recalcFn, type, defaultSize1, defaultSize2, defaultQty, pricesObj) {
   itemCounter++;
   const id  = prefix + itemCounter;
   const qty = defaultQty || 1;
+  const p   = pricesObj || prices;
 
   if (type === 'suit-set') {
     const row   = cloneTemplate('tpl-suit-row');
@@ -664,8 +780,8 @@ function _addCombo(containerId, prefix, recalcFn, type, defaultSize1, defaultSiz
     const rem   = row.querySelector('.sr-remove');
     qtyIn.id = 'qty-' + id; price.id = 'price-' + id;
     qtyIn.value = qty;
-    const unit = prices.Suit.All + prices.Trouser.All + prices.Jacket.All;
-    info.textContent  = `Suit ${rupees(prices.Suit.All)} + Trouser ${rupees(prices.Trouser.All)} + Jacket ${rupees(prices.Jacket.All)} = ${rupees(unit)} each`;
+    const unit = p.Suit.All + p.Trouser.All + p.Jacket.All;
+    info.textContent  = `Suit ${rupees(p.Suit.All)} + Trouser ${rupees(p.Trouser.All)} + Jacket ${rupees(p.Jacket.All)} = ${rupees(unit)} each`;
     price.textContent = rupees(unit * qty);
     qtyIn.addEventListener('input', () => window[recalcFn]());
     rem.addEventListener('click',   () => { row.remove(); window[recalcFn](); });
@@ -688,8 +804,8 @@ function _addCombo(containerId, prefix, recalcFn, type, defaultSize1, defaultSiz
     qtyIn.id = 'qty-' + id; price.id = 'price-' + id;
     size1.id = 's1-'  + id; size2.id = 's2-'   + id;
     qtyIn.value = qty;
-    size1.appendChild(buildSizeOptions(cfg.item1, defaultSize1));
-    size2.appendChild(buildSizeOptions(cfg.item2, defaultSize2 || defaultSize1));
+    size1.appendChild(buildSizeOptions(cfg.item1, defaultSize1, p));
+    size2.appendChild(buildSizeOptions(cfg.item2, defaultSize2 || defaultSize1, p));
     const recalc = () => window[recalcFn]();
     qtyIn.addEventListener('input',  recalc);
     size1.addEventListener('change', recalc);
@@ -728,7 +844,8 @@ function _addAdjustment(containerId, prefix, recalcFn, sign, amount, note) {
   window[recalcFn]();
 }
 
-function _recalc(containerId, totalId, pricesObj = prices) {
+function _recalc(containerId, totalId, pricesObj) {
+  const p = pricesObj || prices;
   let subtotal = 0;
   $(containerId)?.querySelectorAll('.js-item-row').forEach(row => {
     const id   = row.id.replace('item-', '');
@@ -748,13 +865,13 @@ function _recalc(containerId, totalId, pricesObj = prices) {
     if (type === 'single') {
       const is = $('isel-' + id), ss = $('ssel-' + id);
       if (!is) return;
-      unit = pricesObj[is.value]?.[ss.value] || pricesObj[is.value]?.[parseInt(ss.value)] || 0;
+      unit = p[is.value]?.[ss.value] || p[is.value]?.[parseInt(ss.value)] || 0;
     } else if (type === 'suit-set') {
-      unit = pricesObj.Suit.All + pricesObj.Trouser.All + pricesObj.Jacket.All;
+      unit = p.Suit.All + p.Trouser.All + p.Jacket.All;
     } else if (type === 'combo') {
       const s1 = $('s1-' + id), s2 = $('s2-' + id);
-      if (s1) unit += pricesObj[row.dataset.item1]?.[s1.value] || pricesObj[row.dataset.item1]?.[parseInt(s1.value)] || 0;
-      if (s2) unit += pricesObj[row.dataset.item2]?.[s2.value] || pricesObj[row.dataset.item2]?.[parseInt(s2.value)] || 0;
+      if (s1) unit += p[row.dataset.item1]?.[s1.value] || p[row.dataset.item1]?.[parseInt(s1.value)] || 0;
+      if (s2) unit += p[row.dataset.item2]?.[s2.value] || p[row.dataset.item2]?.[parseInt(s2.value)] || 0;
     }
 
     const line = unit * qty;
@@ -766,13 +883,14 @@ function _recalc(containerId, totalId, pricesObj = prices) {
   return subtotal;
 }
 
-function recalcNew()  { _recalc('items-container', 'grand-total'); }
+function recalcNew()  { _recalc('items-container', 'grand-total', prices); }
 function recalcEdit() {
   const order = editOrderId ? savedOrders.find(o => o.id === editOrderId) : null;
-  _recalc('edit-items-container', 'eo-grand-total', PRICES[order?.branch || 'badagaon']);
+  _recalc('edit-items-container', 'eo-grand-total', buildPrices(order?.branch || 'badagaon', order?.season || currentSeason));
 }
 
-function collectItems(containerId, pricesObj = prices) {
+function collectItems(containerId, pricesObj) {
+  const p = pricesObj || prices;
   const items = [];
   let subtotal = 0;
   $(containerId)?.querySelectorAll('.js-item-row').forEach(row => {
@@ -798,19 +916,19 @@ function collectItems(containerId, pricesObj = prices) {
     if (type === 'single') {
       const is = $('isel-' + id), ss = $('ssel-' + id);
       if (!is) return;
-      unit  = pricesObj[is.value]?.[ss.value] || pricesObj[is.value]?.[parseInt(ss.value)] || 0;
+      unit  = p[is.value]?.[ss.value] || p[is.value]?.[parseInt(ss.value)] || 0;
       label = `${is.value} (${ss.value})${qty > 1 ? ' x ' + qty : ''}`;
       extra = { itemType: 'single', itemName: is.value, itemSize: ss.value };
     } else if (type === 'suit-set') {
-      unit  = pricesObj.Suit.All + pricesObj.Trouser.All + pricesObj.Jacket.All;
+      unit  = p.Suit.All + p.Trouser.All + p.Jacket.All;
       label = `Suit Set (Suit + Trouser + Jacket)${qty > 1 ? ' x ' + qty : ''}`;
       extra = { itemType: 'suit-set' };
     } else if (type === 'combo') {
       const s1 = $('s1-' + id), s2 = $('s2-' + id);
       if (!s1 && !s2) return;
       const n1 = row.dataset.item1, n2 = row.dataset.item2;
-      if (s1) unit += pricesObj[n1]?.[s1.value] || pricesObj[n1]?.[parseInt(s1.value)] || 0;
-      if (s2) unit += pricesObj[n2]?.[s2.value] || pricesObj[n2]?.[parseInt(s2.value)] || 0;
+      if (s1) unit += p[n1]?.[s1.value] || p[n1]?.[parseInt(s1.value)] || 0;
+      if (s2) unit += p[n2]?.[s2.value] || p[n2]?.[parseInt(s2.value)] || 0;
       const parts = [];
       if (s1) parts.push(`${n1} (${s1.value})`);
       if (s2) parts.push(`${n2} (${s2.value})`);
@@ -848,7 +966,7 @@ function saveOrder() {
   }
 
   savedOrders.unshift({
-    id: Date.now(), uuid: generateUUID(), branch: currentBranch, ...fields,
+    id: Date.now(), uuid: generateUUID(), branch: currentBranch, season: currentSeason, ...fields,
     payments, items, subtotal, orderDiscount: newDiscount,
     date: new Date().toLocaleDateString('en-IN'),
     deliveryUnits: buildDeliveryUnits(items).map(u => ({ ...u, given: true }))
@@ -876,11 +994,8 @@ function resetNewForm() {
    11. UI — ANALYTICS
 ---------------------------------------------------------- */
 
-function setAnalyticsDate(v) {
-  analyticsDate = v;
-  renderAnalytics();
-}
-function setAnalyticsBranch(v) { analyticsBranch = v; renderAnalytics(); }
+function setAnalyticsDate(v)  { analyticsDate = v; renderAnalytics(); }
+function setAnalyticsBranch(v){ analyticsBranch = v; renderAnalytics(); }
 function setAnalyticsSpecificDate(val) { analyticsSpecificDate = val; renderAnalytics(); }
 
 function makeAnRow(label, count, amt, color) {
@@ -987,8 +1102,8 @@ function renderAnalytics() {
   dpInp.className = 'an-date-input';
   dpInp.style.colorScheme = 'light';
   if (!analyticsSpecificDate) {
-    const today = new Date();
-    analyticsSpecificDate = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    const today2 = new Date();
+    analyticsSpecificDate = `${today2.getFullYear()}-${String(today2.getMonth()+1).padStart(2,'0')}-${String(today2.getDate()).padStart(2,'0')}`;
   }
   dpInp.value = analyticsSpecificDate;
   dpInp.addEventListener('change', e => setAnalyticsSpecificDate(e.target.value));
@@ -1049,10 +1164,7 @@ function setDateFilter(f) {
   renderOrders(getSearchValue()); updateFilterBar();
 }
 
-function setSpecificDateFilter(val) {
-  specificDateFilter = val;
-  renderOrders(getSearchValue()); updateFilterBar();
-}
+function setSpecificDateFilter(val) { specificDateFilter = val; renderOrders(getSearchValue()); updateFilterBar(); }
 
 function setBranchFilter(f)   { branchFilter   = f; ['all','badagaon','baghpat'].forEach(k => $('fopt-branch-'+k)?.classList.toggle('active', k===f)); renderOrders(getSearchValue()); updateFilterBar(); }
 function setDeliveryFilter(f) { deliveryFilter = f; ['all','pending-delivery'].forEach(k => $('fopt-del-'+k)?.classList.toggle('active', k===f)); renderOrders(getSearchValue()); updateFilterBar(); }
@@ -1089,17 +1201,15 @@ function matchesFilter(order) {
     const s = paymentStatus(order);
     if (s !== 'pending' && s !== 'partial') return false;
   }
-  if (paymentFilter === 'refund') {
-    if (order.subtotal > 0) return false;
-  }
+  if (paymentFilter === 'refund') { if (order.subtotal > 0) return false; }
   if (deliveryFilter === 'pending-delivery' && pendingItemCount(order) === 0) return false;
   if (branchFilter !== 'all' && order.branch !== branchFilter) return false;
   if (dateFilter === 'all') return true;
   const d     = parseOrderDate(order.date);
   const now   = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  if (dateFilter === 'today')    return d.getTime() === today.getTime();
-  if (dateFilter === 'week')     { const w = new Date(today); w.setDate(today.getDate() - 6); return d >= w && d <= today; }
+  if (dateFilter === 'today') return d.getTime() === today.getTime();
+  if (dateFilter === 'week')  { const w = new Date(today); w.setDate(today.getDate() - 6); return d >= w && d <= today; }
   if (dateFilter === 'specific') {
     if (!specificDateFilter) return true;
     const [y, m, day] = specificDateFilter.split('-').map(Number);
@@ -1165,8 +1275,7 @@ function renderOrders(query) {
     list.appendChild(empty); return;
   }
 
-  const STATUS_LABEL = { cash: 'Cash', online: 'Online', split: 'Split', partial: 'Partial', pending: 'Pending', refund: 'Refund' };
-
+  const STATUS_LABEL     = { cash: 'Cash', online: 'Online', split: 'Split', partial: 'Partial', pending: 'Pending', refund: 'Refund' };
   const BRANCH_DOT_COLOR = { badagaon: '#059669', baghpat: '#2563eb' };
 
   filtered.forEach(o => {
@@ -1180,11 +1289,12 @@ function renderOrders(query) {
     const strip = document.createElement('div');
     strip.className = 'card-meta-strip';
     const dotColor = BRANCH_DOT_COLOR[o.branch] || '#94a3b8';
+    const seasonIcon = o.season === 'winter' ? ' ❄️' : '';
     strip.innerHTML =
       `<span>${o.date}</span>` +
       `<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--text-3)">` +
         `<span style="width:7px;height:7px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0"></span>` +
-        `${BRANCH_LABEL[o.branch]}` +
+        `${BRANCH_LABEL[o.branch]}${seasonIcon}` +
       `</span>`;
     card.insertAdjacentElement('afterbegin', strip);
 
@@ -1217,9 +1327,9 @@ function renderOrders(query) {
 
     if (o.notes) { const ne = card.querySelector('.oc-notes'); ne.style.display='flex'; ne.querySelector('.oc-notes-text').textContent = o.notes; }
 
-    const disc    = totalDiscount(o);
-    const effAmt  = o.subtotal - disc;
-    const amtEl   = card.querySelector('.oc-amount');
+    const disc   = totalDiscount(o);
+    const effAmt = o.subtotal - disc;
+    const amtEl  = card.querySelector('.oc-amount');
     amtEl.textContent = rupees(effAmt);
     if (effAmt < 0) amtEl.style.color = 'var(--red)';
 
@@ -1236,7 +1346,7 @@ function renderOrders(query) {
     card.querySelector('.oc-whatsapp-btn').onclick       = () => { menuDrop.classList.remove('open'); openWhatsApp(o.id); };
     card.querySelector('.oc-delete-btn').onclick         = () => { menuDrop.classList.remove('open'); deleteOrder(o.id); };
 
-    const panel   = card.querySelector('.oc-items-panel');
+    const panel     = card.querySelector('.oc-items-panel');
     const toggleBtn = card.querySelector('.oc-toggle-btn');
     toggleBtn.onclick = () => {
       const open = panel.style.display !== 'none';
@@ -1393,9 +1503,9 @@ function refreshPaymentSheetHistory(id) {
       entry.querySelector('.pe-date').textContent = p.date;
       entry.querySelector('.pe-amt').textContent  = rupees(p.amount);
       entry.querySelector('.pe-del').onclick      = () => confirmDeletePayEntry(id, i);
-      entry.style.background = 'transparent';
+      entry.style.background   = 'transparent';
       entry.style.borderRadius = '0';
-      entry.style.padding = '4px 0';
+      entry.style.padding      = '4px 0';
       entry.style.marginBottom = '2px';
       histSec.appendChild(entry);
     });
@@ -1512,7 +1622,9 @@ function openEditOrder(id) {
   if (!order) return;
   editOrderId = id; itemCounter = 0;
 
-  const editBranch = order.branch, editPrices = PRICES[editBranch];
+  const editBranch  = order.branch;
+  const editSeason  = order.season || 'summer';
+  const editPrices  = buildPrices(editBranch, editSeason);
   const savedGlobalPrices = prices;
   prices = editPrices;
 
@@ -1521,20 +1633,25 @@ function openEditOrder(id) {
   writeStudentFields('edit', order);
 
   const branchBadge = $('eo-branch-badge');
-  if (branchBadge) { branchBadge.textContent = BRANCH_LABEL[editBranch]; branchBadge.className = `badge ${editBranch}`; }
+  if (branchBadge) {
+    const seasonIcon = editSeason === 'winter' ? ' ❄️' : ' ☀️';
+    branchBadge.textContent = BRANCH_LABEL[editBranch] + seasonIcon;
+    branchBadge.className   = `badge ${editBranch}`;
+  }
 
   $('edit-items-container').innerHTML = '';
   try {
     (order.items || []).forEach(item => {
       const qty = item.qty || 1;
       if (item.itemType === 'suit-set') {
-        _addCombo('edit-items-container', 'e', 'recalcEdit', 'suit-set', null, null, qty);
+        _addCombo('edit-items-container', 'e', 'recalcEdit', 'suit-set', null, null, qty, editPrices);
       } else if (item.itemType === 'combo') {
-        _addCombo('edit-items-container', 'e', 'recalcEdit', COMBO_TYPE_BY_ITEM1[item.item1Name] || 'pant-shirt', item.item1Size, item.item2Size, qty);
+        const comboType = COMBO_TYPE_BY_ITEM1[item.item1Name] || 'pant-shirt';
+        _addCombo('edit-items-container', 'e', 'recalcEdit', comboType, item.item1Size, item.item2Size, qty, editPrices);
       } else if (item.itemType === 'adjustment') {
         _addAdjustment('edit-items-container', 'e', 'recalcEdit', item.sign, item.amount, item.note || '');
       } else {
-        _addItem('edit-items-container', 'e', 'recalcEdit', item.itemName, item.itemSize, qty);
+        _addItem('edit-items-container', 'e', 'recalcEdit', item.itemName, item.itemSize, qty, editPrices);
       }
     });
   } finally {
@@ -1559,7 +1676,7 @@ function saveEditOrder() {
 
   let items, subtotal;
   const savedPrices = prices;
-  prices = PRICES[orig.branch];
+  prices = buildPrices(orig.branch, orig.season || currentSeason);
   try {
     ({ items, subtotal } = collectItems('edit-items-container'));
   } finally {
@@ -1594,15 +1711,15 @@ function openWhatsApp(id) {
   const order = savedOrders.find(o => o.id === id);
   if (!order) return;
 
-  const settings   = loadSettings();
-  const upiId      = settings.upiId;
-  const upiNumber  = settings.upiNumber;
+  const settings  = loadSettings();
+  const upiId     = settings.upiId;
+  const upiNumber = settings.upiNumber;
 
-  const payments   = getPayments(order);
-  const balance    = balanceDue(order);
-  const discount   = totalDiscount(order);
-  const dvUnits    = ensureDeliveryUnits(order);
-  let dvOffset     = 0;
+  const payments  = getPayments(order);
+  const balance   = balanceDue(order);
+  const discount  = totalDiscount(order);
+  const dvUnits   = ensureDeliveryUnits(order);
+  let dvOffset    = 0;
 
   const itemLines = (order.items || []).map(item => {
     if (item.itemType === 'adjustment') {
@@ -1677,13 +1794,13 @@ ${balanceLine}${exchangePolicy}`;
 
 function exportCSV() {
   if (!savedOrders.length) { toast('No orders to export'); return; }
-  const headers = ['UUID','Date','Branch','Student Name','Class','Parent Name','Mobile','Address','Notes','Items','Items Not Delivered','Subtotal','Collected','Discount','Balance','Status','Payment Detail'];
+  const headers = ['UUID','Date','Branch','Season','Student Name','Class','Parent Name','Mobile','Address','Notes','Items','Items Not Delivered','Subtotal','Collected','Discount','Balance','Status','Payment Detail'];
   const rows = savedOrders.map(o => {
     const payments  = getPayments(o);
     const payDetail = payments.map(p => `${p.mode} Rs.${p.amount} on ${p.date}`).join(' | ');
     const pendLabels = ensureDeliveryUnits(o).filter(u => !u.given).map(u => u.label).join(' | ');
     return [
-      o.uuid, o.date, o.branch,
+      o.uuid, o.date, o.branch, o.season || 'summer',
       o.studentName||'', o.studentClass||'', o.parentName||'', o.mobile||'', o.address||'', o.notes||'',
       (o.items||[]).map(i => i.label + ' = ' + (i.lineTotal<0?'-':'') + 'Rs.' + Math.abs(i.lineTotal)).join(' | '),
       pendLabels||'All delivered',
@@ -1740,6 +1857,8 @@ function importJSON(event) {
 function showPriceList() {
   priceBranch = currentBranch;
   ['badagaon','baghpat'].forEach(b => $('pl-branch-'+b)?.classList.toggle('pl-branch-btn-active', b===priceBranch));
+  // Sync season toggle in price list
+  syncPriceListSeasonToggle();
   renderPriceList();
   $('pricelist-screen').style.display = 'block'; document.body.style.overflow = 'hidden';
 }
@@ -1751,8 +1870,25 @@ function setPriceBranch(branch) {
   renderPriceList();
 }
 
+// Price list has its own season view toggle (doesn't change app season)
+let priceListSeason = currentSeason;
+
+function syncPriceListSeasonToggle() {
+  priceListSeason = currentSeason;
+  $('pl-season-summer')?.classList.toggle('pl-branch-btn-active', priceListSeason === 'summer');
+  $('pl-season-winter')?.classList.toggle('pl-branch-btn-active', priceListSeason === 'winter');
+}
+
+function setPriceListSeason(season) {
+  priceListSeason = season;
+  $('pl-season-summer')?.classList.toggle('pl-branch-btn-active', season === 'summer');
+  $('pl-season-winter')?.classList.toggle('pl-branch-btn-active', season === 'winter');
+  renderPriceList();
+}
+
 function renderPriceList() {
-  const p = PRICES[priceBranch], wrap = $('price-list-content');
+  const p    = buildPrices(priceBranch, priceListSeason);
+  const wrap = $('price-list-content');
   wrap.innerHTML = '';
   const pr = v => v ? rupees(v) : `<span class="pl-na">—</span>`;
 
@@ -1780,24 +1916,41 @@ function renderPriceList() {
     sec.appendChild(wrap2); return sec;
   }
 
+  // Yellow uniform: Pant/Shirt/Lower/T-Shirt
   if (priceBranch === 'baghpat') {
-    wrap.appendChild(makeSection('Pant / Shirt / Lower / T-Shirt',
+    wrap.appendChild(makeSection('Pant / Shirt / Lower / T-Shirt (Yellow)',
       ['Size', 'Each', { label: 'Pant+Shirt / Lower+T-Shirt', total: true }],
       Object.entries(p['Pant']).map(([size, price]) => [size, pr(price), { val: pr(price*2), total: true }])
     ));
   } else {
     const allSizes = [...new Set([...Object.keys(p['Pant']), ...Object.keys(p['Lower'])])].sort((a,b)=>parseInt(a)-parseInt(b));
-    wrap.appendChild(makeSection('Pant / Shirt / Lower / T-Shirt',
+    wrap.appendChild(makeSection('Pant / Shirt / Lower / T-Shirt (Yellow)',
       ['Size','Pant / Shirt','Lower / T-Shirt',{label:'Pant+Shirt',total:true},{label:'Lower+T-Shirt',total:true}],
       allSizes.map(size => { const pp=p['Pant'][size]||null, lp=p['Lower'][size]||null; return [size, pr(pp), pr(lp), {val:pr(pp&&pp*2),total:true},{val:pr(lp&&lp*2),total:true}]; })
     ));
   }
 
-  wrap.appendChild(makeSection('Half Lower & Half T-Shirt',
-    ['Size','Half Lower','Half T-Shirt',{label:'Set Total',total:true}],
-    Object.keys(p['Half Lower']).map(size => { const p1=p['Half Lower'][size]||0, p2=p['Half T-Shirt'][size]||0; return [size, pr(p1), pr(p2), {val:pr(p1+p2),total:true}]; })
+  // Red uniform: Shorts + Half Sleeve T-Shirt (summer)
+  wrap.appendChild(makeSection('Half Lower / Half T-Shirt (Red — Summer)',
+    ['Size','Half Lower','Half T-Shirt',{label:'Half Lower + T-Shirt',total:true}],
+    Object.keys(p['Half Lower']).map(size => { const s=p['Half Lower'][size]||0, t=p['Half T-Shirt'][size]||0; return [size, pr(s), pr(t), {val:pr(s+t),total:true}]; })
   ));
 
+  // Red uniform: Full Lower + Full T-Shirt (winter only)
+  if (priceListSeason === 'winter') {
+    wrap.appendChild(makeSection('Full Lower / Full T-Shirt (Red — Winter)',
+      ['Size','Full Lower','Full T-Shirt',{label:'Full Lower + T-Shirt',total:true}],
+      Object.keys(p['Full Lower']).map(size => { const l=p['Full Lower'][size]||0, t=p['Full T-Shirt'][size]||0; return [size, pr(l), pr(t), {val:pr(l+t),total:true}]; })
+    ));
+
+    // Winter extras
+    wrap.appendChild(makeSection('Blazer & Sweater',
+      ['Size','Blazer','Sweater'],
+      Object.keys(p['Blazer']).map(size => [size, pr(p['Blazer'][size]||0), pr(p['Sweater'][size]||0)])
+    ));
+  }
+
+  // Suit Set
   const suitItems = [['Suit','All'],['Trouser','All'],['Jacket','All']];
   const suitTotal = suitItems.reduce((s,[item,sz])=>s+(p[item]?.[sz]||0),0);
   wrap.appendChild(makeSection('Suit Set', ['Item',{label:'Price',total:true}], [
@@ -1805,8 +1958,11 @@ function renderPriceList() {
     [{val:'Set Total',name:true,style:'font-weight:700;color:var(--text)'},{val:rupees(suitTotal),total:true,style:'font-weight:800'}]
   ]));
 
+  // Accessories
+  const accRows = [['Tie','Small'],['Tie','Large'],['Belt','All'],['Socks','Pair']];
+  if (priceListSeason === 'winter') accRows.push(['Winter Cap','All']);
   wrap.appendChild(makeSection('Accessories', ['Item',{label:'Price',total:true}],
-    [['Tie','Small'],['Tie','Large'],['Belt','All'],['Socks','Pair']].map(([item,sz]) => [{val:(sz==='All'||sz==='Pair')?item:`${item} — ${sz}`,name:true},{val:rupees(p[item]?.[sz]||0),total:true}])
+    accRows.map(([item,sz]) => [{val:(sz==='All'||sz==='Pair')?item:`${item} — ${sz}`,name:true},{val:rupees(p[item]?.[sz]||0),total:true}])
   ));
 }
 
@@ -1816,13 +1972,13 @@ function renderPriceList() {
 ---------------------------------------------------------- */
 
 function showQR() {
-  const s       = loadSettings();
-  const qrImg   = $('qr-img');
-  qrImg.src     = s.qrDataUrl || 'GooglePay_QR.png';
+  const s    = loadSettings();
+  const qrImg = $('qr-img');
+  qrImg.src  = s.qrDataUrl || 'GooglePay_QR.png';
   $('qr-screen').style.display = 'block';
   document.body.style.overflow = 'hidden';
 }
-function closeQR() { $('qr-screen').style.display = 'none';  document.body.style.overflow = ''; }
+function closeQR() { $('qr-screen').style.display = 'none'; document.body.style.overflow = ''; }
 
 
 /* ----------------------------------------------------------
@@ -1844,3 +2000,5 @@ document.addEventListener('click', e => {
 buildStudentFields('new-student-fields', 'new');
 buildItemsSection('new-items-section', 'items-container', 'add-btns-new', 'grand-total', 'Subtotal', false);
 syncBranchBadge();
+syncSeasonBadge();
+syncSeasonToggleUI();

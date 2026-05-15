@@ -214,7 +214,6 @@ input, select, button, textarea { font-family: inherit; }
 }
 .branch-header-badge.open .branch-header-chevron { transform: rotate(180deg); }
 
-/* The dropdown panel */
 .branch-header-dropdown {
   display: none;
   position: absolute;
@@ -514,23 +513,27 @@ input, select, button, textarea { font-family: inherit; }
    7. ADD BUTTONS
 ---------------------------------------------------------- */
 .add-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
   margin-top: 10px;
 }
 
 .add-btn {
-  padding: 9px 16px;
-  min-height: 40px;
+  padding: 10px 8px;
+  min-height: 42px;
   font-size: 13px;
   font-weight: 600;
   border: 1.5px solid #c7d2fe;
-  border-radius: 20px;
+  border-radius: 10px;
   cursor: pointer;
   color: #4338ca;
   background: #eef2ff;
   transition: background 0.15s, border-color 0.15s;
+  width: 100%;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.3;
 }
 .add-btn:hover { background: #e0e7ff; border-color: #a5b4fc; }
 
@@ -541,23 +544,21 @@ input, select, button, textarea { font-family: inherit; }
 }
 .add-btn.combo:hover { background: #c7d2fe; border-color: #818cf8; }
 
-.add-btn.quickset {
-  width: 100%;
-  border-radius: 10px;
-  margin-bottom: 8px;
-  font-weight: 700;
-  color: #3730a3;
-  background: #e0e7ff;
-  border-color: #a5b4fc;
-}
-.add-btn.quickset:hover { background: #c7d2fe; border-color: #818cf8; }
-
 .add-btn.adjustment {
-  color: #6d28d9;
-  background: #f5f3ff;
-  border-color: #ddd6fe;
+  color: #4338ca;
+  background: #eef2ff;
+  border-color: #c7d2fe;
 }
-.add-btn.adjustment:hover { background: #ede9fe; border-color: #c4b5fd; }
+.add-btn.adjustment:hover { background: #e0e7ff; border-color: #a5b4fc; }
+
+.add-btn.quickset {
+  grid-column: 1 / -1;
+  font-weight: 600;
+  color: #4338ca;
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+.add-btn.quickset:hover { background: #e0e7ff; border-color: #a5b4fc; color: #3730a3; }
 
 /* ----------------------------------------------------------
    8. TOTAL CARD & SAVE BUTTON
@@ -1579,7 +1580,6 @@ input, select, button, textarea { font-family: inherit; }
 ---------------------------------------------------------- */
 .pl-branch-toggle {
   display: flex;
-  margin-left: auto;
   background: var(--surface);
   border: 1.5px solid var(--border-2);
   border-radius: var(--radius-sm);
@@ -1597,9 +1597,20 @@ input, select, button, textarea { font-family: inherit; }
   cursor: pointer;
   transition: all 0.15s;
 }
-.pl-branch-btn-active                         { background: var(--green-bg); color: var(--green); }
 #pl-branch-badagaon.pl-branch-btn-active { background: #d1fae5; color: #065f46; }
 #pl-branch-baghpat.pl-branch-btn-active  { background: #dbeafe; color: #1e3a8a; }
+#pl-season-summer.pl-branch-btn-active   { background: #fffbeb; color: #92400e; }
+#pl-season-winter.pl-branch-btn-active   { background: #eff6ff; color: #1e3a8a; }
+
+#pricelist-screen .analytics-screen-header {
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+#pricelist-screen .analytics-screen-header .edit-screen-title { flex: 1; }
+#pricelist-screen .analytics-screen-header > div:last-child {
+  width: 100%;
+  justify-content: flex-start;
+}
 
 .pl-table {
   width: 100%;
@@ -1653,7 +1664,6 @@ input, select, button, textarea { font-family: inherit; }
 /* ----------------------------------------------------------
    21. ADJUSTMENT SHEET
 ---------------------------------------------------------- */
-
 .adj-sign-toggle {
   display: flex;
   background: var(--surface);
@@ -1725,22 +1735,6 @@ input, select, button, textarea { font-family: inherit; }
 /* ----------------------------------------------------------
    22. SETTINGS SCREEN
 ---------------------------------------------------------- */
-
-.settings-info-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px 14px;
-  background: #eff6ff;
-  border: 1.5px solid #bfdbfe;
-  border-radius: var(--radius-md);
-  margin-bottom: 12px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #1e40af;
-  line-height: 1.5;
-}
-
 .settings-field-hint {
   margin-top: 5px;
   font-size: 11px;
@@ -1786,7 +1780,6 @@ input, select, button, textarea { font-family: inherit; }
 /* ----------------------------------------------------------
    23. DATE PICKER INPUTS (filter & analytics)
 ---------------------------------------------------------- */
-
 .filter-date-input {
   width: 100%;
   padding: 8px 10px;
@@ -1799,9 +1792,7 @@ input, select, button, textarea { font-family: inherit; }
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.filter-date-input:focus {
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-}
+.filter-date-input:focus { box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
 
 .an-date-input {
   flex: 1;
@@ -1815,6 +1806,44 @@ input, select, button, textarea { font-family: inherit; }
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.an-date-input:focus {
-  box-shadow: 0 0 0 2px rgba(37,99,235,0.12);
+.an-date-input:focus { box-shadow: 0 0 0 2px rgba(37,99,235,0.12); }
+
+/* ----------------------------------------------------------
+   24. SEASON TOGGLE (Settings)
+---------------------------------------------------------- */
+.season-header-badge { display: none; }
+
+.season-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
+
+.season-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 12px;
+  border: 2px solid var(--border-2);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.season-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
+
+.season-icon  { font-size: 22px; line-height: 1; }
+.season-label { font-size: 14px; font-weight: 700; color: var(--text); }
+.season-desc  { font-size: 11px; font-weight: 400; color: var(--text-3); line-height: 1.4; }
+
+.season-btn.season-active-summer { border-color: #fde68a; background: #fffbeb; }
+.season-btn.season-active-summer .season-label { color: #92400e; }
+.season-btn.season-active-summer .season-desc  { color: #b45309; }
+
+.season-btn.season-active-winter { border-color: #93c5fd; background: #eff6ff; }
+.season-btn.season-active-winter .season-label { color: #1e3a8a; }
+.season-btn.season-active-winter .season-desc  { color: #1d4ed8; }
+
+.season-btn.season-inactive { opacity: 0.55; }
