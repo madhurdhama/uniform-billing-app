@@ -97,13 +97,13 @@
   <!-- ── PRICE LIST OVERLAY ────────────────────────── -->
   <div id="pricelist-screen" style="display:none">
     <div class="analytics-screen-inner">
-      <div class="analytics-screen-header" style="flex-wrap:wrap;gap:8px">
+      <div class="analytics-screen-header pricelist-header">
         <button class="back-btn" onclick="closePriceList()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           Back
         </button>
         <div class="edit-screen-title">Price List</div>
-        <div style="display:flex;gap:6px;margin-left:auto;align-items:center">
+        <div class="pricelist-toggles">
           <div class="pl-branch-toggle">
             <button class="pl-branch-btn pl-branch-btn-active" id="pl-branch-badagaon" onclick="setPriceBranch('badagaon')">Badagaon</button>
             <button class="pl-branch-btn"                      id="pl-branch-baghpat"  onclick="setPriceBranch('baghpat')">Baghpat</button>
@@ -128,9 +128,8 @@
         </button>
         <div class="edit-screen-title">Scan to Pay</div>
       </div>
-      <div class="section" style="text-align:center;padding:24px 16px">
-        <img src="GooglePay_QR.png" id="qr-img" alt="Payment QR Code"
-          style="width:100%;max-width:420px;border-radius:16px;display:block;margin:0 auto;border:1.5px solid var(--border);box-shadow:var(--shadow-lg)">
+      <div class="section qr-img-section">
+        <img src="GooglePay_QR.png" id="qr-img" alt="Payment QR Code" class="qr-img">
       </div>
     </div>
   </div>
@@ -170,7 +169,7 @@
           <input id="settings-upi-id" type="text" placeholder="e.g. yourname@okaxis" autocomplete="off" autocapitalize="none" spellcheck="false">
           <div class="settings-field-hint">Used in WhatsApp bill payment link. Leave blank to use the default.</div>
         </div>
-        <div class="field" style="margin-bottom:0">
+        <div class="field settings-field-last">
           <label>UPI / Mobile Number</label>
           <input id="settings-upi-number" type="tel" placeholder="e.g. 9876543210">
           <div class="settings-field-hint">Shown in WhatsApp bill as an alternative payment option.</div>
@@ -179,35 +178,34 @@
 
       <div class="section">
         <div class="section-title">QR Code Image</div>
-        <div id="settings-qr-current" style="font-size:12px;color:var(--text-3);margin-bottom:12px;font-style:italic"></div>
-        <img id="settings-qr-preview" alt="QR Preview"
-          style="display:none;width:100%;max-width:240px;border-radius:12px;border:1.5px solid var(--border);margin-bottom:14px">
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div id="settings-qr-current" class="settings-qr-current"></div>
+        <img id="settings-qr-preview" alt="QR Preview" class="settings-qr-preview">
+        <div class="settings-qr-actions">
           <label class="settings-upload-btn" for="settings-qr-file">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Upload QR image
           </label>
-          <input type="file" id="settings-qr-file" accept="image/*" style="display:none" onchange="handleQRFileSelect(this)">
+          <input type="file" id="settings-qr-file" accept="image/*" class="settings-file-input" onchange="handleQRFileSelect(this)">
           <button class="settings-clear-btn" onclick="clearSettingsQR()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
             Reset to default
           </button>
         </div>
-        <div class="settings-field-hint" style="margin-top:10px">Max 2 MB. Stored locally on this device only.</div>
+        <div class="settings-field-hint settings-qr-hint">Max 2 MB. Stored locally on this device only.</div>
       </div>
 
       <div class="section">
         <div class="section-title">Data Management</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <button class="menu-item" style="border:1.5px solid var(--border-2);border-radius:var(--radius-sm);background:var(--surface)" onclick="exportJSON()">
+        <div class="settings-data-btns">
+          <button class="menu-item settings-data-btn" onclick="exportJSON()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Backup Orders
           </button>
-          <button class="menu-item" style="border:1.5px solid var(--border-2);border-radius:var(--radius-sm);background:var(--surface)" onclick="$('import-file').click()">
+          <button class="menu-item settings-data-btn" onclick="$('import-file').click()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Restore Orders
           </button>
-          <button class="menu-item" style="border:1.5px solid var(--border-2);border-radius:var(--radius-sm);background:var(--surface)" onclick="exportCSV()">
+          <button class="menu-item settings-data-btn" onclick="exportCSV()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             Export Orders (CSV)
           </button>
@@ -223,7 +221,7 @@
     </div>
   </div>
 
-  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+  <input type="file" id="import-file" accept=".json" class="settings-file-input" onchange="importJSON(event)">
 
   <!-- ── TABS ───────────────────────────────────────── -->
   <div class="tabs">
@@ -258,13 +256,13 @@
           <button class="pay-btn"        id="pay-online"  onclick="setNewOrderPayMode('online')">Online</button>
         </div>
       </div>
-      <div class="row2" id="payment-extra-row" style="display:none;margin-bottom:0">
-        <div class="field" id="new-discount-field" style="margin-bottom:0">
-          <label>Discount <span style="font-weight:400;color:var(--text-3)">(optional)</span></label>
+      <div class="row2 payment-extra-row" id="payment-extra-row" style="display:none">
+        <div class="field payment-extra-field">
+          <label>Discount <span class="label-optional">(optional)</span></label>
           <input id="new-discount" type="number" placeholder="e.g. 60" min="0">
         </div>
-        <div class="field" id="paid-amt-field" style="margin-bottom:0">
-          <label>Amount Paid <span style="font-weight:400;color:var(--text-3)">(blank = full)</span></label>
+        <div class="field payment-extra-field">
+          <label>Amount Paid <span class="label-optional">(blank = full)</span></label>
           <input id="paid-amt" type="number" placeholder="e.g. 500" min="0">
         </div>
       </div>
@@ -343,7 +341,7 @@
       </div>
     </div>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 8px">
+    <div class="orders-meta-row">
       <div id="orders-summary" class="total-count"></div>
       <div id="filter-bar-label"></div>
     </div>
@@ -358,7 +356,7 @@
      EDIT ORDER SCREEN
 ═════════════════════════════════════════════════════→ -->
 <div id="edit-order-screen">
-  <div style="max-width:640px;margin:0 auto">
+  <div class="edit-screen-inner">
     <div class="edit-screen-header">
       <button class="back-btn" onclick="closeEditOrder()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -372,7 +370,7 @@
       <div id="edit-student-fields"></div>
     </div>
     <div id="edit-items-section"></div>
-    <div class="save-btn-wrap" style="padding-bottom:2rem">
+    <div class="save-btn-wrap edit-save-btn-wrap">
       <button class="save-btn" onclick="saveEditOrder()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Save Changes
@@ -389,71 +387,86 @@
 <!-- Quick Set -->
 <div class="sheet-modal" id="qs-modal" onclick="closeSheet('qs-modal',event)">
   <div class="sheet">
-    <div class="sheet-title">Full Set</div>
+    <div class="sheet-header">
+      <div class="sheet-title">Full Set</div>
+      <button class="sheet-close-btn" onclick="closeSheet('qs-modal')">✕</button>
+    </div>
     <div class="sheet-sub">Adds: Pant + Shirt + Lower + T-Shirt + Tie + Belt + 2×Socks</div>
     <div class="sheet-label">Pick size — all items use same size</div>
     <div class="chip-grid" id="qs-sizes"></div>
-    <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">
+    <div class="sheet-tie-note">
       Tie: Small for size &lt;34 &nbsp;|&nbsp; Large for size 34+
     </div>
     <div class="qty-row">
       <label>Quantity</label>
       <div class="qty-stepper">
-        <button onclick="stepQty('qs-qty',-1)">−</button>
+        <button onclick="stepQty('qs-qty',-1);updateQSPrice()">−</button>
         <span id="qs-qty">1</span>
-        <button onclick="stepQty('qs-qty',1)">+</button>
+        <button onclick="stepQty('qs-qty',1);updateQSPrice()">+</button>
       </div>
+      <div class="sheet-price-preview" id="qs-price-preview"></div>
     </div>
-    <button class="sheet-confirm" onclick="confirmQuickSet()">Add Full Set</button>
-    <button class="sheet-cancel"  onclick="closeSheet('qs-modal')">Cancel</button>
+    <button class="sheet-confirm" onclick="confirmQuickSet()">✦ Add Full Set</button>
   </div>
 </div>
 
 <!-- Combo -->
 <div class="sheet-modal" id="co-modal" onclick="closeSheet('co-modal',event)">
   <div class="sheet">
-    <div class="sheet-title" id="co-title">Add Combo</div>
+    <div class="sheet-header">
+      <div class="sheet-title" id="co-title">Add Combo</div>
+      <button class="sheet-close-btn" onclick="closeSheet('co-modal')">✕</button>
+    </div>
     <div class="sheet-sub"   id="co-sub"></div>
     <div class="sheet-label" id="co-label1">Select size</div>
     <div class="chip-grid"   id="co-sizes1"></div>
     <div class="qty-row">
       <label>Quantity</label>
       <div class="qty-stepper">
-        <button onclick="stepQty('co-qty',-1)">−</button>
+        <button onclick="stepQty('co-qty',-1);updateComboQtyPrice()">−</button>
         <span id="co-qty">1</span>
-        <button onclick="stepQty('co-qty',1)">+</button>
+        <button onclick="stepQty('co-qty',1);updateComboQtyPrice()">+</button>
       </div>
+      <div class="sheet-price-preview" id="co-price-preview"></div>
     </div>
     <button class="sheet-confirm" onclick="confirmCombo()">Add</button>
-    <button class="sheet-cancel"  onclick="closeSheet('co-modal')">Cancel</button>
   </div>
 </div>
 
 <!-- Single Item -->
 <div class="sheet-modal" id="si-modal" onclick="closeSheet('si-modal',event)">
-  <div class="sheet">
-    <div class="sheet-title">Add Single Item</div>
-    <div class="sheet-label">Select item</div>
-    <div class="chip-grid wide" id="si-items"></div>
-    <div class="sheet-label">Select size</div>
-    <div class="chip-grid"      id="si-sizes"></div>
-    <div class="qty-row">
-      <label>Quantity</label>
-      <div class="qty-stepper">
-        <button onclick="stepQty('si-qty',-1)">−</button>
-        <span id="si-qty">1</span>
-        <button onclick="stepQty('si-qty',1)">+</button>
-      </div>
+  <div class="sheet si-sheet">
+    <div class="sheet-header">
+      <div class="sheet-title">Add Items</div>
+      <button class="sheet-close-btn" onclick="closeSheet('si-modal')">✕</button>
     </div>
-    <button class="sheet-confirm" onclick="confirmSingleItem()">Add Item</button>
-    <button class="sheet-cancel"  onclick="closeSheet('si-modal')">Cancel</button>
+    <div class="sheet-sub">Tap a size to add — tap again to remove</div>
+
+    <div class="si-group-label">Accessories</div>
+    <div id="si-accessories"></div>
+
+    <div class="si-group-label">
+      Sized Items
+    </div>
+    <div id="si-sized"></div>
+
+    <div class="si-confirm-bar" id="si-confirm-bar">
+      <div class="si-confirm-left">
+        <div class="si-confirm-summary" id="si-confirm-summary"></div>
+        <div class="sheet-price-preview" id="si-price-preview"></div>
+      </div>
+      <button class="si-confirm-btn" onclick="confirmSingleItem()">Add Selected</button>
+    </div>
   </div>
 </div>
 
 <!-- Price Adjustment -->
 <div class="sheet-modal" id="adj-modal" onclick="closeSheet('adj-modal',event)">
   <div class="sheet">
-    <div class="sheet-title">Price Adjustment</div>
+    <div class="sheet-header">
+      <div class="sheet-title">Price Adjustment</div>
+      <button class="sheet-close-btn" onclick="closeSheet('adj-modal')">✕</button>
+    </div>
     <div class="sheet-sub">Add a charge (+) or refund (−) to the order total</div>
 
     <div class="sheet-label">Sign</div>
@@ -465,25 +478,27 @@
     <div class="sheet-label">Amount (Rs.)</div>
     <input class="sheet-input" id="adj-amount" type="number" placeholder="e.g. 50" min="0">
 
-    <div class="sheet-label">Note <span style="font-weight:400;color:var(--text-3);text-transform:none">(optional)</span></div>
+    <div class="sheet-label">Note <span class="label-optional">(optional)</span></div>
     <input class="sheet-input" id="adj-note" type="text" placeholder="e.g. Pant 32→34, size up">
 
     <button class="sheet-confirm" onclick="confirmAdj()">Add Adjustment</button>
-    <button class="sheet-cancel"  onclick="closeSheet('adj-modal')">Cancel</button>
   </div>
 </div>
 
 <!-- Delivery Tracking -->
 <div class="sheet-modal" id="dv-modal" onclick="closeSheet('dv-modal',event)">
   <div class="sheet">
-    <div class="sheet-title">Delivery</div>
-    <div id="dv-student" style="font-size:13px;color:var(--text-3);margin-bottom:6px"></div>
-    <div id="dv-summary" style="font-size:13px;margin-bottom:14px"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div class="sheet-label" style="margin:0">Items — toggle to mark as given</div>
+    <div class="sheet-header">
+      <div class="sheet-title">Delivery</div>
+      <button class="sheet-close-btn" onclick="closeSheet('dv-modal')">✕</button>
+    </div>
+    <div id="dv-student" class="dv-student"></div>
+    <div id="dv-summary" class="dv-summary"></div>
+    <div class="dv-items-header">
+      <div class="sheet-label dv-items-label">Items — toggle to mark as given</div>
       <button class="dv-mark-all-btn" onclick="markAllDelivered(deliverySheetOrderId)">Mark All Delivered</button>
     </div>
-    <div id="dv-items" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+    <div id="dv-items" class="dv-items-list"></div>
     <button class="sheet-done" onclick="closeSheet('dv-modal')">Done</button>
   </div>
 </div>
@@ -491,26 +506,28 @@
 <!-- Edit Payment -->
 <div class="sheet-modal" id="ep-modal" onclick="closeSheet('ep-modal',event)">
   <div class="sheet">
-    <div class="sheet-title">Payment</div>
+    <div class="sheet-header">
+      <div class="sheet-title">Payment</div>
+      <button class="sheet-close-btn" onclick="closeSheet('ep-modal')">✕</button>
+    </div>
     <div id="ep-history"></div>
-    <div class="sheet-label" style="margin-top:14px">Payment Mode</div>
+    <div class="sheet-label ep-mode-label">Payment Mode</div>
     <div class="edit-pay-toggle">
       <button class="edit-pay-btn" id="ep-cash"   onclick="setPaymentSheetMode('cash')">Cash</button>
       <button class="edit-pay-btn" id="ep-online" onclick="setPaymentSheetMode('online')">Online</button>
     </div>
-    <div id="ep-discount-row" class="row2" style="gap:10px;margin-top:4px">
+    <div id="ep-discount-row" class="row2 ep-discount-row">
       <div>
-        <div class="sheet-label">Discount <span style="font-weight:400;color:var(--text-3);text-transform:none">(optional)</span></div>
+        <div class="sheet-label">Discount <span class="label-optional">(optional)</span></div>
         <input id="ep-discount" type="number" placeholder="e.g. 60" min="0" class="sheet-input" oninput="syncDiscountAmount()">
       </div>
       <div>
-        <div class="sheet-label">Amount Received <span style="font-weight:400;color:var(--text-3);text-transform:none">(blank = full)</span></div>
+        <div class="sheet-label">Amount Received <span class="label-optional">(blank = full)</span></div>
         <input id="ep-amt" type="number" placeholder="e.g. 1000" min="0" class="sheet-input">
       </div>
     </div>
     <div id="ep-orig" style="display:none"></div>
     <button class="sheet-confirm" onclick="savePaymentEntry()">Add Payment</button>
-    <button class="sheet-cancel"  onclick="closeSheet('ep-modal')">Cancel</button>
   </div>
 </div>
 
@@ -541,43 +558,52 @@
 
 <template id="tpl-student-fields">
   <div>
-    <div class="row2">
-      <div class="field">
-        <label>Student Name</label>
-        <input class="sf-name" type="text" placeholder="e.g. Rahul">
+    <div class="sf-grid-box">
+      <div class="sf-grid-cell sf-cell-name">
+        <div class="sf-cell-label">NAME</div>
+        <input class="sf-name sf-cell-input" type="text" placeholder="Student name">
       </div>
-      <div class="field">
-        <label>Class</label>
-        <input class="sf-class" type="text" placeholder="e.g. 5A">
+      <div class="sf-grid-cell sf-cell-class">
+        <div class="sf-cell-label">CLASS</div>
+        <input class="sf-class sf-cell-input" type="text" placeholder="e.g. 5A">
       </div>
-    </div>
-    <div class="row2">
-      <div class="field">
-        <label>Parent Name</label>
-        <input class="sf-parent" type="text" placeholder="e.g. Suresh Sharma">
+      <div class="sf-grid-cell sf-cell-parent">
+        <div class="sf-cell-label">PARENT</div>
+        <input class="sf-parent sf-cell-input" type="text" placeholder="Parent name">
       </div>
-      <div class="field">
-        <label>Mobile Number</label>
-        <input class="sf-mobile" type="tel" placeholder="e.g. 9876543210" maxlength="13">
+      <div class="sf-grid-cell sf-cell-mobile">
+        <div class="sf-cell-label">Mobile</div>
+        <input class="sf-mobile sf-cell-input" type="tel" placeholder="10-digit number" maxlength="13">
       </div>
     </div>
-    <div class="field">
-      <label>Address <span style="font-weight:400;color:var(--text-3)">(optional)</span></label>
-      <input class="sf-address" type="text" placeholder="e.g. Village Badagaon">
-    </div>
-    <div class="field" style="margin-bottom:0">
-      <label>Notes <span style="font-weight:400;color:var(--text-3)">(optional)</span></label>
-      <input class="sf-notes" type="text" placeholder="e.g. alteration needed">
+
+    <button type="button" class="sf-expand-pill" aria-expanded="false">
+      <svg class="sf-pill-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      Address &amp; Notes
+    </button>
+
+    <div class="sf-extra" style="display:none">
+      <div class="field sf-extra-field">
+        <label>ADDRESS</label>
+        <input class="sf-address" type="text" placeholder="e.g. Village Badagaon">
+      </div>
+      <div class="field sf-extra-field-last">
+        <label>NOTE</label>
+        <input class="sf-notes" type="text" placeholder="e.g. alteration needed">
+      </div>
     </div>
   </div>
 </template>
 
 <template id="tpl-items-section">
   <div class="section">
-    <div class="section-title">Dress Items</div>
+    <div class="section-title-row">
+      <div class="section-title">Dress Items</div>
+      <button class="clear-items-btn" style="display:none" onclick="clearAllItems(this)">✕ Clear all</button>
+    </div>
     <div class="col-labels">
       <span>Item</span><span>Size</span><span>Qty</span>
-      <span style="text-align:right">Line Total</span><span></span>
+      <span class="col-label-right">Line Total</span><span></span>
     </div>
     <div class="is-items-ctn"></div>
     <div class="is-add-btns add-buttons"></div>
@@ -591,23 +617,23 @@
 <template id="tpl-order-card">
   <div class="order-card">
     <div class="order-card-top">
-      <div style="flex:1;min-width:0">
+      <div class="order-card-info">
         <div class="order-name">
           <span class="oc-student-name"></span>
-          <span class="oc-student-class" style="font-size:12px;font-weight:400;color:var(--text-3)"></span>
+          <span class="oc-student-class oc-student-class-text"></span>
         </div>
-        <div class="oc-contact order-contact" style="margin-top:3px"></div>
-        <div class="oc-address order-contact" style="margin-top:1px;display:none"></div>
-        <div class="oc-badges" style="margin-top:6px;display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+        <div class="oc-contact order-contact oc-contact-row"></div>
+        <div class="oc-address order-contact oc-address-row"></div>
+        <div class="oc-badges oc-badges-row">
           <span class="oc-status-badge badge"></span>
           <span class="oc-branch-badge badge"></span>
         </div>
-        <div class="oc-notes" style="font-size:12px;color:var(--orange);margin-top:4px;display:none;align-items:center;gap:4px;font-style:italic">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <div class="oc-notes oc-notes-row">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="oc-notes-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           <span class="oc-notes-text"></span>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;margin-left:10px;flex-shrink:0">
+      <div class="order-card-right">
         <div class="menu-wrap oc-menu-wrap">
           <button class="menu-btn oc-menu-btn">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="2.5" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="8" cy="13.5" r="1.4"/></svg>
@@ -661,10 +687,10 @@
 <!-- Order item line -->
 <template id="tpl-order-item-line">
   <div class="order-item-line">
-    <span style="display:flex;align-items:center;gap:6px">
+    <span class="oil-label-wrap">
       <span class="item-status-dot oil-dot"></span>
       <span class="oil-label"></span>
-      <span class="oil-pend-note" style="font-size:10px;color:#e11d48;font-weight:600;margin-left:4px;display:none"></span>
+      <span class="oil-pend-note oil-pend-note-hidden"></span>
     </span>
     <span class="oil-price"></span>
   </div>
@@ -672,9 +698,9 @@
 
 <!-- Payment history row -->
 <template id="tpl-pay-history-row">
-  <div class="order-item-line" style="color:var(--text-3)">
+  <div class="order-item-line pay-history-row">
     <span class="phr-label"></span>
-    <span class="phr-amt" style="color:var(--green);font-weight:600"></span>
+    <span class="phr-amt phr-amt-green"></span>
   </div>
 </template>
 
@@ -693,12 +719,12 @@
 <template id="tpl-suit-row">
   <div class="combo-row js-item-row" data-type="suit-set">
     <div class="combo-top">
-      <div style="font-size:12px;font-weight:600;color:var(--text-2)">Suit Set</div>
+      <div class="suit-set-label">Suit Set</div>
       <input class="sr-qty" type="number" value="1" min="1" max="99" style="text-align:center">
       <div class="sr-price item-price"></div>
       <button class="remove-btn sr-remove">&#215;</button>
     </div>
-    <div class="sr-info" style="font-size:11px;color:var(--text-3);padding:2px 0 4px"></div>
+    <div class="sr-info suit-set-info"></div>
   </div>
 </template>
 
@@ -706,7 +732,7 @@
 <template id="tpl-combo-row">
   <div class="combo-row js-item-row" data-type="combo">
     <div class="combo-top">
-      <div class="cr-label" style="font-size:12px;font-weight:600;color:var(--text-2)"></div>
+      <div class="cr-label combo-row-label"></div>
       <input class="cr-qty" type="number" value="1" min="1" max="99" style="text-align:center">
       <div class="cr-price item-price">Rs.0</div>
       <button class="remove-btn cr-remove" title="Remove both">&#215;</button>
@@ -715,12 +741,12 @@
       <div class="combo-item-row cr-row1">
         <div class="combo-label cr-label1"></div>
         <select class="cr-size1"></select>
-        <button class="remove-btn cr-remove1" style="width:24px;height:24px;font-size:14px">&#215;</button>
+        <button class="remove-btn cr-remove1 combo-sub-remove">&#215;</button>
       </div>
       <div class="combo-item-row cr-row2">
         <div class="combo-label cr-label2"></div>
         <select class="cr-size2"></select>
-        <button class="remove-btn cr-remove2" style="width:24px;height:24px;font-size:14px">&#215;</button>
+        <button class="remove-btn cr-remove2 combo-sub-remove">&#215;</button>
       </div>
     </div>
   </div>
@@ -733,10 +759,10 @@
       <span class="item-status-dot dot-adjustment"></span>
       <div>
         <div class="adj-row-label ar-label">± Adjustment</div>
-        <div class="adj-row-note ar-note" style="display:none"></div>
+        <div class="adj-row-note ar-note adj-note-hidden"></div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+    <div class="adj-row-right">
       <div class="adj-row-price ar-price"></div>
       <button class="remove-btn ar-remove">&#215;</button>
     </div>
@@ -747,7 +773,7 @@
 <template id="tpl-dv-item">
   <label class="dv-item-row">
     <div class="dv-item-info">
-      <span class="item-status-dot dvi-dot" style="flex-shrink:0"></span>
+      <span class="item-status-dot dvi-dot dvi-dot-shrink"></span>
       <span class="dv-item-label dvi-label"></span>
     </div>
     <div class="dv-toggle-wrap">
@@ -785,14 +811,14 @@
 
 <!-- Payment sheet history entry -->
 <template id="tpl-pay-entry">
-  <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface);border-radius:8px;margin-bottom:5px;font-size:13px">
+  <div class="pay-entry-row">
     <div>
-      <span class="pe-mode" style="font-weight:600;color:var(--text-2)"></span>
-      <span class="pe-date" style="color:var(--text-3);margin-left:6px"></span>
+      <span class="pe-mode pay-entry-mode"></span>
+      <span class="pe-date pay-entry-date"></span>
     </div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <span class="pe-amt" style="font-weight:700;color:var(--green)"></span>
-      <button class="pe-del" style="background:none;border:none;cursor:pointer;color:var(--text-3);display:flex;align-items:center;padding:2px" title="Delete">
+    <div class="pay-entry-right">
+      <span class="pe-amt pay-entry-amt"></span>
+      <button class="pe-del pay-entry-del" title="Delete">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
           <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>

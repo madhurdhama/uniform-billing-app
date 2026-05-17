@@ -102,7 +102,7 @@ let paySheetOrderId      = null;
 let pendingPayDeleteId   = null;
 let deliverySheetOrderId = null;
 
-const sheet = { quickSetSize: null, comboType: null, comboSize: null, singleItem: null, singleSize: null };
+const sheet = { quickSetSize: null, comboType: null, comboSize: null };
 
 let adjSign     = 1;
 let priceBranch = currentBranch;
@@ -331,6 +331,7 @@ function buildStudentFields(containerId, ctxKey) {
   const wrap = $(containerId);
   wrap.innerHTML = '';
   wrap.appendChild(cloneTemplate('tpl-student-fields'));
+
   ctx[ctxKey].name    = wrap.querySelector('.sf-name');
   ctx[ctxKey].cls     = wrap.querySelector('.sf-class');
   ctx[ctxKey].parent  = wrap.querySelector('.sf-parent');
@@ -338,18 +339,53 @@ function buildStudentFields(containerId, ctxKey) {
   ctx[ctxKey].address = wrap.querySelector('.sf-address');
   ctx[ctxKey].notes   = wrap.querySelector('.sf-notes');
 
-  const fields = [ctx[ctxKey].name, ctx[ctxKey].cls, ctx[ctxKey].parent, ctx[ctxKey].mobile, ctx[ctxKey].address, ctx[ctxKey].notes];
-  fields.forEach((field, i) => {
+  const pill  = wrap.querySelector('.sf-expand-pill');
+  const extra = wrap.querySelector('.sf-extra');
+
+  pill.addEventListener('click', () => {
+    const isOpen = extra.style.display !== 'none';
+    extra.style.display = isOpen ? 'none' : 'block';
+    pill.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  // Auto-expand when address or notes already have a value (edit order)
+  ctx[ctxKey]._expandExtra = () => {
+    if ((ctx[ctxKey].address?.value || '').trim() || (ctx[ctxKey].notes?.value || '').trim()) {
+      extra.style.display = 'block';
+      pill.setAttribute('aria-expanded', 'true');
+    }
+  };
+
+  // Enter key flow: Name → Class → Parent → Mobile → (opens extra) Address → Notes
+  const coreFields = [ctx[ctxKey].name, ctx[ctxKey].cls, ctx[ctxKey].parent, ctx[ctxKey].mobile];
+  const allFields  = [...coreFields, ctx[ctxKey].address, ctx[ctxKey].notes];
+
+  allFields.forEach((field, i) => {
     if (!field) return;
     field.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const next = fields[i + 1];
-        if (next) next.focus();
-        else field.blur();
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      if (i === coreFields.length - 1 && extra.style.display === 'none') {
+        extra.style.display = 'block';
+        pill.setAttribute('aria-expanded', 'true');
+        ctx[ctxKey].address?.focus();
+        return;
       }
+      const next = allFields[i + 1];
+      if (next) next.focus(); else field.blur();
     });
   });
+}
+
+function writeStudentFields(ctxKey, order) {
+  const c = ctx[ctxKey];
+  if (c.name)    c.name.value    = order.studentName  || '';
+  if (c.cls)     c.cls.value     = order.studentClass || '';
+  if (c.parent)  c.parent.value  = order.parentName   || '';
+  if (c.mobile)  c.mobile.value  = order.mobile       || '';
+  if (c.address) c.address.value = order.address      || '';
+  if (c.notes)   c.notes.value   = order.notes        || '';
+  if (c._expandExtra) c._expandExtra();
 }
 
 function buildItemsSection(wrapId, itemsCtnId, addBtnsId, totalId, totalLabel, isEdit) {
@@ -364,6 +400,9 @@ function buildItemsSection(wrapId, itemsCtnId, addBtnsId, totalId, totalLabel, i
   btns.id = addBtnsId;
 
   if (isEdit) {
+    const clearBtn = sec.querySelector('.clear-items-btn');
+    if (clearBtn) clearBtn.remove();
+
     tot.className = 'total-final';
     tot.innerHTML = `<span>${totalLabel}</span><span id="${totalId}">Rs.0</span>`;
   } else {
@@ -395,6 +434,7 @@ function writeStudentFields(ctxKey, order) {
   if (c.mobile)  c.mobile.value  = order.mobile       || '';
   if (c.address) c.address.value = order.address      || '';
   if (c.notes)   c.notes.value   = order.notes        || '';
+  if (c._expandExtra) c._expandExtra();
 }
 
 function clearStudentFields(ctxKey) {
@@ -600,7 +640,9 @@ function openQuickSetSheet(target) {
   const sizes = [26, 28, 30, 32, 34, 36, 38, 40, 42, 44];
   sheet.quickSetSize = String(sizes[0]);
   buildChips('qs-sizes', sizes, sheet.quickSetSize,
-    (v, el) => { sheet.quickSetSize = selectChip('qs-sizes', v, el); });
+    (v, el) => { sheet.quickSetSize = selectChip('qs-sizes', v, el); updateQSPrice(); });
+  $('qs-qty').textContent = '1';
+  updateQSPrice();
   openSheet('qs-modal');
 }
 
@@ -616,52 +658,243 @@ function confirmQuickSet() {
   _addItem (ctr, pfx, fn, 'Socks', 'Pair', qty * 2);
 }
 
+function updateQSPrice() {
+  const el   = $('qs-price-preview');
+  if (!el) return;
+  const size = sheet.quickSetSize;
+  const qty  = parseInt($('qs-qty').textContent) || 1;
+  if (!size) { el.textContent = ''; return; }
+
+  const p       = prices;
+  const pant    = p['Pant']?.[size]       || p['Pant']?.[parseInt(size)]       || 0;
+  const shirt   = p['Shirt']?.[size]      || p['Shirt']?.[parseInt(size)]      || 0;
+  const lower   = p['Lower']?.[size]      || p['Lower']?.[parseInt(size)]      || 0;
+  const tshirt  = p['T-Shirt']?.[size]    || p['T-Shirt']?.[parseInt(size)]    || 0;
+  const tieSize = parseInt(size) >= 34 ? 'Large' : 'Small';
+  const tie     = p['Tie']?.[tieSize]     || 0;
+  const belt    = p['Belt']?.['All']      || 0;
+  const socks   = (p['Socks']?.['Pair']   || 0) * 2;
+
+  const unit = pant + shirt + lower + tshirt + tie + belt + socks;
+  el.textContent = unit ? rupees(unit * qty) : '';
+}
+
 // ── Single Item sheet ──
-// Returns the price object filtered by season for single item picker
-function getSingleItemPrices(forBranch, forSeason) {
-  const p = buildPrices(forBranch || currentBranch, forSeason || currentSeason);
-  if ((forSeason || currentSeason) === 'summer') {
-    // Remove winter-only items in summer
-    const filtered = {};
-    Object.keys(p).forEach(k => { if (!WINTER_ONLY_ITEMS.has(k)) filtered[k] = p[k]; });
-    return filtered;
+const SI_ACCESSORIES = [
+  { item: 'Tie',        size: 'Small'  },
+  { item: 'Tie',        size: 'Large'  },
+  { item: 'Belt',       size: 'All'    },
+  { item: 'Socks',      size: 'Pair'   },
+  { item: 'Winter Cap', size: 'All', winterOnly: true }
+];
+
+// Sized items in display order
+function getSiSizedOrder(season) {
+  const winter = season === 'winter' ? ['Blazer','Sweater'] : [];
+  return [
+    ...winter,
+    'Pant','Shirt','Lower','T-Shirt',
+    'Half Lower','Half T-Shirt',
+    'Full Lower','Full T-Shirt',
+    'Suit','Trouser','Jacket'
+  ];
+}
+
+let siSelections = {};
+
+function siKey(item, size) { return `${item}|${size}`; }
+
+function siGetCtx(target) {
+  if (target === 'edit' && editOrderId) {
+    const ord = savedOrders.find(o => o.id === editOrderId);
+    return { p: buildPrices(ord?.branch || currentBranch, ord?.season || currentSeason), season: ord?.season || currentSeason };
   }
-  return p;
+  return { p: prices, season: currentSeason };
 }
 
 function openSingleItemSheet(target) {
-  sheetTarget = target;
-  sheet.singleItem = sheet.singleSize = null;
-  $('si-qty').textContent = '1';
-  $('si-sizes').innerHTML = '<div style="color:var(--text-3);font-size:12px">Select an item first</div>';
+  sheetTarget  = target;
+  siSelections = {};
+  const { p, season } = siGetCtx(target);
 
-  // For edit context, use the order's branch/season prices
-  let siPrices = prices;
-  if (target === 'edit' && editOrderId) {
-    const ord = savedOrders.find(o => o.id === editOrderId);
-    siPrices = getSingleItemPrices(ord?.branch || currentBranch, ord?.season || currentSeason);
-  } else {
-    siPrices = getSingleItemPrices();
-  }
+  // Clear search
+  const searchEl = $('si-search');
+  if (searchEl) searchEl.value = '';
 
-  buildChips('si-items', Object.keys(siPrices), null, (item, el) => {
-    sheet.singleItem = selectChip('si-items', item, el);
-    const sizes = Object.keys(siPrices[item] || {});
-    let defaultSize = String(sizes[0]);
-    if (item === 'Tie') defaultSize = 'Large';
-    sheet.singleSize = defaultSize;
-    buildChips('si-sizes', sizes, sheet.singleSize,
-      (v, el2) => { sheet.singleSize = selectChip('si-sizes', v, el2); });
+  // ── Accessories ──
+  const accCtn = $('si-accessories');
+  accCtn.innerHTML = '';
+  SI_ACCESSORIES.forEach(({ item, size, winterOnly }) => {
+    if (winterOnly && season !== 'winter') return;
+    if (!p[item]?.[size]) return;
+    const price  = p[item][size];
+    const key    = siKey(item, size);
+    const safeId = key.replace('|', '-');
+
+    const row = document.createElement('div');
+    row.className   = 'si-acc-row';
+    row.dataset.key = key;
+    row.innerHTML   = `
+      <div class="si-acc-left">
+        <div class="si-acc-check">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+            <polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="si-acc-name">${size === 'All' || size === 'Pair' ? item : item + ' — ' + size}</span>
+        <span class="si-acc-price">Rs.${price}</span>
+      </div>
+      <div class="si-acc-stepper-wrap si-row-stepper">
+        <button onclick="siAccStep('${key}',-1,event)">−</button>
+        <span id="si-acc-qty-${safeId}">1</span>
+        <button onclick="siAccStep('${key}',1,event)">+</button>
+      </div>`;
+
+    row.addEventListener('click', e => {
+      if (e.target.closest('.si-row-stepper')) return;
+      siToggleAcc(key, item, size, price, row);
+    });
+    accCtn.appendChild(row);
   });
+
+  // ── Sized items ──
+  const sizedCtn = $('si-sized');
+  sizedCtn.innerHTML = '';
+
+  getSiSizedOrder(season).forEach(itemName => {
+    if (!p[itemName]) return;
+    if (WINTER_ONLY_ITEMS.has(itemName) && season !== 'winter') return;
+
+    const wrap = document.createElement('div');
+    wrap.className    = 'si-sized-row';
+    wrap.dataset.item = itemName;
+
+    // Header — tapping toggles expand/collapse
+    const header = document.createElement('div');
+    header.className = 'si-sized-header';
+    header.innerHTML = `
+      <span class="si-sized-name">${itemName}</span>
+      <div class="si-sized-right">
+        <span class="si-sized-sel-price" id="si-sized-price-${itemName}"></span>
+        <div class="si-sized-stepper-wrap si-row-stepper">
+          <button onclick="siSizedStep('${itemName}',-1,event)">−</button>
+          <span id="si-sized-qty-${itemName}">1</span>
+          <button onclick="siSizedStep('${itemName}',1,event)">+</button>
+        </div>
+        <span class="si-sized-chevron">▸</span>
+      </div>`;
+
+    header.addEventListener('click', e => {
+      if (e.target.closest('.si-row-stepper')) return;
+      wrap.classList.toggle('expanded');
+    });
+
+    // Size chips
+    const sizesWrap = document.createElement('div');
+    sizesWrap.className = 'si-sized-sizes';
+
+    Object.entries(p[itemName]).forEach(([size, price]) => {
+      const chip = document.createElement('div');
+      chip.className    = 'si-size-chip';
+      chip.textContent  = size;
+      chip.dataset.size = size;
+      chip.addEventListener('click', () => siToggleSized(itemName, size, price, chip, wrap));
+      sizesWrap.appendChild(chip);
+    });
+
+    wrap.appendChild(header);
+    wrap.appendChild(sizesWrap);
+    sizedCtn.appendChild(wrap);
+  });
+
+  siUpdateConfirmBar();
   openSheet('si-modal');
 }
 
+function siToggleAcc(key, item, size, price, row) {
+  if (siSelections[key]) {
+    delete siSelections[key];
+    row.classList.remove('selected');
+  } else {
+    const safeId = key.replace('|', '-');
+    const qty    = parseInt(document.getElementById('si-acc-qty-' + safeId)?.textContent) || 1;
+    siSelections[key] = { item, size, price, qty };
+    row.classList.add('selected');
+  }
+  siUpdateConfirmBar();
+}
+
+function siAccStep(key, delta, e) {
+  e.stopPropagation();
+  const safeId = key.replace('|', '-');
+  const el     = document.getElementById('si-acc-qty-' + safeId);
+  if (!el) return;
+  const newQty      = Math.max(1, Math.min(99, parseInt(el.textContent) + delta));
+  el.textContent    = newQty;
+  if (siSelections[key]) { siSelections[key].qty = newQty; siUpdateConfirmBar(); }
+}
+
+function siToggleSized(itemName, size, price, chip, wrap) {
+  const key     = siKey(itemName, size);
+  const prevKey = Object.keys(siSelections).find(k => k.startsWith(itemName + '|'));
+
+  // Deselect previous size for this item
+  if (prevKey) {
+    delete siSelections[prevKey];
+    wrap.querySelectorAll('.si-size-chip').forEach(c => c.classList.remove('selected'));
+    // If same chip tapped → collapse and clear
+    if (prevKey === key) {
+      wrap.classList.remove('has-selection');
+      const priceEl = document.getElementById('si-sized-price-' + itemName);
+      if (priceEl) priceEl.textContent = '';
+      siUpdateConfirmBar();
+      return;
+    }
+  }
+
+  // Select new chip — ensure row stays expanded
+  const qtyEl = document.getElementById('si-sized-qty-' + itemName);
+  const qty   = qtyEl ? parseInt(qtyEl.textContent) || 1 : 1;
+  siSelections[key] = { item: itemName, size, price, qty };
+  chip.classList.add('selected');
+  wrap.classList.add('has-selection', 'expanded');
+  const priceEl = document.getElementById('si-sized-price-' + itemName);
+  if (priceEl) priceEl.textContent = 'Rs.' + price;
+  siUpdateConfirmBar();
+}
+
+function siSizedStep(itemName, delta, e) {
+  e.stopPropagation();
+  const el = document.getElementById('si-sized-qty-' + itemName);
+  if (!el) return;
+  const newQty   = Math.max(1, Math.min(99, parseInt(el.textContent) + delta));
+  el.textContent = newQty;
+  const selKey   = Object.keys(siSelections).find(k => k.startsWith(itemName + '|'));
+  if (selKey) { siSelections[selKey].qty = newQty; siUpdateConfirmBar(); }
+}
+
+function siUpdateConfirmBar() {
+  const bar      = $('si-confirm-bar');
+  const sumEl    = $('si-confirm-summary');
+  const priceEl  = $('si-price-preview');
+  const items    = Object.values(siSelections);
+  if (!items.length) { bar.classList.remove('visible'); return; }
+  bar.classList.add('visible');
+  sumEl.textContent = items.map(({ item, size, qty }) => {
+    const label = (size === 'All' || size === 'Pair') ? item : `${item} (${size})`;
+    return qty > 1 ? `${label} ×${qty}` : label;
+  }).join(', ');
+  const total = items.reduce((s, { price, qty }) => s + price * qty, 0);
+  if (priceEl) priceEl.textContent = total ? rupees(total) : '';
+}
+
 function confirmSingleItem() {
-  if (!sheet.singleItem) { toast('Select an item first', 'error'); return; }
-  if (!sheet.singleSize) { toast('Select a size first',  'error'); return; }
+  const items = Object.values(siSelections);
+  if (!items.length) { toast('Select at least one item', 'error'); return; }
   closeSheet('si-modal');
   const { ctr, pfx, fn } = sheetCtx(sheetTarget);
-  _addItem(ctr, pfx, fn, sheet.singleItem, sheet.singleSize, parseInt($('si-qty').textContent));
+  // Suit/Trouser/Jacket go in as single items using their 'All' size
+  items.forEach(({ item, size, qty }) => _addItem(ctr, pfx, fn, item, size, qty));
 }
 
 // ── Combo sheet ──
@@ -678,10 +911,11 @@ function openComboSheet(target, type) {
 
   if (type === 'suit-set') {
     const unit = ctxPrices.Suit.All + ctxPrices.Trouser.All + ctxPrices.Jacket.All;
-    $('co-title').textContent  = 'Suit Set';
-    $('co-sub').textContent    = `Suit + Trouser + Jacket = ${rupees(unit)} each`;
-    $('co-label1').textContent = '';
-    $('co-sizes1').innerHTML   = '';
+    $('co-title').textContent         = 'Suit Set';
+    $('co-sub').textContent           = `Suit + Trouser + Jacket = ${rupees(unit)} each`;
+    $('co-label1').textContent        = '';
+    $('co-sizes1').innerHTML          = '';
+    $('co-price-preview').textContent = '';
   } else {
     const cfg   = COMBOS[type];
     const sizes = Object.keys(ctxPrices[cfg.item1] || {});
@@ -690,9 +924,31 @@ function openComboSheet(target, type) {
     $('co-label1').textContent = 'Select size';
     sheet.comboSize = String(sizes[0]);
     buildChips('co-sizes1', sizes, sheet.comboSize,
-      (v, el) => { sheet.comboSize = selectChip('co-sizes1', v, el); });
+      (v, el) => { sheet.comboSize = selectChip('co-sizes1', v, el); updateComboPrice(type, v, ctxPrices); });
+    updateComboPrice(type, sheet.comboSize, ctxPrices);
   }
   openSheet('co-modal');
+}
+
+function updateComboPrice(type, size, p) {
+  const el = $('co-price-preview');
+  if (!el) return;
+  const cfg = COMBOS[type];
+  if (!cfg) { el.textContent = ''; return; }
+  const p1    = p[cfg.item1]?.[size] || p[cfg.item1]?.[parseInt(size)] || 0;
+  const p2    = p[cfg.item2]?.[size] || p[cfg.item2]?.[parseInt(size)] || 0;
+  const unit  = p1 + p2;
+  const qty   = parseInt($('co-qty').textContent) || 1;
+  el.dataset.unit = unit;
+  el.textContent  = unit ? rupees(unit * qty) : '';
+}
+
+function updateComboQtyPrice() {
+  const el   = $('co-price-preview');
+  if (!el) return;
+  const unit = parseFloat(el.dataset.unit) || 0;
+  const qty  = parseInt($('co-qty').textContent) || 1;
+  el.textContent = unit ? rupees(unit * qty) : '';
 }
 
 function confirmCombo() {
@@ -713,7 +969,6 @@ function openAdjSheet(target) {
   $('adj-amount').value = '';
   $('adj-note').value   = '';
   openSheet('adj-modal');
-  setTimeout(() => $('adj-amount').focus(), 280);
 }
 
 function setAdjSign(sign) {
@@ -883,10 +1138,16 @@ function _recalc(containerId, totalId, pricesObj) {
   return subtotal;
 }
 
-function recalcNew()  { _recalc('items-container', 'grand-total', prices); }
+function recalcNew() {
+  _recalc('items-container', 'grand-total', prices);
+  const btn = document.querySelector('#tab-new .clear-items-btn');
+  if (btn) btn.style.display = document.getElementById('items-container')?.querySelector('.js-item-row') ? 'block' : 'none';
+}
 function recalcEdit() {
   const order = editOrderId ? savedOrders.find(o => o.id === editOrderId) : null;
   _recalc('edit-items-container', 'eo-grand-total', buildPrices(order?.branch || 'badagaon', order?.season || currentSeason));
+  const btn = document.querySelector('#edit-order-screen .clear-items-btn');
+  if (btn) btn.style.display = document.getElementById('edit-items-container')?.querySelector('.js-item-row') ? 'block' : 'none';
 }
 
 function collectItems(containerId, pricesObj) {
@@ -987,6 +1248,29 @@ function resetNewForm() {
   setNewOrderPayMode('pending');
   recalcNew();
   document.activeElement?.blur();
+}
+
+function clearAllItems(btn) {
+  // Find the items container sibling — works for both new and edit contexts
+  const section = btn.closest('.section');
+  const ctn = section.querySelector('.is-items-ctn') 
+    ? section.querySelector('.is-items-ctn') 
+    : null;
+  
+  // Determine which container by checking id
+  const isEdit = !!document.getElementById('edit-items-container')
+    ?.contains(btn.closest('.section'));
+  const containerId = isEdit ? 'edit-items-container' : 'items-container';
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  if (!container.querySelector('.js-item-row')) return; // nothing to clear
+  if (!confirm('Clear all items from this order?')) return;
+
+  container.innerHTML = '';
+  itemCounter = 0;
+  btn.style.display = 'none';
+  isEdit ? recalcEdit() : recalcNew();
 }
 
 
