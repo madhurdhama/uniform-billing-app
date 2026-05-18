@@ -405,12 +405,13 @@ function buildItemsSection(wrapId, itemsCtnId, addBtnsId, totalId, totalLabel, i
 
 function readStudentFields(ctxKey) {
   const c = ctx[ctxKey];
+  const capitalize = s => s.replace(/\b\w/g, ch => ch.toUpperCase());
   return {
-    studentName:  (c.name?.value    || '').trim(),
-    studentClass: (c.cls?.value     || '').trim(),
-    parentName:   (c.parent?.value  || '').trim(),
+    studentName:  capitalize((c.name?.value    || '').trim()),
+    studentClass: (c.cls?.value     || '').trim().toUpperCase(),
+    parentName:   capitalize((c.parent?.value  || '').trim()),
     mobile:       (c.mobile?.value  || '').trim(),
-    address:      (c.address?.value || '').trim(),
+    address:      capitalize((c.address?.value || '').trim()),
     notes:        (c.notes?.value   || '').trim()
   };
 }
