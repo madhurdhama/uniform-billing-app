@@ -108,8 +108,8 @@ let adjSign     = 1;
 let priceBranch = currentBranch;
 
 const ctx = {
-  new:  { name: null, cls: null, parent: null, mobile: null, notes: null },
-  edit: { name: null, cls: null, parent: null, mobile: null, notes: null }
+  new:  { name: null, cls: null, parent: null, mobile: null, address: null, notes: null },
+  edit: { name: null, cls: null, parent: null, mobile: null, address: null, notes: null }
 };
 
 
@@ -375,17 +375,6 @@ function buildStudentFields(containerId, ctxKey) {
       if (next) next.focus(); else field.blur();
     });
   });
-}
-
-function writeStudentFields(ctxKey, order) {
-  const c = ctx[ctxKey];
-  if (c.name)    c.name.value    = order.studentName  || '';
-  if (c.cls)     c.cls.value     = order.studentClass || '';
-  if (c.parent)  c.parent.value  = order.parentName   || '';
-  if (c.mobile)  c.mobile.value  = order.mobile       || '';
-  if (c.address) c.address.value = order.address      || '';
-  if (c.notes)   c.notes.value   = order.notes        || '';
-  if (c._expandExtra) c._expandExtra();
 }
 
 function buildItemsSection(wrapId, itemsCtnId, addBtnsId, totalId, totalLabel, isEdit) {
@@ -717,10 +706,6 @@ function openSingleItemSheet(target) {
   siSelections = {};
   const { p, season } = siGetCtx(target);
 
-  // Clear search
-  const searchEl = $('si-search');
-  if (searchEl) searchEl.value = '';
-
   // ── Accessories ──
   const accCtn = $('si-accessories');
   accCtn.innerHTML = '';
@@ -765,11 +750,44 @@ function openSingleItemSheet(target) {
     if (!p[itemName]) return;
     if (WINTER_ONLY_ITEMS.has(itemName) && season !== 'winter') return;
 
+    const sizes = Object.entries(p[itemName]);
+
+    // Single-size items (Suit, Trouser, Jacket) → accessory-style tap-to-select
+    if (sizes.length === 1) {
+      const [size, price] = sizes[0];
+      const key    = siKey(itemName, size);
+      const safeId = key.replace('|', '-');
+      const row    = document.createElement('div');
+      row.className   = 'si-acc-row';
+      row.dataset.key = key;
+      row.innerHTML   = `
+        <div class="si-acc-left">
+          <div class="si-acc-check">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+              <polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="si-acc-name">${itemName}</span>
+          <span class="si-acc-price">Rs.${price}</span>
+        </div>
+        <div class="si-acc-stepper-wrap si-row-stepper">
+          <button onclick="siAccStep('${key}',-1,event)">−</button>
+          <span id="si-acc-qty-${safeId}">1</span>
+          <button onclick="siAccStep('${key}',1,event)">+</button>
+        </div>`;
+      row.addEventListener('click', e => {
+        if (e.target.closest('.si-row-stepper')) return;
+        siToggleAcc(key, itemName, size, price, row);
+      });
+      sizedCtn.appendChild(row);
+      return;
+    }
+
+    // Multi-size items — always expanded inline, no collapse
     const wrap = document.createElement('div');
     wrap.className    = 'si-sized-row';
     wrap.dataset.item = itemName;
 
-    // Header — tapping toggles expand/collapse
     const header = document.createElement('div');
     header.className = 'si-sized-header';
     header.innerHTML = `
@@ -781,19 +799,12 @@ function openSingleItemSheet(target) {
           <span id="si-sized-qty-${itemName}">1</span>
           <button onclick="siSizedStep('${itemName}',1,event)">+</button>
         </div>
-        <span class="si-sized-chevron">▸</span>
       </div>`;
 
-    header.addEventListener('click', e => {
-      if (e.target.closest('.si-row-stepper')) return;
-      wrap.classList.toggle('expanded');
-    });
-
-    // Size chips
     const sizesWrap = document.createElement('div');
     sizesWrap.className = 'si-sized-sizes';
 
-    Object.entries(p[itemName]).forEach(([size, price]) => {
+    sizes.forEach(([size, price]) => {
       const chip = document.createElement('div');
       chip.className    = 'si-size-chip';
       chip.textContent  = size;
